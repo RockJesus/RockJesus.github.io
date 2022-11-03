@@ -2,70 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://rockjesus.cn/ah.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/cn.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/messageboard/index.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/alc.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/en.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/hdmi.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/light.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/mouse.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/oc.html</loc>
-    
-    <lastmod>2022-11-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rockjesus.cn/qa.html</loc>
+    <loc>https://rockjesus.cn/theme.html</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -79,7 +16,70 @@
   </url>
   
   <url>
-    <loc>https://rockjesus.cn/theme.html</loc>
+    <loc>https://rockjesus.cn/qa.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/oc.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/mouse.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/light.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/hdmi.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/en.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/cn.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/alc.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/ah.html</loc>
+    
+    <lastmod>2022-11-03</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://rockjesus.cn/messageboard/index.html</loc>
     
     <lastmod>2022-11-03</lastmod>
     

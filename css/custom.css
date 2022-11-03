@@ -34,7 +34,7 @@
 }
 
 #web_bg {
-    background: https://gcore.jsdelivr.net/gh/rockjesus/rockjesus@1.0/img/oc.png
+    background: https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/oc.png
 
 }
 
@@ -109,7 +109,7 @@
 
 
 body {
-    cursor: url(https://gcore.jsdelivr.net/gh/rockjesus/rockjesus@1.0/img/cur.png), auto;
+    cursor: url(https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/cur.png), auto;
 }
 
 .hide-block>.hide-button.open,
@@ -120,7 +120,7 @@ body {
 a,
 button,
 img {
-    cursor: url(https://gcore.jsdelivr.net/gh/rockjesus/rockjesus@1.0/img/cur.png), auto
+    cursor: url(https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/cur.png), auto
 }
 
 @font-face {
