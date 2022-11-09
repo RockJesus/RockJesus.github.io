@@ -15,4 +15,4 @@ Disallow: /fancybox/
 
 # 记得替换成你的域名
 Sitemap: http://www.rockjesus.cn/sitemap.xml
-Sitemap: http://www.rockjesus.cn/baidusitemap.xml主动推送
+Sitemap: http://www.rockjesus.cn/baidusitemap.xml
