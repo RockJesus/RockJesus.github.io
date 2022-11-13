@@ -14,5 +14,5 @@ Disallow: /vendors/
 Disallow: /fancybox/
 
 # 记得替换成你的域名
-Sitemap: http://www.rockjesus.cn/sitemap.xml
-Sitemap: http://www.rockjesus.cn/baidusitemap.xml
+Sitemap: https://www.rockjesus.cn/sitemap.xml
+Sitemap: https://www.rockjesus.cn/baidusitemap.xml
