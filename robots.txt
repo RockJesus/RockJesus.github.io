@@ -13,6 +13,5 @@ Disallow: /fonts/
 Disallow: /vendors/
 Disallow: /fancybox/
 
-# 记得替换成你的域名
 Sitemap: https://www.rockjesus.cn/sitemap.xml
 Sitemap: https://www.rockjesus.cn/baidusitemap.xml
