@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://www.rockjesus.cn/categories/index.html</loc>
+    
+    <lastmod>2022-11-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://www.rockjesus.cn/about/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
@@ -12,6 +21,15 @@
   
   <url>
     <loc>https://www.rockjesus.cn/messageboard/index.html</loc>
+    
+    <lastmod>2022-11-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.rockjesus.cn/tags/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
@@ -121,7 +139,7 @@
 
   <url>
     <loc>https://www.rockjesus.cn/</loc>
-    <lastmod>2022-11-13</lastmod>
+    <lastmod>2022-11-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
