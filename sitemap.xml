@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://rockjesus.cn/messageboard/index.html</loc>
+    <loc>https://rockjesus.cn/messageboard/index.html</loc>
     
     <lastmod>2022-11-17</lastmod>
     
@@ -11,7 +11,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/about/index.html</loc>
+    <loc>https://rockjesus.cn/about/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
@@ -20,7 +20,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/categories/index.html</loc>
+    <loc>https://rockjesus.cn/tags/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
@@ -29,7 +29,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/tags/index.html</loc>
+    <loc>https://rockjesus.cn/categories/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
@@ -38,7 +38,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/en/</loc>
+    <loc>https://rockjesus.cn/en/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -47,7 +47,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/cn/</loc>
+    <loc>https://rockjesus.cn/cn/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -56,7 +56,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/theme/</loc>
+    <loc>https://rockjesus.cn/theme/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -65,7 +65,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/tb/</loc>
+    <loc>https://rockjesus.cn/tb/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -74,7 +74,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/qa/</loc>
+    <loc>https://rockjesus.cn/qa/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -83,7 +83,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/oc/</loc>
+    <loc>https://rockjesus.cn/oc/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -92,7 +92,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/mouse/</loc>
+    <loc>https://rockjesus.cn/mouse/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -101,7 +101,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/light/</loc>
+    <loc>https://rockjesus.cn/light/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -110,7 +110,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/hdmi/</loc>
+    <loc>https://rockjesus.cn/hdmi/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -119,7 +119,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/alc/</loc>
+    <loc>https://rockjesus.cn/alc/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -128,7 +128,7 @@
   </url>
   
   <url>
-    <loc>http://rockjesus.cn/ah/</loc>
+    <loc>https://rockjesus.cn/ah/</loc>
     
     <lastmod>2022-11-03</lastmod>
     
@@ -138,7 +138,7 @@
   
 
   <url>
-    <loc>http://rockjesus.cn/</loc>
+    <loc>https://rockjesus.cn/</loc>
     <lastmod>2022-11-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
