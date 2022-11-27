@@ -20,7 +20,7 @@
   </url>
   
   <url>
-    <loc>http://www.rockjesus.cn/tags/index.html</loc>
+    <loc>http://www.rockjesus.cn/categories/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
@@ -29,7 +29,7 @@
   </url>
   
   <url>
-    <loc>http://www.rockjesus.cn/categories/index.html</loc>
+    <loc>http://www.rockjesus.cn/tags/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
@@ -139,7 +139,7 @@
 
   <url>
     <loc>http://www.rockjesus.cn/</loc>
-    <lastmod>2022-11-23</lastmod>
+    <lastmod>2022-11-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
