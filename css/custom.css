@@ -935,3 +935,106 @@ img {
 #nav .menus_item_child .site-page:hover {
   color: #e0d7ff;
 }
+
+/* ============================================================
+   右下角聊天按钮 — 豆包对话框 V10
+   豆包女生头像按钮 + 毛玻璃弹窗内嵌豆包网页聊天
+   ============================================================ */
+#rightside #chat_btn.rj-doubao-btn {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  background: transparent;
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.55), 0 4px 14px rgba(2, 6, 23, 0.5);
+}
+#chat_btn.rj-doubao-btn .rj-doubao-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+#chat_btn.rj-doubao-btn.rj-doubao-active {
+  border-color: #22d3ee;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.6), 0 4px 14px rgba(2, 6, 23, 0.5);
+}
+
+#rj-doubao-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 80px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  width: 380px;
+  max-width: calc(100vw - 36px);
+  height: min(560px, 72vh);
+  overflow: hidden;
+  background: rgba(15, 18, 32, 0.82);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.6), 0 0 24px rgba(139, 92, 246, 0.3);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transform-origin: bottom right;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+#rj-doubao-panel.rj-doubao-open {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.rj-doubao-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.25), rgba(34, 211, 238, 0.12));
+  border-bottom: 1px solid rgba(167, 139, 250, 0.3);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.rj-doubao-head-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.rj-doubao-close {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(148, 163, 255, 0.15);
+  color: #e2e8f0;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.rj-doubao-close:hover {
+  background: rgba(244, 114, 182, 0.35);
+  color: #ffffff;
+}
+.rj-doubao-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #ffffff;
+}
+@media (max-width: 767px) {
+  #rj-doubao-panel {
+    right: 10px;
+    bottom: 74px;
+    width: calc(100vw - 20px);
+    height: 68vh;
+  }
+}

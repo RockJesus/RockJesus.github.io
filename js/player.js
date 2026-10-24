@@ -249,6 +249,62 @@
     });
   }
 
+  // —— 右下角聊天按钮：改为豆包对话框（点击弹出豆包网页内嵌聊天） ——
+  (function () {
+    var btn = document.getElementById('chat_btn');
+    if (!btn) return;
+    var DOUBAO_CHAT_URL = 'https://www.doubao.com/chat/';
+    var DOUBAO_AVATAR = 'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao/web/doubao_avatar.png';
+
+    // 换豆包女生头像外观
+    btn.className = 'rj-doubao-btn';
+    btn.innerHTML = '<img class="rj-doubao-avatar" src="' + DOUBAO_AVATAR + '" alt="豆包">';
+    btn.title = '和豆包聊天';
+
+    // 弹窗面板（懒创建）
+    var panel = null;
+    function buildPanel() {
+      if (panel) return panel;
+      panel = document.createElement('div');
+      panel.id = 'rj-doubao-panel';
+      panel.innerHTML =
+        '<div class="rj-doubao-head">' +
+          '<img class="rj-doubao-head-avatar" src="' + DOUBAO_AVATAR + '" alt="">' +
+          '<span>和豆包聊天</span>' +
+          '<button class="rj-doubao-close" title="关闭">×</button>' +
+        '</div>' +
+        '<iframe class="rj-doubao-frame" src="' + DOUBAO_CHAT_URL + '" frameborder="0" allow="clipboard-write; autoplay; microphone" allowtransparency="true"></iframe>';
+      panel.querySelector('.rj-doubao-close').addEventListener('click', function () { hide(); });
+      document.body.appendChild(panel);
+      return panel;
+    }
+    function show() {
+      buildPanel().classList.add('rj-doubao-open');
+      btn.classList.add('rj-doubao-active');
+    }
+    function hide() {
+      if (panel) panel.classList.remove('rj-doubao-open');
+      btn.classList.remove('rj-doubao-active');
+    }
+
+    // 捕获阶段截停：屏蔽 gitter 等对 #chat_btn 的默认触发，改由豆包弹窗接管
+    document.addEventListener('click', function (e) {
+      if (btn.contains(e.target)) {
+        e.preventDefault();
+        e.stopPropagation();
+        var open = panel && panel.classList.contains('rj-doubao-open');
+        open ? hide() : show();
+      }
+    }, true);
+
+    // 点击面板外部关闭
+    document.addEventListener('click', function (e) {
+      if (!panel || !panel.classList.contains('rj-doubao-open')) return;
+      if (btn.contains(e.target) || panel.contains(e.target)) return;
+      hide();
+    });
+  })();
+
   function load() {
     ensureAplayer(function () {
       fetchPlaylist()
