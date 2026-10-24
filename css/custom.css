@@ -20,13 +20,10 @@
   --blockquote-bg: rgba(139, 92, 246, 0.08);
 }
 
-/* ---------- 背景：深空 + 极光霓虹 ---------- */
+/* ---------- 背景：恢复原始背景图（主题配置 background: oc.png） ---------- */
 #web_bg {
-  background:
-    radial-gradient(1200px 600px at 12% -10%, rgba(139, 92, 246, 0.28), transparent 60%),
-    radial-gradient(1000px 520px at 88% 8%, rgba(34, 211, 238, 0.16), transparent 55%),
-    radial-gradient(900px 700px at 50% 108%, rgba(244, 114, 182, 0.14), transparent 60%),
-    #070a14;
+  background: url(https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/oc.png) center/cover no-repeat;
+  background-attachment: local;
 }
 
 /* ---------- 卡片：暗色玻璃拟态 ---------- */
@@ -78,7 +75,29 @@
 
 #site-subtitle {
   color: rgba(196, 205, 255, 0.9);
-  text-shadow: 0 0 12px rgba(34, 211, 238, 0.45);
+  text-shadow: 0 0 18px rgba(139, 92, 246, 0.6), 0 0 8px rgba(34, 211, 238, 0.45);
+}
+
+/* 副标题打字文字：主题紫→青→粉渐变 */
+#site-subtitle #subtitle {
+  background: linear-gradient(90deg, #c4b5fd 0%, #67e8f9 50%, #f0abfc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+#site-subtitle .typed-cursor {
+  color: #22d3ee;
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.8);
+}
+
+/* 首屏下滑箭头：主题色 */
+#scroll-down i {
+  color: #a78bfa;
+  text-shadow: 0 0 14px rgba(34, 211, 238, 0.65);
 }
 
 #site-name {
@@ -96,8 +115,31 @@
   transition: color .2s ease, text-shadow .2s ease;
 }
 .article-title:hover {
+  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ---------- 主页中间（文章卡片）字体：对齐站点主题色 ---------- */
+.recent-post-info .article-meta-wrap {
+  color: rgba(148, 163, 184, 0.85);
+}
+.recent-post-info .article-meta-wrap i {
+  color: #a78bfa;
+}
+.recent-post-info .article-meta-wrap .article-meta-separator {
+  color: rgba(34, 211, 238, 0.5);
+}
+.recent-post-info .article-meta-wrap a {
   color: #22d3ee;
-  text-shadow: 0 0 14px rgba(34, 211, 238, 0.5);
+}
+.recent-post-info .article-meta-wrap a:hover {
+  color: #f472b6;
+}
+.recent-post-info .content {
+  color: rgba(196, 205, 255, 0.78);
 }
 
 a {

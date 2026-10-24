@@ -101,18 +101,62 @@
     ap.on('pause', function () { saveState(); });
   }
 
-  function showTip() {
+  function showTip(msg) {
     var t = document.getElementById('rj-tip');
     if (t) return;
     t = document.createElement('div');
     t.id = 'rj-tip';
     t.className = 'rj-tip';
-    t.textContent = '♪ 点击页面任意处开启音乐';
+    t.textContent = msg || '♪ 点击页面任意处开启音乐';
     document.body.appendChild(t);
     setTimeout(function () {
       t.classList.add('rj-tip-hide');
       setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 700);
     }, 5000);
+  }
+
+  // —— 自动播放：先正常带声播放；被浏览器拦截时转"静音自动播放"（muted 自动播放始终被允许），
+  //    首次点击/按键任意处即恢复音量 —— 实现"打开网站后自动播放，无需先点击" ——
+  //    注：APlayer 1.10.1 的 play() 不返回 Promise，须直接驱动 audio 元素（UI 由 audio 事件自动同步）
+  function unmuteLater(ap) {
+    var restore = function () {
+      try {
+        if (ap.audio) { ap.audio.muted = false; ap.audio.volume = 0.75; }
+        document.body.setAttribute('data-rj-unmuted', JSON.stringify({ m: ap.audio ? ap.audio.muted : null, v: ap.audio ? ap.audio.volume : null }));
+      } catch (e) {}
+      document.removeEventListener('pointerdown', restore);
+      document.removeEventListener('keydown', restore);
+      document.removeEventListener('touchstart', restore);
+    };
+    document.addEventListener('pointerdown', restore);
+    document.addEventListener('keydown', restore);
+    document.addEventListener('touchstart', restore);
+  }
+  function autoPlay(ap, silent) {
+    var a = ap.audio;
+    if (!a) return;
+    try {
+      a.muted = false;
+      a.volume = 0.75;
+      var p = a.play();
+      if (p && p.catch) {
+        p.catch(function () {
+          try {
+            a.muted = true;
+            a.volume = 0;
+            document.body.setAttribute('data-rj-muted', '1');
+            var p2 = a.play();
+            if (p2 && p2.catch) p2.catch(function () {});
+            if (!silent) showTip('♪ 已自动播放，点击页面任意处开启声音');
+            unmuteLater(ap);
+          } catch (e2) {
+            if (!silent) showTip('♪ 点击页面任意处开启音乐');
+          }
+        });
+      }
+    } catch (e) {
+      if (!silent) showTip('♪ 点击页面任意处开启音乐');
+    }
   }
 
   function readState() {
@@ -144,7 +188,7 @@
     var saved = readState();
     var resumeTime = saved && typeof saved.time === 'number' ? Math.min(Math.max(saved.time, 0), 3600) : 0;
 
-    // —— 打开：优先续播上次歌曲，否则随机播放；被拦截时提示 ——
+    // —— 打开：优先续播上次歌曲（同曲同进度、不切歌），否则随机挑一首；随后自动播放 ——
     try {
       if (saved && typeof saved.idx === 'number' && saved.idx >= 0 && saved.idx < ap.list.audios.length) {
         ap.list.switch(saved.idx);
@@ -154,10 +198,9 @@
       } else if (ap.list.audios.length > 1) {
         ap.list.switch(Math.floor(Math.random() * ap.list.audios.length));
       }
-      var p = ap.play();
-      if (p && p.catch) { p.catch(function () { showTip(); }); }
+      autoPlay(ap, false);
     } catch (e) {
-      showTip();
+      showTip('♪ 点击页面任意处开启音乐');
     }
 
     // 首次点击页面任意处 -> 开始播放（尊重浏览器自动播放策略兜底）
@@ -198,10 +241,7 @@
       if (st && st.time > 3) {
         nap.on('loadeddata', function () { try { nap.seek(st.time); } catch (e) {} });
       }
-      try {
-        var np = nap.play();
-        if (np && np.catch) { np.catch(function () {}); }
-      } catch (e) {}
+      autoPlay(nap, true);
     });
   }
 
