@@ -418,8 +418,8 @@ img {
 }
 
 /* ============================================================
-   APlayer 固定迷你播放器 — 赛博蒸汽波玻璃风 V5
-   布局：全幅毛玻璃封面卡（封面铺满 + 半透明磨砂）+ 主题渐变玻璃播放键
+   APlayer 固定迷你播放器 — 赛博蒸汽波玻璃风 V7
+   布局：全幅毛玻璃封面卡（封面铺满 + 半透明磨砂）+ 隐形整卡点击层 + 右下角状态小图标（无圆形按钮）
    ============================================================ */
 .aplayer.aplayer-fixed {
   left: 18px;
@@ -452,54 +452,38 @@ img {
   cursor: pointer;
   background-image: linear-gradient(90deg, rgba(7, 9, 20, 0.5) 0%, rgba(7, 9, 20, 0.15) 55%, rgba(7, 9, 20, 0.42) 100%);
 }
-/* 主题色渐变玻璃播放键（半透明毛玻璃，紫→青渐变，不遮挡封面主视觉） */
+/* 播放控制：隐形整卡点击层（点击卡片任意处播放/暂停），无圆形按钮遮挡封面 */
 .aplayer-row .aplayer-pic {
-  position: relative;
-  z-index: 3;
-  flex: 0 0 52px;
-  width: 52px;
-  height: 52px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   margin: 0;
-  border-radius: 50%;
-  background-image: none !important;
-  background-color: transparent !important;
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.9), rgba(99, 102, 241, 0.8) 55%, rgba(34, 211, 238, 0.85)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 18px rgba(88, 28, 135, 0.55), 0 0 22px rgba(167, 139, 250, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 0;
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  opacity: 0;
+  cursor: pointer;
 }
-.aplayer-row .aplayer-pic:hover {
-  transform: scale(1.07);
-  box-shadow: 0 0 28px rgba(167, 139, 250, 0.8), 0 0 12px rgba(34, 211, 238, 0.55);
+/* 右下角播放/暂停状态小图标（无圆形底色，不遮挡封面） */
+.aplayer-row::after {
+  content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='13' height='13'><path d='M8 5v14l11-7z' fill='white'/></svg>");
+  position: absolute;
+  right: 10px;
+  bottom: 7px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+  transition: opacity 0.2s ease;
 }
-.aplayer-row.rj-playing .aplayer-pic {
-  border-color: rgba(34, 211, 238, 0.85);
-  box-shadow: 0 4px 20px rgba(88, 28, 135, 0.6), 0 0 26px rgba(34, 211, 238, 0.55);
-}
-/* 播放/暂停图标（白色，随按键放大） */
-.aplayer-row .aplayer-pic .aplayer-play,
-.aplayer-row .aplayer-pic .aplayer-pause {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  width: 100% !important;
-  height: 100% !important;
-  transform: translate(-50%, -50%) !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
-.aplayer-row .aplayer-pic .aplayer-play svg,
-.aplayer-row .aplayer-pic .aplayer-pause svg {
-  position: static !important;
-  width: 22px !important;
-  height: 22px !important;
-}
-.aplayer-row .aplayer-pic .aplayer-play path,
-.aplayer-row .aplayer-pic .aplayer-pause path {
-  fill: #ffffff !important;
+.aplayer-row.rj-playing::after {
+  content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='13' height='13'><rect x='6' y='5' width='4.5' height='14' rx='1' fill='white'/><rect x='13.5' y='5' width='4.5' height='14' rx='1' fill='white'/></svg>");
 }
 /* 歌曲信息（叠在封面卡上） */
 .aplayer-row .aplayer-info {
@@ -672,11 +656,6 @@ img {
   .aplayer-row {
     padding: 6px 10px;
     gap: 10px;
-  }
-  .aplayer-row .aplayer-pic {
-    flex-basis: 46px;
-    width: 46px;
-    height: 46px;
   }
   .aplayer.aplayer-fixed .aplayer-body {
     border-radius: 14px;
