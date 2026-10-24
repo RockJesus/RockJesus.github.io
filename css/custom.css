@@ -893,3 +893,45 @@ img {
 #post .post-copyright .post-copyright-meta {
   color: #22d3ee;
 }
+
+/* ============================================================
+   主页首屏 V9 — 移除大标题 / 打字副标题下移纯紫 / 右上角导航紫色
+   鼠标互动线条（canvas-nest）紫色由 player.js 运行时设置
+   ============================================================ */
+/* 删除主页中央大标题（Alienware Hackintosh） */
+#site-title {
+  display: none;
+}
+
+/* 打字副标题组：水平居中，垂直下移至 75%（即距首屏底部 25%） */
+#page-header.full_page #site-info {
+  top: 75%;
+}
+
+/* 打字副标题：只要紫色文字（覆盖原渐变） */
+#site-subtitle #subtitle {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: initial;
+  color: #a78bfa;
+  text-shadow: 0 0 12px rgba(139, 92, 246, 0.65);
+}
+#site-subtitle .typed-cursor {
+  color: #a78bfa;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+}
+
+/* 右上角导航文字全部紫色 */
+#nav #menus .site-page,
+#nav .menus_item_child .site-page {
+  color: #a78bfa;
+}
+#nav #menus .site-page i,
+#nav .menus_item_child .site-page i {
+  color: #a78bfa;
+}
+#nav #menus .site-page:hover,
+#nav .menus_item_child .site-page:hover {
+  color: #e0d7ff;
+}

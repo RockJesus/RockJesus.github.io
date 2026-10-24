@@ -3,6 +3,10 @@
   if (window.__rjMusicInit) return; // pjax 防重复初始化
   window.__rjMusicInit = true;
 
+  // —— 鼠标互动线条（canvas-nest）改为主题紫 #8b5cf6 ——
+  var rjCanvasNest = document.getElementById('canvas_nest');
+  if (rjCanvasNest) rjCanvasNest.setAttribute('color', '139,92,246');
+
   var PLAYLIST_URLS = [
     'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
     'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
