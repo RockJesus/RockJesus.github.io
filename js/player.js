@@ -55,6 +55,70 @@
     return out;
   }
 
+  // —— 统一装饰：全幅封面背景 + 悬浮播放键 + 播放状态 + 断点记忆 ——
+  function decorate(ap, container, list) {
+    var body = container.querySelector('.aplayer-body');
+    var pic = container.querySelector('.aplayer-pic');
+    var info = container.querySelector('.aplayer-info');
+    var row = null;
+    if (body && pic && info) {
+      row = document.createElement('div');
+      row.className = 'aplayer-row';
+      body.insertBefore(row, body.firstChild);
+      row.appendChild(pic);
+      row.appendChild(info);
+      pic.style.backgroundImage = 'none'; // 封面改由整卡背景展示
+    }
+    function curCover() {
+      var a = ap.list.audios[ap.list.index];
+      return (a && a.cover) || SEED.cover;
+    }
+    function setCover() {
+      if (!body) return;
+      body.style.backgroundImage = 'url("' + curCover() + '")';
+      body.style.backgroundSize = 'cover';
+      body.style.backgroundPosition = 'center';
+    }
+    setCover();
+
+    ap.on('listswitch', function () { setCover(); });
+    ap.on('play', function () { if (row) row.classList.add('rj-playing'); });
+    ap.on('pause', function () { if (row) row.classList.remove('rj-playing'); });
+    ap.on('ended', function () { if (row) row.classList.remove('rj-playing'); });
+
+    // 断点续播记忆
+    var STATE_KEY = 'rjPlayerState';
+    function saveState() {
+      try {
+        localStorage.setItem(STATE_KEY, JSON.stringify({
+          idx: ap.list.index,
+          time: (ap.audio && ap.audio.currentTime) || 0
+        }));
+      } catch (e) {}
+    }
+    setInterval(saveState, 3000);
+    ap.on('listswitch', function () { saveState(); });
+    ap.on('pause', function () { saveState(); });
+  }
+
+  function showTip() {
+    var t = document.getElementById('rj-tip');
+    if (t) return;
+    t = document.createElement('div');
+    t.id = 'rj-tip';
+    t.className = 'rj-tip';
+    t.textContent = '♪ 点击页面任意处开启音乐';
+    document.body.appendChild(t);
+    setTimeout(function () {
+      t.classList.add('rj-tip-hide');
+      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 700);
+    }, 5000);
+  }
+
+  function readState() {
+    try { return JSON.parse(localStorage.getItem('rjPlayerState')); } catch (e) { return null; }
+  }
+
   function init(list) {
     var container = document.getElementById('site-player');
     if (!container || !window.APlayer || !list.length) return;
@@ -75,63 +139,14 @@
     });
     window.aplayers = window.aplayers || [];
     window.aplayers.push(ap); // pjax 只销毁非 fixed 实例
+    decorate(ap, container, list);
 
-    // —— 重组迷你条：封面播放键 + 歌名/进度 ——
-    var body = container.querySelector('.aplayer-body');
-    var pic = container.querySelector('.aplayer-pic');
-    var info = container.querySelector('.aplayer-info');
-    var row = null;
-    if (body && pic && info) {
-      row = document.createElement('div');
-      row.className = 'aplayer-row';
-      body.insertBefore(row, body.firstChild);
-      row.appendChild(pic);
-      row.appendChild(info);
-    }
+    var saved = readState();
+    var resumeTime = saved && typeof saved.time === 'number' ? Math.min(Math.max(saved.time, 0), 3600) : 0;
 
-    ap.on('play', function () { if (row) row.classList.add('rj-playing'); });
-    ap.on('pause', function () { if (row) row.classList.remove('rj-playing'); });
-    ap.on('ended', function () { if (row) row.classList.remove('rj-playing'); });
-
-    // —— 断点续播：记住歌曲序号 + 进度，页面切换后同一首歌继续 ——
-    var STATE_KEY = 'rjPlayerState';
-    function saveState() {
-      try {
-        localStorage.setItem(STATE_KEY, JSON.stringify({
-          idx: ap.list.index,
-          time: (ap.audio && ap.audio.currentTime) || 0
-        }));
-      } catch (e) {}
-    }
-    setInterval(saveState, 3000);
-    ap.on('listswitch', function () { saveState(); });
-    ap.on('pause', function () { saveState(); });
-
-    var saved = null;
-    try { saved = JSON.parse(localStorage.getItem(STATE_KEY)); } catch (e) {}
-    var resumeIdx = 0;
-    var resumeTime = 0;
-    if (saved && typeof saved.idx === 'number' && saved.idx >= 0 && saved.idx < ap.list.audios.length) {
-      resumeIdx = saved.idx;
-      resumeTime = Math.min(Math.max(saved.time || 0, 0), 3600);
-    }
-
-    // —— 打开即随机播放（浏览器拦截时给出提示，点任意处即播）——
-    function showTip() {
-      var t = document.getElementById('rj-tip');
-      if (t) return;
-      t = document.createElement('div');
-      t.id = 'rj-tip';
-      t.className = 'rj-tip';
-      t.textContent = '♪ 点击页面任意处开启音乐';
-      document.body.appendChild(t);
-      setTimeout(function () {
-        t.classList.add('rj-tip-hide');
-        setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 700);
-      }, 5000);
-    }
+    // —— 打开：优先续播上次歌曲，否则随机播放；被拦截时提示 ——
     try {
-      if (saved && saved.idx >= 0 && saved.idx < ap.list.audios.length) {
+      if (saved && typeof saved.idx === 'number' && saved.idx >= 0 && saved.idx < ap.list.audios.length) {
         ap.list.switch(saved.idx);
         if (resumeTime > 3) {
           ap.on('loadeddata', function () { try { ap.seek(resumeTime); } catch (e) {} });
@@ -159,10 +174,9 @@
     document.addEventListener('pjax:complete', function () {
       var c = document.getElementById('site-player');
       if (!c || c.querySelector('.aplayer-body')) return;
-      var st = null;
-      try { st = JSON.parse(localStorage.getItem(STATE_KEY)); } catch (e) {}
-      var audio = st && st.idx >= 0 && st.idx < ap.list.audios.length ? ap.list.audios[st.idx] : list[0];
-      if (!audio) return;
+      var st = readState();
+      var idx = st && typeof st.idx === 'number' && st.idx >= 0 && st.idx < list.length ? st.idx : 0;
+      if (!list[idx]) return;
       var nap = new APlayer({
         container: c,
         fixed: true,
@@ -179,7 +193,8 @@
         audio: list
       });
       window.aplayers.push(nap);
-      nap.list.switch(ap.list.audios.indexOf(audio) >= 0 ? ap.list.audios.indexOf(audio) : 0);
+      decorate(nap, c, list);
+      nap.list.switch(idx);
       if (st && st.time > 3) {
         nap.on('loadeddata', function () { try { nap.seek(st.time); } catch (e) {} });
       }

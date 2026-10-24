@@ -376,8 +376,8 @@ img {
 }
 
 /* ============================================================
-   APlayer 固定迷你播放器 — 赛博蒸汽波玻璃风 V2
-   布局：[渐变播放键] [黑胶封面] [歌名/歌手 + 渐变进度条]
+   APlayer 固定迷你播放器 — 赛博蒸汽波玻璃风 V4
+   布局：全幅封面卡（封面铺满播放器）+ 悬浮玻璃播放键 + 歌名/进度
    ============================================================ */
 .aplayer.aplayer-fixed {
   left: 18px;
@@ -389,84 +389,82 @@ img {
 .aplayer.aplayer-fixed .aplayer-body {
   display: flex;
   flex-direction: column;
-  background: rgba(19, 23, 40, 0.78);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background-color: rgba(19, 23, 40, 0.55);
+  background-size: cover;
+  background-position: center;
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
   border: 1px solid rgba(167, 139, 250, 0.4);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 24px rgba(167, 139, 250, 0.22);
   overflow: hidden;
 }
-/* —— 主行：播放键 + 封面 + 信息 —— */
+/* —— 全幅封面卡：封面铺满播放器（body 背景），左侧悬浮播放键 + 右侧歌名 —— */
 .aplayer-row {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 8px;
-  gap: 8px;
+  padding: 8px 12px;
+  gap: 12px;
+  min-height: 74px;
+  background-image: linear-gradient(90deg, rgba(7, 9, 20, 0.72) 0%, rgba(7, 9, 20, 0.28) 55%, rgba(7, 9, 20, 0.62) 100%);
 }
-/* 封面播放键（圆形专辑封面，中央玻璃角标） */
+/* 悬浮玻璃播放键（封面由整卡背景展示，不再占用按钮区域） */
 .aplayer-row .aplayer-pic {
-  flex: 0 0 56px;
-  width: 56px;
-  height: 56px;
+  position: relative;
+  z-index: 2;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
   margin: 0;
   border-radius: 50%;
-  background-color: #1e1b2e !important;
-  background-size: cover !important;
-  background-position: center !important;
-  border: 2px solid rgba(167, 139, 250, 0.65);
-  box-shadow: 0 0 16px rgba(167, 139, 250, 0.5), 0 0 6px rgba(34, 211, 238, 0.4);
+  background-image: none !important;
+  background-color: rgba(15, 17, 32, 0.45) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.5), 0 0 14px rgba(167, 139, 250, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .aplayer-row .aplayer-pic:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 26px rgba(167, 139, 250, 0.8), 0 0 10px rgba(34, 211, 238, 0.5);
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(167, 139, 250, 0.75), 0 0 10px rgba(34, 211, 238, 0.5);
 }
 .aplayer-row.rj-playing .aplayer-pic {
-  box-shadow: 0 0 22px rgba(167, 139, 250, 0.75), 0 0 8px rgba(34, 211, 238, 0.6);
-  border-color: rgba(34, 211, 238, 0.8);
+  border-color: rgba(34, 211, 238, 0.85);
+  box-shadow: 0 0 18px rgba(167, 139, 250, 0.7), 0 0 8px rgba(34, 211, 238, 0.6);
 }
-/* 播放/暂停玻璃角标 */
+/* 播放/暂停图标 */
 .aplayer-row .aplayer-pic .aplayer-play,
 .aplayer-row .aplayer-pic .aplayer-pause {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
-  width: 24px !important;
-  height: 24px !important;
+  width: 100% !important;
+  height: 100% !important;
   transform: translate(-50%, -50%) !important;
-  background: rgba(8, 10, 20, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 50%;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.45);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 .aplayer-row .aplayer-pic .aplayer-play svg,
 .aplayer-row .aplayer-pic .aplayer-pause svg {
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  width: 12px !important;
-  height: 12px !important;
-  transform: translate(-50%, -50%) !important;
+  position: static !important;
+  width: 16px !important;
+  height: 16px !important;
 }
 .aplayer-row .aplayer-pic .aplayer-play path,
 .aplayer-row .aplayer-pic .aplayer-pause path {
   fill: #ffffff !important;
 }
-.aplayer-row .aplayer-pic .aplayer-play,
-.aplayer-row .aplayer-pic .aplayer-pause {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* 歌曲信息 */
+/* 歌曲信息（叠在封面卡上） */
 .aplayer-row .aplayer-info {
+  position: relative;
+  z-index: 2;
   flex: 1;
   min-width: 0;
   height: auto;
-  padding: 2px 6px 4px 2px;
+  padding: 2px 6px 4px 0;
   border-bottom: 0;
 }
 .aplayer-row .aplayer-info .aplayer-music {
@@ -478,15 +476,14 @@ img {
   text-overflow: ellipsis;
 }
 .aplayer-row .aplayer-info .aplayer-music .aplayer-title {
-  background: linear-gradient(90deg, #a78bfa, #22d3ee, #f472b6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #ffffff;
   font-weight: 600;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85), 0 0 16px rgba(139, 92, 246, 0.6);
 }
 .aplayer-row .aplayer-info .aplayer-music .aplayer-author {
-  color: #94a3b8;
+  color: #cbd5e1;
   font-size: 11px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 .aplayer-row .aplayer-info .aplayer-controller {
   height: 22px;
@@ -495,12 +492,12 @@ img {
   padding: 3px 2px 1px;
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.22);
   height: 3px;
   border-radius: 3px;
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
-  background: rgba(34, 211, 238, 0.25);
+  background: rgba(34, 211, 238, 0.3);
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
   background: linear-gradient(90deg, #a78bfa, #22d3ee, #f472b6);
@@ -514,8 +511,9 @@ img {
   transform: scale(0.7);
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-time {
-  color: #a78bfa;
+  color: #f0e9ff;
   font-size: 10px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon path {
   fill: #a78bfa;
@@ -628,13 +626,13 @@ img {
     max-width: calc(100vw - 20px);
   }
   .aplayer-row {
-    padding: 6px;
-    gap: 6px;
+    padding: 6px 10px;
+    gap: 8px;
   }
   .aplayer-row .aplayer-pic {
-    flex-basis: 48px;
-    width: 48px;
-    height: 48px;
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
   }
   .aplayer.aplayer-fixed .aplayer-body {
     border-radius: 14px;
