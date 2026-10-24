@@ -1,16 +1,3 @@
-<% if (theme.baidu_push) { %>
-    <script>
-        (function(){
-            var bp = document.createElement('script');
-            var curProtocol = window.location.protocol.split(':')[0];
-            if (curProtocol === 'https') {
-                bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
-            }
-            else {
-                bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-            }
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(bp, s);
-        })();
-    </script>
-<% } %> 
+/* RockJesus.cn - baidu push placeholder
+   原文件误将未编译的 EJS 模板源码发布到了站点（theme.baidu_push 未启用，
+   模板本应渲染为空）。此处替换为惰性占位内容，避免源码泄漏。 */
