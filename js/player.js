@@ -76,35 +76,45 @@
     window.aplayers = window.aplayers || [];
     window.aplayers.push(ap); // pjax 只销毁非 fixed 实例
 
-    // —— 重组迷你条：渐变播放键 + 黑胶封面 + 歌名/进度 ——
+    // —— 重组迷你条：封面播放键 + 歌名/进度 ——
     var body = container.querySelector('.aplayer-body');
     var pic = container.querySelector('.aplayer-pic');
     var info = container.querySelector('.aplayer-info');
     var row = null;
-    var cover = null;
     if (body && pic && info) {
       row = document.createElement('div');
       row.className = 'aplayer-row';
-      cover = document.createElement('img');
-      cover.className = 'rj-cover';
-      cover.alt = '';
-      cover.src = (list[0] && list[0].cover) || SEED.cover;
-      cover.onerror = function () { cover.src = SEED.cover; };
       body.insertBefore(row, body.firstChild);
       row.appendChild(pic);
-      row.appendChild(cover);
       row.appendChild(info);
     }
 
-    function refreshCover(idx) {
-      if (!cover) return;
-      var a = ap.list.audios[idx];
-      cover.src = (a && a.cover) || SEED.cover;
-    }
-    ap.on('listswitch', function (e) { refreshCover(e.index); });
     ap.on('play', function () { if (row) row.classList.add('rj-playing'); });
     ap.on('pause', function () { if (row) row.classList.remove('rj-playing'); });
     ap.on('ended', function () { if (row) row.classList.remove('rj-playing'); });
+
+    // —— 断点续播：记住歌曲序号 + 进度，页面切换后同一首歌继续 ——
+    var STATE_KEY = 'rjPlayerState';
+    function saveState() {
+      try {
+        localStorage.setItem(STATE_KEY, JSON.stringify({
+          idx: ap.list.index,
+          time: (ap.audio && ap.audio.currentTime) || 0
+        }));
+      } catch (e) {}
+    }
+    setInterval(saveState, 3000);
+    ap.on('listswitch', function () { saveState(); });
+    ap.on('pause', function () { saveState(); });
+
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(STATE_KEY)); } catch (e) {}
+    var resumeIdx = 0;
+    var resumeTime = 0;
+    if (saved && typeof saved.idx === 'number' && saved.idx >= 0 && saved.idx < ap.list.audios.length) {
+      resumeIdx = saved.idx;
+      resumeTime = Math.min(Math.max(saved.time || 0, 0), 3600);
+    }
 
     // —— 打开即随机播放（浏览器拦截时给出提示，点任意处即播）——
     function showTip() {
@@ -121,7 +131,12 @@
       }, 5000);
     }
     try {
-      if (ap.list.audios.length > 1) {
+      if (saved && saved.idx >= 0 && saved.idx < ap.list.audios.length) {
+        ap.list.switch(saved.idx);
+        if (resumeTime > 3) {
+          ap.on('loadeddata', function () { try { ap.seek(resumeTime); } catch (e) {} });
+        }
+      } else if (ap.list.audios.length > 1) {
         ap.list.switch(Math.floor(Math.random() * ap.list.audios.length));
       }
       var p = ap.play();
@@ -139,6 +154,40 @@
         try { ap.play(); } catch (e) {}
       }
     }, true);
+
+    // —— pjax 切换页面后若播放器被重建，用记忆状态自动续播 ——
+    document.addEventListener('pjax:complete', function () {
+      var c = document.getElementById('site-player');
+      if (!c || c.querySelector('.aplayer-body')) return;
+      var st = null;
+      try { st = JSON.parse(localStorage.getItem(STATE_KEY)); } catch (e) {}
+      var audio = st && st.idx >= 0 && st.idx < ap.list.audios.length ? ap.list.audios[st.idx] : list[0];
+      if (!audio) return;
+      var nap = new APlayer({
+        container: c,
+        fixed: true,
+        mini: true,
+        autoplay: false,
+        theme: '#a78bfa',
+        loop: 'all',
+        order: 'random',
+        preload: 'none',
+        volume: 0.75,
+        mutex: true,
+        listFolded: true,
+        listMaxHeight: 260,
+        audio: list
+      });
+      window.aplayers.push(nap);
+      nap.list.switch(ap.list.audios.indexOf(audio) >= 0 ? ap.list.audios.indexOf(audio) : 0);
+      if (st && st.time > 3) {
+        nap.on('loadeddata', function () { try { nap.seek(st.time); } catch (e) {} });
+      }
+      try {
+        var np = nap.play();
+        if (np && np.catch) { np.catch(function () {}); }
+      } catch (e) {}
+    });
   }
 
   function load() {
