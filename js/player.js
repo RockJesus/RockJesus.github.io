@@ -4,6 +4,7 @@
   window.__rjMusicInit = true;
 
   var PLAYLIST_URLS = [
+    'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
     'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
     'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'
   ];
