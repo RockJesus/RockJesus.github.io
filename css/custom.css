@@ -376,79 +376,132 @@ img {
 }
 
 /* ============================================================
-   APlayer 固定迷你播放器 — 赛博蒸汽波玻璃风主题化
+   APlayer 固定迷你播放器 — 赛博蒸汽波玻璃风 V2
+   布局：[渐变播放键] [黑胶封面] [歌名/歌手 + 渐变进度条]
    ============================================================ */
 .aplayer.aplayer-fixed {
   left: 18px;
   bottom: 18px;
   z-index: 999;
+  width: 340px;
+  max-width: calc(100vw - 36px);
 }
 .aplayer.aplayer-fixed .aplayer-body {
+  display: flex;
+  flex-direction: column;
   background: rgba(19, 23, 40, 0.78);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(167, 139, 250, 0.35);
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(167, 139, 250, 0.16);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 24px rgba(167, 139, 250, 0.22);
   overflow: hidden;
 }
-.aplayer.aplayer-fixed .aplayer-pic {
-  background-color: #a78bfa !important;
+/* —— 主行：播放键 + 封面 + 信息 —— */
+.aplayer-row {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
+}
+/* 圆形渐变播放键（替代默认封面按钮） */
+.aplayer-row .aplayer-pic {
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  border-radius: 50%;
   background-image: linear-gradient(135deg, #a78bfa 0%, #22d3ee 55%, #f472b6 100%) !important;
+  background-color: #a78bfa !important;
   background-size: 260% 260%;
   animation: aplayerGradient 12s ease infinite;
-  border-radius: 12px;
-  margin: 4px;
-  box-shadow: 0 0 14px rgba(167, 139, 250, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.55);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.aplayer-row .aplayer-pic:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 26px rgba(167, 139, 250, 0.8), 0 0 10px rgba(34, 211, 238, 0.5);
 }
 @keyframes aplayerGradient {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-.aplayer.aplayer-fixed .aplayer-info {
+/* 黑胶封面（播放时旋转） */
+.aplayer-row .rj-cover {
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(167, 139, 250, 0.65);
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.5), 0 0 6px rgba(34, 211, 238, 0.45);
+  animation: rjSpin 24s linear infinite;
+  animation-play-state: paused;
+  background: #1e1b2e;
+}
+.aplayer-row.rj-playing .rj-cover {
+  animation-play-state: running;
+}
+@keyframes rjSpin {
+  to { transform: rotate(360deg); }
+}
+/* 歌曲信息 */
+.aplayer-row .aplayer-info {
+  flex: 1;
+  min-width: 0;
   height: auto;
-  padding: 6px 8px 4px 12px;
+  padding: 2px 6px 4px 2px;
   border-bottom: 0;
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-music {
-  color: #e2e8f0;
+.aplayer-row .aplayer-info .aplayer-music {
   height: auto;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-music .aplayer-title {
-  color: #a78bfa;
+.aplayer-row .aplayer-info .aplayer-music .aplayer-title {
+  background: linear-gradient(90deg, #a78bfa, #22d3ee, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-music .aplayer-author {
-  color: #64748b;
+.aplayer-row .aplayer-info .aplayer-music .aplayer-author {
+  color: #94a3b8;
+  font-size: 11px;
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-controller {
-  height: 24px;
+.aplayer-row .aplayer-info .aplayer-controller {
+  height: 22px;
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap {
-  padding: 4px 4px 2px;
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap {
+  padding: 3px 2px 1px;
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
   background: rgba(255, 255, 255, 0.08);
   height: 3px;
   border-radius: 3px;
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
   background: rgba(34, 211, 238, 0.25);
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
-  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
+  background: linear-gradient(90deg, #a78bfa, #22d3ee, #f472b6);
   height: 3px;
   border-radius: 3px;
+  box-shadow: 0 0 6px rgba(167, 139, 250, 0.6);
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
   background: #f472b6;
-  box-shadow: 0 0 8px rgba(244, 114, 182, 0.9);
+  box-shadow: 0 0 10px rgba(244, 114, 182, 0.95);
+  transform: scale(0.7);
 }
-.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-time {
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-time {
   color: #a78bfa;
-  font-size: 11px;
+  font-size: 10px;
 }
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon path {
   fill: #a78bfa;
@@ -457,34 +510,62 @@ img {
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path {
   fill: #22d3ee;
 }
-/* 播放列表面板 */
+/* —— 播放列表面板 —— */
 .aplayer .aplayer-list {
   background: rgba(19, 23, 40, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(167, 139, 250, 0.25);
-  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 0 0 16px 16px;
   overflow: hidden;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
 }
 .aplayer .aplayer-list ol {
   max-height: 260px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.5) transparent;
+}
+.aplayer .aplayer-list ol::-webkit-scrollbar {
+  width: 4px;
+}
+.aplayer .aplayer-list ol::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.5);
+  border-radius: 4px;
 }
 .aplayer .aplayer-list ol li {
   color: #cbd5e1;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 7px 14px;
+  transition: background 0.2s ease;
 }
 .aplayer .aplayer-list ol li:hover {
   background: rgba(167, 139, 250, 0.12);
 }
 .aplayer .aplayer-list ol li.aplayer-list-light {
-  background: linear-gradient(90deg, rgba(167, 139, 250, 0.28), rgba(34, 211, 238, 0.12));
+  background: linear-gradient(90deg, rgba(167, 139, 250, 0.3), rgba(34, 211, 238, 0.12));
+  border-left: 2px solid #f472b6;
 }
 .aplayer .aplayer-list ol li .aplayer-list-index {
   color: #a78bfa;
+  position: relative;
 }
 .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index {
-  color: #22d3ee;
+  color: transparent;
+}
+.aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 12'><rect x='0' y='4' width='2.5' height='8' rx='1' fill='%23f472b6'/><rect x='5' y='0' width='2.5' height='12' rx='1' fill='%23a78bfa'/><rect x='10' y='2.5' width='2.5' height='9' rx='1' fill='%2322d3ee'/></svg>") center/contain no-repeat;
+  animation: rjEq 0.9s ease-in-out infinite;
+}
+@keyframes rjEq {
+  0%, 100% { transform: translate(-50%, -50%) scaleY(0.7); }
+  50% { transform: translate(-50%, -50%) scaleY(1.15); }
 }
 .aplayer .aplayer-list ol li .aplayer-list-title {
   color: #e2e8f0;
@@ -498,14 +579,54 @@ img {
 .aplayer .aplayer-list ol li .aplayer-list-cur {
   color: #f472b6;
 }
+/* —— 自动播放被拦截时的提示 —— */
+.rj-tip {
+  position: fixed;
+  left: 18px;
+  bottom: 92px;
+  z-index: 1000;
+  padding: 8px 14px;
+  background: rgba(19, 23, 40, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 999px;
+  color: #e2e8f0;
+  font-size: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(167, 139, 250, 0.25);
+  opacity: 1;
+  transition: opacity 0.6s ease;
+  animation: rjTipIn 0.4s ease;
+}
+@keyframes rjTipIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rj-tip.rj-tip-hide {
+  opacity: 0;
+}
 /* 移动端适配 */
 @media (max-width: 767px) {
   .aplayer.aplayer-fixed {
     left: 10px;
     bottom: 10px;
+    width: auto;
     max-width: calc(100vw - 20px);
   }
+  .aplayer-row {
+    padding: 6px;
+    gap: 6px;
+  }
+  .aplayer-row .aplayer-pic,
+  .aplayer-row .rj-cover {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+  }
   .aplayer.aplayer-fixed .aplayer-body {
-    border-radius: 12px;
+    border-radius: 14px;
+  }
+  .aplayer .aplayer-list {
+    border-radius: 0 0 14px 14px;
   }
 }
