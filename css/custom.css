@@ -664,3 +664,232 @@ img {
     border-radius: 0 0 14px 14px;
   }
 }
+
+/* ============================================================
+   文章正文排版美化 V1 — Cyberpunk Vaporwave Typography
+   覆盖：标题层级 / 段落 / 行内代码 / 代码块 / 表格 / 引用 / 分割线 / 键盘 / 图片 / 链接 / 列表 / 标签 / 版权
+   ============================================================ */
+#article-container {
+  font-size: 1.02em;
+  line-height: 1.9;
+  color: rgba(226, 232, 255, 0.84);
+}
+
+/* —— 标题层级：主题渐变前缀 + 悬停微移（保留原动画） —— */
+#article-container h1,
+#article-container h2,
+#article-container h3,
+#article-container h4,
+#article-container h5,
+#article-container h6 {
+  color: rgba(240, 243, 255, 0.96);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+#article-container h2::before,
+#article-container h3::before,
+#article-container h4::before,
+#article-container h5::before,
+#article-container h6::before {
+  color: #a78bfa;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.7);
+}
+#article-container h2 {
+  border-bottom: 1px solid rgba(167, 139, 250, 0.28);
+  padding-bottom: 8px;
+}
+#article-container h2:hover,
+#article-container h3:hover,
+#article-container h4:hover {
+  color: #ffffff;
+}
+#article-container a.headerlink::after {
+  color: #a78bfa;
+}
+
+/* —— 段落 —— */
+#article-container p {
+  line-height: 1.9;
+  margin-bottom: 18px;
+}
+
+/* —— 行内代码：玻璃芯片 —— */
+#article-container p code,
+#article-container li code,
+#article-container td code {
+  margin: 0 2px;
+  padding: 2px 7px;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.12);
+  color: #e0d7ff;
+  font-size: 0.88em;
+  white-space: nowrap;
+  word-break: break-all;
+}
+
+/* —— 代码块：毛玻璃终端 + 霓虹窗口头 —— */
+#article-container pre {
+  position: relative;
+  padding: 16px 18px;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 12px;
+  background: rgba(9, 12, 24, 0.72) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 24px rgba(2, 6, 23, 0.5), 0 0 18px rgba(139, 92, 246, 0.18);
+  overflow-x: auto;
+  line-height: 1.6;
+}
+#article-container pre::before {
+  content: '';
+  display: block;
+  height: 10px;
+  margin-bottom: 12px;
+  background-image:
+    radial-gradient(circle 5px at 4px 5px, rgba(244, 114, 182, 0.9) 100%, transparent),
+    radial-gradient(circle 5px at 22px 5px, rgba(167, 139, 250, 0.9) 100%, transparent),
+    radial-gradient(circle 5px at 40px 5px, rgba(34, 211, 238, 0.9) 100%, transparent);
+}
+#article-container pre code {
+  background: transparent !important;
+  color: #d8deff;
+  font-family: Consolas, 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.9em;
+  text-shadow: none;
+}
+.hljs {
+  background: transparent !important;
+}
+
+/* —— 表格：霓虹描边 —— */
+#article-container table {
+  width: 100%;
+  margin: 20px 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(19, 23, 40, 0.45);
+}
+#article-container table thead th {
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.28), rgba(34, 211, 238, 0.16));
+  color: #ffffff;
+  font-weight: 600;
+  padding: 10px 14px;
+}
+#article-container table tbody td {
+  border-top: 1px solid rgba(148, 163, 255, 0.15);
+  padding: 9px 14px;
+  color: rgba(226, 232, 255, 0.85);
+}
+#article-container table tbody tr:nth-child(even) td {
+  background: rgba(148, 163, 255, 0.04);
+}
+#article-container table tbody tr:hover td {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+/* —— 引用块：霓虹侧边 + 玻璃底 —— */
+#article-container blockquote {
+  margin: 20px 0;
+  padding: 14px 18px;
+  border-radius: 0 12px 12px 0;
+  border-left: 4px solid transparent;
+  border-image: linear-gradient(180deg, #8b5cf6, #22d3ee) 1;
+  background: rgba(139, 92, 246, 0.08);
+  color: rgba(196, 205, 255, 0.9);
+}
+#article-container blockquote p {
+  margin-bottom: 6px;
+}
+#article-container blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* —— 分割线：主题渐变 —— */
+#article-container hr {
+  margin: 28px auto;
+  width: 60%;
+  height: 2px;
+  border: none;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #a78bfa, #22d3ee, #f472b6, transparent);
+  opacity: 0.75;
+}
+
+/* —— 键盘键帽 —— */
+#article-container kbd {
+  margin: 0 3px;
+  padding: 3px 8px;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.15);
+  box-shadow: 0 2px 0 rgba(139, 92, 246, 0.35), 0 1px 4px rgba(0, 0, 0, 0.4) inset;
+  color: #e0d7ff;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+/* —— 文章图片：圆角玻璃框 —— */
+#article-container img {
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 255, 0.18);
+  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.45);
+}
+#article-container img:hover {
+  filter: brightness(1.08);
+}
+
+/* —— 正文链接：虚线描边 + 悬停变色 —— */
+#article-container a:not(.headerlink) {
+  color: #a78bfa;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(167, 139, 250, 0.5);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+#article-container a:not(.headerlink):hover {
+  color: #22d3ee;
+  border-bottom-color: #22d3ee;
+}
+
+/* —— 列表 —— */
+#article-container ul li::marker,
+#article-container ol li::marker {
+  color: #a78bfa;
+}
+#article-container ul li:hover::marker,
+#article-container ol li:hover::marker {
+  color: #22d3ee;
+}
+#article-container li {
+  margin: 5px 0;
+}
+
+/* —— 文章标签 chips —— */
+#post .tag_share .post-meta__tags {
+  border-color: rgba(167, 139, 250, 0.6);
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.1);
+}
+#post .tag_share .post-meta__tags:hover {
+  background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* —— 版权卡：毛玻璃渐变 —— */
+#post .post-copyright {
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 12px;
+  background: rgba(19, 23, 40, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+#post .post-copyright:hover {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.35), 0 4px 16px rgba(2, 6, 23, 0.45);
+}
+#post .post-copyright .post-copyright-meta {
+  color: #22d3ee;
+}
