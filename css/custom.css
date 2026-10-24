@@ -374,3 +374,138 @@ img {
 .icon-aliens-line:before {
   content: "\e756";
 }
+
+/* ============================================================
+   APlayer 固定迷你播放器 — 赛博蒸汽波玻璃风主题化
+   ============================================================ */
+.aplayer.aplayer-fixed {
+  left: 18px;
+  bottom: 18px;
+  z-index: 999;
+}
+.aplayer.aplayer-fixed .aplayer-body {
+  background: rgba(19, 23, 40, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(167, 139, 250, 0.16);
+  overflow: hidden;
+}
+.aplayer.aplayer-fixed .aplayer-pic {
+  background-color: #a78bfa !important;
+  background-image: linear-gradient(135deg, #a78bfa 0%, #22d3ee 55%, #f472b6 100%) !important;
+  background-size: 260% 260%;
+  animation: aplayerGradient 12s ease infinite;
+  border-radius: 12px;
+  margin: 4px;
+  box-shadow: 0 0 14px rgba(167, 139, 250, 0.35);
+}
+@keyframes aplayerGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.aplayer.aplayer-fixed .aplayer-info {
+  height: auto;
+  padding: 6px 8px 4px 12px;
+  border-bottom: 0;
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-music {
+  color: #e2e8f0;
+  height: auto;
+  margin-bottom: 2px;
+  font-size: 13px;
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-music .aplayer-title {
+  color: #a78bfa;
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-music .aplayer-author {
+  color: #64748b;
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-controller {
+  height: 24px;
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap {
+  padding: 4px 4px 2px;
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
+  background: rgba(255, 255, 255, 0.08);
+  height: 3px;
+  border-radius: 3px;
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
+  background: rgba(34, 211, 238, 0.25);
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
+  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+  height: 3px;
+  border-radius: 3px;
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
+  background: #f472b6;
+  box-shadow: 0 0 8px rgba(244, 114, 182, 0.9);
+}
+.aplayer.aplayer-fixed .aplayer-info .aplayer-controller .aplayer-time {
+  color: #a78bfa;
+  font-size: 11px;
+}
+.aplayer .aplayer-info .aplayer-controller .aplayer-icon path {
+  fill: #a78bfa;
+  transition: fill 0.2s ease;
+}
+.aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path {
+  fill: #22d3ee;
+}
+/* 播放列表面板 */
+.aplayer .aplayer-list {
+  background: rgba(19, 23, 40, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
+}
+.aplayer .aplayer-list ol {
+  max-height: 260px;
+}
+.aplayer .aplayer-list ol li {
+  color: #cbd5e1;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.aplayer .aplayer-list ol li:hover {
+  background: rgba(167, 139, 250, 0.12);
+}
+.aplayer .aplayer-list ol li.aplayer-list-light {
+  background: linear-gradient(90deg, rgba(167, 139, 250, 0.28), rgba(34, 211, 238, 0.12));
+}
+.aplayer .aplayer-list ol li .aplayer-list-index {
+  color: #a78bfa;
+}
+.aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index {
+  color: #22d3ee;
+}
+.aplayer .aplayer-list ol li .aplayer-list-title {
+  color: #e2e8f0;
+}
+.aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-title {
+  color: #ffffff;
+}
+.aplayer .aplayer-list ol li .aplayer-list-author {
+  color: #64748b;
+}
+.aplayer .aplayer-list ol li .aplayer-list-cur {
+  color: #f472b6;
+}
+/* 移动端适配 */
+@media (max-width: 767px) {
+  .aplayer.aplayer-fixed {
+    left: 10px;
+    bottom: 10px;
+    max-width: calc(100vw - 20px);
+  }
+  .aplayer.aplayer-fixed .aplayer-body {
+    border-radius: 12px;
+  }
+}
