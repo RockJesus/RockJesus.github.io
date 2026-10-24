@@ -3,13 +3,34 @@
   if (window.__rjMusicInit) return; // pjax 防重复初始化
   window.__rjMusicInit = true;
 
-  var PLAYLIST_URL = 'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json';
+  var PLAYLIST_URLS = [
+    'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
+    'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'
+  ];
   var SEED = {
     name: 'RockJesus Station',
     artist: 'CC0 · Pixabay',
     url: 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus@main/music/seed1.mp3',
     cover: 'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/header_oc.webp'
   };
+
+  // 带超时的 fetch：任何源 10s 内无响应即放弃，保证播放器一定初始化
+  function fetchJson(url, timeout) {
+    return new Promise(function (resolve, reject) {
+      var ctrl = new AbortController();
+      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 10000);
+      fetch(url, { cache: 'no-cache', signal: ctrl.signal })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (d) { clearTimeout(timer); resolve(d); })
+        .catch(function (e) { clearTimeout(timer); reject(e); });
+    });
+  }
+
+  function fetchPlaylist(i) {
+    i = i || 0;
+    if (i >= PLAYLIST_URLS.length) return Promise.reject(new Error('all sources failed'));
+    return fetchJson(PLAYLIST_URLS[i]).catch(function () { return fetchPlaylist(i + 1); });
+  }
 
   function ensureAplayer(cb) {
     if (window.APlayer) return cb();
@@ -67,8 +88,7 @@
 
   function load() {
     ensureAplayer(function () {
-      fetch(PLAYLIST_URL, { cache: 'no-cache' })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      fetchPlaylist()
         .then(function (data) {
           var list = normalize(data && data.tracks);
           init(list.length ? list : [SEED]);
