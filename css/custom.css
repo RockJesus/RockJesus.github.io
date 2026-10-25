@@ -1300,3 +1300,66 @@ a:hover { color: #6366f1; }
   box-shadow: 0 0 16px rgba(139,92,246,.6), 0 4px 14px rgba(2,6,23,.5);
 }
 .rj-doubao-close:hover { background: rgba(139,92,246,.35); }
+
+/* ============================================================
+   V12.2 — 文章排版优化补充：图片自适应居中 / 巨图限高 / 表格横滚
+   #11 所有文章排版美化（md 渲染正文）
+   ============================================================ */
+/* —— 正文图片：自适应容器，独立成行的大图自动居中；行内小图保持原样 —— */
+#article-container img {
+  max-width: 100%;
+  height: auto;
+}
+#article-container p > img:only-child,
+#article-container blockquote > p > img:only-child {
+  display: block;
+  margin: 16px auto;
+}
+/* —— 巨型壁纸 GIF（数 MB 大图）：限高显示，避免整屏拉伸 —— */
+#article-container img[src*=".gif"] {
+  max-height: 72vh;
+  width: auto;
+}
+/* —— 正文图片 hover：轻微放大 + 边框光（保留原动画风格） —— */
+#article-container p > img:only-child {
+  transition: transform .3s ease;
+}
+#article-container p > img:only-child:hover {
+  transform: scale(1.012);
+}
+/* —— 表格容器：窄屏横向滚动，不挤压列宽 —— */
+#article-container figure.table,
+#article-container .table-wrap {
+  overflow-x: auto;
+}
+/* —— 大段代码块（长行）横向滚动条美化：紫细条 —— */
+#article-container pre::-webkit-scrollbar {
+  height: 6px;
+}
+#article-container pre::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  border-radius: 3px;
+}
+/* —— 列表排版：缩进与间距更透气 —— */
+#article-container ul,
+#article-container ol {
+  padding-left: 1.6em;
+}
+#article-container li > ul,
+#article-container li > ol {
+  margin: 4px 0 8px;
+}
+/* —— 引用块内段落收紧 —— */
+#article-container blockquote p {
+  margin: 4px 0;
+}
+/* —— 键盘键帽与行内代码在移动端不换行错位 —— */
+@media (max-width: 767px) {
+  #article-container p code,
+  #article-container li code {
+    white-space: nowrap;
+  }
+  #article-container img[src*=".gif"] {
+    max-height: 60vh;
+  }
+}

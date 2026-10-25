@@ -307,24 +307,55 @@
 
 
   // ============ V12 全站增强：破图兜底 / 打赏二维码 / 人生信条 / 3D 旋转地球 ============
-  // —— 破图兜底：任何 img 加载失败 → 优雅紫渐变占位（消灭红叉/损坏图标）——
+  // —— 破图兜底 V12.2 三层防红叉：事件捕获 + 逐图补挂 onerror + 全量扫描补救 ——
+  //     ① 任意 img 加载失败 → 优雅紫渐变占位（消灭红叉/损坏图标）
+  //     ② 不可靠外部源（vercel.app 的 GitHub stats / img.shields.io 徽章）→ 直接隐藏
+  //        （国内网络超时且为装饰内容，隐藏比占位更干净；error 早于脚本注册时也能被扫描补救）
+  function rjBrokenSvg() {
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0" stop-color="#1e1b4b"/><stop offset="1" stop-color="#312e81"/></linearGradient></defs>' +
+      '<rect width="400" height="225" fill="url(#g)"/>' +
+      '<circle cx="200" cy="112" r="30" fill="none" stroke="rgba(139,92,246,.55)" stroke-width="2"/>' +
+      '<path d="M186 112 l10 10 l18 -22" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>');
+  }
+  function rjIsExtUnreliable(src) {
+    return (src || '').indexOf('vercel.app') >= 0 || (src || '').indexOf('img.shields.io') >= 0;
+  }
+  function rjHideBroken(img) {
+    try {
+      img.style.display = 'none';
+      img.dataset.rjFallback = '2';
+    } catch (e) {}
+  }
+  function rjReplaceBroken(img) {
+    try {
+      img.onerror = null;
+      img.removeAttribute('onerror');
+      img.src = rjBrokenSvg();
+      img.dataset.rjFallback = '2';
+    } catch (e) {}
+  }
+  function rjPatchBrokenImgs() {
+    document.querySelectorAll('img').forEach(function (img) {
+      if (!img || img.dataset.rjFallback) return;
+      var src = img.getAttribute('src') || img.getAttribute('data-lazy-src') || '';
+      if (rjIsExtUnreliable(src)) { rjHideBroken(img); return; }
+      img.dataset.rjFallback = '1';
+      img.onerror = function () { rjReplaceBroken(this); };
+      if (img.complete && img.naturalWidth === 0) { rjReplaceBroken(img); }
+    });
+  }
+  // 事件捕获兜底：覆盖脚本注册后发生的加载失败；不可靠外部源直接隐藏
   document.addEventListener('error', function (e) {
     var t = e.target;
-    if (t && t.tagName === 'IMG') {
+    if (t && t.tagName === 'IMG' && !t.dataset.rjFallback) {
       try {
-        if (t.dataset.rjFallback) return;
-        t.dataset.rjFallback = '1';
-        var svg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
-          '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225">' +
-          '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-          '<stop offset="0" stop-color="#1e1b4b"/><stop offset="1" stop-color="#312e81"/></linearGradient></defs>' +
-          '<rect width="400" height="225" fill="url(#g)"/>' +
-          '<circle cx="200" cy="112" r="30" fill="none" stroke="rgba(139,92,246,.55)" stroke-width="2"/>' +
-          '<path d="M186 112 l10 10 l18 -22" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
-          '</svg>');
-        if (t.onerror) t.onerror = null;
-        t.removeAttribute('onerror');
-        t.src = svg;
+        var src = t.getAttribute('src') || '';
+        if (rjIsExtUnreliable(src)) { rjHideBroken(t); return; }
+        rjReplaceBroken(t);
       } catch (err) {}
     }
   }, true);
@@ -554,6 +585,10 @@
     upgradeRewardMenus();
     upgradeAnnouncement();
     initGlobe();
+    rjPatchBrokenImgs();
+    setTimeout(rjPatchBrokenImgs, 1500);
+    setTimeout(rjPatchBrokenImgs, 4000);
+    setTimeout(rjPatchBrokenImgs, 8000);
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', rjV12Run);
@@ -566,6 +601,8 @@
     upgradeAnnouncement();
     rjGlobeDone = false;
     initGlobe();
+    rjPatchBrokenImgs();
+    setTimeout(rjPatchBrokenImgs, 1500);
   });
 
   function load() {
