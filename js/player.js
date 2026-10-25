@@ -570,24 +570,19 @@
     }
     resize();
     var cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 8;
-    var lon = 0, tex = null, visitor = null, flagImg = null, started = false, running = false;
-    var TEX_URLS = [
-      'https://gcore.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_atmos_2048.jpg',
-      'https://unpkg.com/three-globe/example/img/earth-night.jpg'
-    ];
+    var lon = 0, visitor = null, flagImg = null, started = false, running = false;
+    // 赛博朋克数据光点（固定种子伪随机，青/洋红交替）
+    var DOTS = [];
+    (function () {
+      var s = 42;
+      function rnd() { s = (s * 16807) % 2147483647; return s / 2147483647; }
+      for (var i = 0; i < 42; i++) {
+        DOTS.push({ lat: -72 + rnd() * 144, lng: rnd() * 360, c: i % 2 ? 'rgba(34,211,238,' : 'rgba(232,121,249,' });
+      }
+    })();
     function flagEmoji(cc) {
       if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return '🌍';
       return String.fromCodePoint.apply(null, cc.toUpperCase().split('').map(function (c) { return 127397 + c.charCodeAt(0); }));
-    }
-    function startTex() {
-      if (tex) return;
-      var img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = function () { tex = img; };
-      img.onerror = function () {
-        if (TEX_URLS.length > 1) { TEX_URLS.shift(); img.src = TEX_URLS[0]; }
-      };
-      img.src = TEX_URLS[0];
     }
     function recordVisit(v) {
       var key = 'rjGlobeHistory';
@@ -640,101 +635,119 @@
           renderStats(arr);
         });
     }
-    // 球面映射绘制纹理：逐行按纬度压缩宽度，营造球体包裹感（offsetX 为纹理片左缘绝对坐标）
-    function drawSphere(tex, offsetX) {
-      var tw = tex.width, th = tex.height;
-      var steps = 64;
-      for (var i = 0; i < steps; i++) {
-        var lat0 = Math.PI * i / steps - Math.PI / 2;
-        var rowW = R * 2 * Math.cos(lat0);
-        if (rowW < 0.7) continue;
-        var y0 = cy - R + (R * 2 * i / steps);
-        var y1 = cy - R + (R * 2 * (i + 1) / steps);
-        ctx.drawImage(tex, 0, (i / steps) * th, tw, th / steps, offsetX - rowW / 2, y0, rowW, y1 - y0 + 0.6);
-      }
+    // 球面投影（含旋转 lon），返回屏幕坐标与深度 z（正面 z>0）
+    function proj(latDeg, lngDeg) {
+      var latR = latDeg * Math.PI / 180;
+      var lr = (((lngDeg - lon + 540) % 360) - 180) * Math.PI / 180;
+      return {
+        x: cx + R * Math.cos(latR) * Math.sin(lr),
+        y: cy - R * Math.sin(latR),
+        z: Math.cos(latR) * Math.cos(lr)
+      };
     }
     function draw() {
       if (!running) return;
       ctx.clearRect(0, 0, W, H);
-      lon += 0.22;
+      lon += 0.26;
       if (lon >= 360) lon -= 360;
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.clip();
-      if (tex && tex.width) {
-        var w = tex.width, h = tex.height;
-        var sl = (lon / 360) * w;
-        for (var k = -1; k <= 1; k++) {
-          var dx0 = cx - R + ((k * w - sl) / w) * (R * 2);
-          drawSphere(tex, dx0);
+      var tt = Date.now() / 1000;
+      var i, p, q;
+      // 球体暗底（深空色）
+      var g0 = ctx.createRadialGradient(cx - R * 0.2, cy - R * 0.25, R * 0.15, cx, cy, R);
+      g0.addColorStop(0, 'rgba(16,32,66,.92)');
+      g0.addColorStop(1, 'rgba(4,8,18,.97)');
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.fillStyle = g0; ctx.fill();
+      // 霓虹经纬线框（经线青/紫交替，纬线青色）
+      ctx.lineWidth = 1;
+      for (var lng = -180; lng < 180; lng += 15) {
+        ctx.strokeStyle = (Math.abs(lng) % 30 < 15) ? 'rgba(34,211,238,.5)' : 'rgba(168,85,247,.42)';
+        ctx.beginPath();
+        for (i = 0; i <= 24; i++) {
+          p = proj(-90 + i * 7.5, lng);
+          if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
         }
-      } else {
-        ctx.strokeStyle = 'rgba(139,92,246,.3)';
-        ctx.lineWidth = 1;
-        for (var i = 1; i < 8; i++) {
-          var yy = cy - R + (R * 2 * i / 8);
-          ctx.beginPath(); ctx.moveTo(cx - R, yy); ctx.lineTo(cx + R, yy); ctx.stroke();
-        }
-        for (var j = 1; j < 12; j++) {
-          var xx = cx - R + (R * 2 * j / 12);
-          ctx.beginPath(); ctx.moveTo(xx, cy - R); ctx.lineTo(xx, cy + R); ctx.stroke();
-        }
+        ctx.stroke();
       }
-      // 球面光影：右上高光、左下暗角（增强立体感）
-      var g = ctx.createRadialGradient(cx + R * 0.32, cy - R * 0.45, R * 0.08, cx, cy, R * 1.05);
-      g.addColorStop(0, 'rgba(255,255,255,.32)');
-      g.addColorStop(0.32, 'rgba(255,255,255,.07)');
-      g.addColorStop(0.68, 'rgba(2,6,23,0)');
-      g.addColorStop(1, 'rgba(2,6,23,.62)');
-      ctx.fillStyle = g;
+      for (var lat = -75; lat <= 75; lat += 15) {
+        ctx.strokeStyle = 'rgba(94,234,212,.34)';
+        ctx.beginPath();
+        for (i = 0; i <= 60; i++) {
+          q = proj(lat, -180 + i * 6);
+          if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+        }
+        ctx.stroke();
+      }
+      // 数据光点（青/洋红闪烁）
+      for (i = 0; i < DOTS.length; i++) {
+        var d = DOTS[i];
+        var dp = proj(d.lat, d.lng);
+        var dz = Math.max(0, dp.z);
+        var tw = 0.5 + 0.5 * Math.sin(tt * 2.2 + i * 1.7);
+        ctx.fillStyle = d.c + (0.25 + 0.55 * dz * (0.55 + 0.45 * tw)).toFixed(2) + ')';
+        ctx.beginPath();
+        ctx.arc(dp.x, dp.y, 1.2 + 1.6 * dz, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // 全息扫描带 + 高光（球内）
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
+      var sy = cy - R + (2 * R * ((tt * 0.35) % 1));
+      var sg = ctx.createLinearGradient(0, sy - 14, 0, sy + 14);
+      sg.addColorStop(0, 'rgba(34,211,238,0)');
+      sg.addColorStop(0.5, 'rgba(34,211,238,.22)');
+      sg.addColorStop(1, 'rgba(34,211,238,0)');
+      ctx.fillStyle = sg;
+      ctx.fillRect(cx - R, sy - 14, R * 2, 28);
+      var hg = ctx.createRadialGradient(cx + R * 0.32, cy - R * 0.45, R * 0.06, cx, cy, R * 1.02);
+      hg.addColorStop(0, 'rgba(165,243,252,.28)');
+      hg.addColorStop(0.4, 'rgba(165,243,252,.06)');
+      hg.addColorStop(1, 'rgba(4,8,18,0)');
+      ctx.fillStyle = hg;
       ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
       ctx.restore();
-      // 大气辉光外圈 + 紫环描边
-      var halo = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.25);
-      halo.addColorStop(0, 'rgba(139,92,246,.18)');
-      halo.addColorStop(1, 'rgba(139,92,246,0)');
-      ctx.fillStyle = halo;
-      ctx.fillRect(cx - R * 1.25, cy - R * 1.25, R * 2.5, R * 2.5);
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(139,92,246,.55)';
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = 'rgba(139,92,246,.9)';
-      ctx.shadowBlur = 14;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      // 国旗标注（紫定位圆标 + 对应国家国旗，不再用粉色点）
+      // 访客定位：脉冲圈 + 洋红点 + 国旗（正背面均显示）
       if (visitor && !isNaN(visitor.lat) && !isNaN(visitor.lon)) {
-        var latR = visitor.lat * Math.PI / 180;
-        var dLon = ((visitor.lon - lon + 540) % 360) - 180;
-        var dLonR = dLon * Math.PI / 180;
-        var px = cx + R * Math.cos(latR) * Math.sin(dLonR);
-        var py = cy - R * Math.sin(latR);
-        if (Math.cos(dLonR) > 0) {
-          ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(139,92,246,.6)';
-          ctx.shadowColor = 'rgba(139,92,246,.9)';
-          ctx.shadowBlur = 8;
-          ctx.fill();
-          ctx.shadowBlur = 0;
-          if (flagImg && flagImg.width) {
-            ctx.drawImage(flagImg, px - 10, py - 24, 20, 14);
-          } else {
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '12px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(visitor.cc, px, py - 8);
-          }
-        }
+        var vp = proj(visitor.lat, visitor.lon);
+        var vz = Math.max(0.05, vp.z);
+        ctx.strokeStyle = 'rgba(232,121,249,' + (0.4 + 0.3 * vz) + ')';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(vp.x, vp.y, 4 + 2.5 * Math.sin(tt * 3.2), 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(vp.x, vp.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(232,121,249,.95)'; ctx.fill();
+        if (flagImg && flagImg.width) ctx.drawImage(flagImg, vp.x - 10, vp.y - 26, 20, 14);
+        else { ctx.fillStyle = '#fff'; ctx.font = '11px monospace'; ctx.textAlign = 'center'; ctx.fillText(visitor.cc, vp.x, vp.y - 10); }
       }
+      // 外光晕（青→紫）
+      var halo = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.3);
+      halo.addColorStop(0, 'rgba(34,211,238,.14)');
+      halo.addColorStop(0.55, 'rgba(168,85,247,.10)');
+      halo.addColorStop(1, 'rgba(168,85,247,0)');
+      ctx.fillStyle = halo;
+      ctx.fillRect(cx - R * 1.3, cy - R * 1.3, R * 2.6, R * 2.6);
+      // 卫星轨道环（青色 + 洋红双环，带移动光点）
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-0.45 + tt * 0.12);
+      ctx.strokeStyle = 'rgba(34,211,238,.45)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(0, 0, R + 15, (R + 15) * 0.36, 0, 0, Math.PI * 2); ctx.stroke();
+      var sa = (tt * 0.9) % (Math.PI * 2);
+      ctx.fillStyle = 'rgba(103,232,249,.95)';
+      ctx.beginPath(); ctx.arc(Math.cos(sa) * (R + 15), Math.sin(sa) * (R + 15) * 0.36, 2.4, 0, Math.PI * 2); ctx.fill();
+      ctx.rotate(1.35);
+      ctx.strokeStyle = 'rgba(232,121,249,.38)';
+      ctx.beginPath(); ctx.ellipse(0, 0, R + 22, (R + 22) * 0.3, 0, 0, Math.PI * 2); ctx.stroke();
+      var sb = ((tt * 0.6) + 2) % (Math.PI * 2);
+      ctx.fillStyle = 'rgba(249,168,212,.9)';
+      ctx.beginPath(); ctx.arc(Math.cos(sb) * (R + 22), Math.sin(sb) * (R + 22) * 0.3, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
       requestAnimationFrame(draw);
     }
     function start() {
       if (started) return;
       started = true;
       running = true;
-      startTex();
       locate();
       var arr = [];
       try { arr = JSON.parse(localStorage.getItem('rjGlobeHistory')) || []; } catch (e) {}
