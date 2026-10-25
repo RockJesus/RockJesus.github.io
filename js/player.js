@@ -73,22 +73,46 @@
       row.appendChild(info);
       pic.style.backgroundImage = 'none'; // 封面改由整卡背景展示
     }
-    function curCover() {
-      var a = ap.list.audios[ap.list.index];
-      return (a && a.cover) || SEED.cover;
+    function curAudio() {
+      var list = ap.list && ap.list.audios;
+      return (list && list[ap.list.index]) || null;
     }
-    function setCover() {
+    // —— 封面同步 V15：预加载新封面成功后再切换（消除旧图残留/跨域加载竞态），
+    //    加载失败兜底默认封面；listswitch/play/loadeddata 三事件双保险，封面始终跟随播放中的歌曲 ——
+    function syncCover() {
       if (!body) return;
-      body.style.backgroundImage = 'url("' + curCover() + '")';
-      body.style.backgroundSize = 'cover';
-      body.style.backgroundPosition = 'center';
+      var a = curAudio();
+      var cover = (a && a.cover) || SEED.cover;
+      var img = new Image();
+      img.onload = function () {
+        if (curAudio() !== a) return; // 已切走，忽略过期加载结果
+        body.style.backgroundImage = 'url("' + cover + '")';
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+      };
+      img.onerror = function () {
+        if (curAudio() !== a) return;
+        body.style.backgroundImage = 'url("' + SEED.cover + '")';
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+      };
+      img.src = cover;
     }
-    setCover();
+    var syncTimer = null;
+    function syncCoverDebounced() {
+      if (syncTimer) clearTimeout(syncTimer);
+      syncTimer = setTimeout(syncCover, 120); // 等待事件序列稳定，避免读到切换中间态
+    }
+    syncCover();
 
-    ap.on('listswitch', function () { setCover(); });
-    ap.on('play', function () { if (row) row.classList.add('rj-playing'); });
+    ap.on('listswitch', syncCoverDebounced);
+    ap.on('play', function () {
+      if (row) row.classList.add('rj-playing');
+      syncCoverDebounced();
+    });
     ap.on('pause', function () { if (row) row.classList.remove('rj-playing'); });
     ap.on('ended', function () { if (row) row.classList.remove('rj-playing'); });
+    ap.on('loadeddata', syncCoverDebounced);
 
     // 断点续播记忆
     var STATE_KEY = 'rjPlayerState';
@@ -103,6 +127,30 @@
     setInterval(saveState, 3000);
     ap.on('listswitch', function () { saveState(); });
     ap.on('pause', function () { saveState(); });
+
+    // —— 歌单展开后 10 秒无操作自动收起（点击播放器/歌单任意处重置计时） ——
+    var listEl = container.querySelector('.aplayer-list');
+    var foldTimer = null;
+    function foldList() {
+      try {
+        if (ap.list && typeof ap.list.hide === 'function') { ap.list.hide(); }
+        else if (listEl) { listEl.style.display = 'none'; }
+      } catch (e) { if (listEl) { listEl.style.display = 'none'; } }
+      foldTimer = null;
+    }
+    function armFold() {
+      if (foldTimer) { clearTimeout(foldTimer); foldTimer = null; }
+      if (!listEl) return;
+      if (listEl.style.display !== 'none' && listEl.getBoundingClientRect().height > 0) {
+        foldTimer = setTimeout(foldList, 10000);
+      }
+    }
+    if (listEl && typeof MutationObserver !== 'undefined') {
+      var mo = new MutationObserver(armFold);
+      mo.observe(listEl, { attributes: true, attributeFilter: ['style', 'class'] });
+    }
+    container.addEventListener('pointerdown', function () { armFold(); }, true);
+    armFold();
   }
 
   function showTip(msg) {
