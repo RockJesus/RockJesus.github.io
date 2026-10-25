@@ -716,9 +716,34 @@
       arr.sort(function (a, b) { return (b.n || 0) - (a.n || 0); });
       arr = arr.slice(0, 24);
       try { localStorage.setItem(key, JSON.stringify(arr)); } catch (e) {}
-      historyVisits = arr;
-      arr.forEach(function (x) { preloadFlag(x.cc); });
-      renderStats(arr);
+      refreshVisits();
+    }
+    // —— 云端持久化：/data/visitors.json（GitHub Pages 公开累计基准）∪ 本地增量 ——
+    var cloudVisits = null;
+    function mergeVisits() {
+      var m = {};
+      if (cloudVisits) {
+        for (var k in cloudVisits) {
+          if (Object.prototype.hasOwnProperty.call(cloudVisits, k) && /^[A-Za-z]{2}$/.test(k)) m[k] = cloudVisits[k];
+        }
+      }
+      try {
+        var l = JSON.parse(localStorage.getItem('rjGlobeHistory')) || [];
+        l.forEach(function (x) { if (x && /^[A-Za-z]{2}$/.test(x.cc)) m[x.cc] = Math.max(m[x.cc] || 0, x.n || 1); });
+      } catch (e) {}
+      return Object.keys(m).map(function (k) { return { cc: k, n: m[k] }; })
+        .sort(function (a, b) { return (b.n || 0) - (a.n || 0); }).slice(0, 24);
+    }
+    function refreshVisits() {
+      historyVisits = mergeVisits();
+      historyVisits.forEach(function (x) { preloadFlag(x.cc); });
+      renderStats(historyVisits);
+    }
+    function loadCloudVisits() {
+      fetch('/data/visitors.json?v=' + Math.floor(Date.now() / 86400000), { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('bad'); return r.json(); })
+        .then(function (d) { cloudVisits = (d && typeof d === 'object') ? d : null; refreshVisits(); })
+        .catch(function () {});
     }
     function renderStats(arr) {
       var wrap = box.querySelector('.rj-globe-stats-flags');
@@ -753,9 +778,7 @@
         })
         .catch(function () {
           label.textContent = '🌐 欢迎来自世界各地的访客';
-          var arr = [];
-          try { arr = JSON.parse(localStorage.getItem('rjGlobeHistory')) || []; } catch (e) {}
-          renderStats(arr);
+          refreshVisits();
         });
     }
     // 球面投影（含旋转 lon），返回屏幕坐标与深度 z（正面 z>0）
@@ -895,9 +918,8 @@
       running = true;
       locate();
       loadLand();
-      var arr = [];
-      try { arr = JSON.parse(localStorage.getItem('rjGlobeHistory')) || []; } catch (e) {}
-      if (arr.length) { historyVisits = arr; arr.forEach(function (x) { preloadFlag(x.cc); }); renderStats(arr); }
+      refreshVisits();
+      loadCloudVisits();
       requestAnimationFrame(draw);
     }
     if ('IntersectionObserver' in window) {
