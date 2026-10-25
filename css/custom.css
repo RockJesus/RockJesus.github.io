@@ -450,9 +450,11 @@ img {
   gap: 14px;
   min-height: 74px;
   cursor: pointer;
+  touch-action: manipulation;
   background-image: linear-gradient(90deg, rgba(7, 9, 20, 0.5) 0%, rgba(7, 9, 20, 0.15) 55%, rgba(7, 9, 20, 0.42) 100%);
 }
-/* 播放控制：隐形整卡点击层（点击卡片任意处播放/暂停），无圆形按钮遮挡封面 */
+/* 播放控制：整卡点击层由 .aplayer-row 统一接管（单击播放/暂停、双击开合歌单）。
+   pointer-events:none 屏蔽 APlayer 内建绑在 pic 上的 click(toggle)，避免与双击手势打架 */
 .aplayer-row .aplayer-pic {
   position: absolute;
   left: 0;
@@ -468,7 +470,7 @@ img {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   opacity: 0;
-  cursor: pointer;
+  pointer-events: none;
 }
 /* 右下角播放/暂停状态小图标（无圆形底色，不遮挡封面） */
 .aplayer-row::after {

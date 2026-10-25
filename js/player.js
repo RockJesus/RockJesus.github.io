@@ -151,6 +151,48 @@
     }
     container.addEventListener('pointerdown', function () { armFold(); }, true);
     armFold();
+
+    // —— 单击封面播放/暂停，双击打开/关闭折叠歌单（V16）——
+    //    原理：APlayer 内建在 .aplayer-pic 上绑定的 click(toggle) 已被 CSS pointer-events:none 屏蔽，
+    //    事件落到 .aplayer-row 上由本层统一处理；单击延迟 280ms 以区分双击（双击取消待执行的单击），
+    //    双击立即切换歌单展开状态；歌单按钮(.aplayer-menu)等交互控件保持 APlayer 内建行为
+    var singleTimer = null;
+    function isInteractive(el) {
+      return !!(el && el.closest && el.closest(
+        '.aplayer-bar-wrap, .aplayer-menu, .aplayer-volume-wrap, .aplayer-loop, ' +
+        '.aplayer-icon, .aplayer-time, .aplayer-miniswitcher, button, a'
+      ));
+    }
+    function togglePlay() {
+      if (!ap.audio) return;
+      try {
+        if (ap.audio.paused) { ap.play(); } else { ap.pause(); }
+      } catch (e) {}
+    }
+    function listHidden() {
+      return !listEl || listEl.classList.contains('aplayer-list-hide') || listEl.style.display === 'none';
+    }
+    function toggleList() {
+      if (!listEl) return;
+      try {
+        if (listHidden()) { ap.list.show(); } else { ap.list.hide(); }
+      } catch (e) {
+        listEl.style.display = listHidden() ? 'block' : 'none';
+      }
+      armFold();
+    }
+    if (row) {
+      row.addEventListener('click', function (e) {
+        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
+        if (isInteractive(e.target)) return;
+        singleTimer = setTimeout(function () { singleTimer = null; togglePlay(); }, 280);
+      });
+      row.addEventListener('dblclick', function (e) {
+        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
+        if (isInteractive(e.target)) return;
+        toggleList();
+      });
+    }
   }
 
   function showTip(msg) {
