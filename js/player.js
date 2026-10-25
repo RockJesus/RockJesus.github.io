@@ -588,10 +588,10 @@
     var landGeo = null;
     function loadLand() {
       var s = document.createElement('script');
-      s.src = 'https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js';
+      s.src = '/js/topojson-client.min.js';
       s.onload = function () {
         if (!window.topojson) return;
-        fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json')
+        fetch('/data/countries-110m.json')
           .then(function (r) { return r.json(); })
           .then(function (topo) {
             try {
