@@ -787,22 +787,22 @@
       halo.addColorStop(1, 'rgba(168,85,247,0)');
       ctx.fillStyle = halo;
       ctx.fillRect(cx - R * 1.3, cy - R * 1.3, R * 2.6, R * 2.6);
-      // 卫星轨道环（青色 + 洋红双环，带移动光点）
+      // 球面轨道（内切球体，永不越界被裁）+ 卫星光点
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(-0.45 + tt * 0.12);
-      ctx.strokeStyle = 'rgba(34,211,238,.45)';
+      ctx.strokeStyle = 'rgba(34,211,238,.5)';
       ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.ellipse(0, 0, R + 15, (R + 15) * 0.36, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(0, 0, R * 0.97, R * 0.34, 0, 0, Math.PI * 2); ctx.stroke();
       var sa = (tt * 0.9) % (Math.PI * 2);
       ctx.fillStyle = 'rgba(103,232,249,.95)';
-      ctx.beginPath(); ctx.arc(Math.cos(sa) * (R + 15), Math.sin(sa) * (R + 15) * 0.36, 2.4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(Math.cos(sa) * R * 0.97, Math.sin(sa) * R * 0.34, 2.4, 0, Math.PI * 2); ctx.fill();
       ctx.rotate(1.35);
-      ctx.strokeStyle = 'rgba(232,121,249,.38)';
-      ctx.beginPath(); ctx.ellipse(0, 0, R + 22, (R + 22) * 0.3, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(232,121,249,.42)';
+      ctx.beginPath(); ctx.ellipse(0, 0, R * 0.95, R * 0.3, 0, 0, Math.PI * 2); ctx.stroke();
       var sb = ((tt * 0.6) + 2) % (Math.PI * 2);
       ctx.fillStyle = 'rgba(249,168,212,.9)';
-      ctx.beginPath(); ctx.arc(Math.cos(sb) * (R + 22), Math.sin(sb) * (R + 22) * 0.3, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(Math.cos(sb) * R * 0.95, Math.sin(sb) * R * 0.3, 1.8, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       requestAnimationFrame(draw);
     }
