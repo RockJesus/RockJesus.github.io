@@ -26,11 +26,20 @@
   background-attachment: local;
 }
 
-/* ---------- 卡片：暗色玻璃拟态 ---------- */
+/* ---------- 卡片：暗色玻璃拟态（文章/列表卡对齐右侧卡片风格，更实玻璃+紫边+光晕） ---------- */
 #recent-posts > .recent-post-item,
 .layout_page > div:first-child:not(.recent-posts),
 .layout_post > #page,
-.layout_post > #post,
+.layout_post > #post {
+  background: rgba(19, 23, 40, 0.86);
+  color: rgba(226, 232, 255, 0.85);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 18px;
+  backdrop-filter: saturate(160%) blur(22px);
+  -webkit-backdrop-filter: saturate(160%) blur(22px);
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.6), 0 0 30px rgba(139, 92, 246, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
 #aside-content .card-widget {
   background: rgba(19, 23, 40, 0.62);
   color: rgba(226, 232, 255, 0.82);
