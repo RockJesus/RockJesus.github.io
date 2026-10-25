@@ -1195,21 +1195,38 @@ a:hover { color: #6366f1; }
 #article-container img { border-radius: 18px; }
 .post_cover { border-radius: 18px; overflow: hidden; }
 
-/* —— 打赏/加入我们 二维码菜单：主页同套卡片风格（#7 / v1.0.9 强化）—— */
+/* —— 打赏/加入我们 二维码菜单：复刻人生信条卡风格（深蓝渐变·星点·引号装饰）—— */
 #nav .menus_item_child.rj-qr-menu,
 #sidebar-menus .menus_item_child.rj-qr-menu {
+  position: relative;
   display: none;
   flex-direction: row;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 16px 16px 14px;
   min-width: 372px;
   width: auto;
   border-radius: 18px;
-  background: linear-gradient(150deg, rgba(30, 34, 60, 0.75), rgba(15, 18, 32, 0.62));
-  backdrop-filter: saturate(160%) blur(22px);
-  -webkit-backdrop-filter: saturate(160%) blur(22px);
-  border: 1px solid rgba(167, 139, 250, 0.5);
-  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.65), 0 0 30px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(1.6px 1.6px at 22% 28%, rgba(255,255,255,.4) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 78% 16%, rgba(255,255,255,.28) 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 62% 80%, rgba(255,255,255,.32) 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 12% 74%, rgba(255,255,255,.24) 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 88% 58%, rgba(255,255,255,.2) 50%, transparent 51%),
+    linear-gradient(160deg, #17324f 0%, #0b1c33 55%, #081226 100%);
+  border: 1px solid rgba(125, 165, 255, 0.28);
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.65), 0 0 30px rgba(59, 130, 246, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+#nav .menus_item_child.rj-qr-menu::before,
+#sidebar-menus .menus_item_child.rj-qr-menu::before {
+  content: '“';
+  position: absolute;
+  left: 12px;
+  top: -4px;
+  font-size: 44px;
+  line-height: 1;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: rgba(139, 148, 255, 0.38);
+  pointer-events: none;
 }
 #nav .menus_item:hover .menus_item_child.rj-qr-menu,
 #sidebar-menus .menus_item:hover .menus_item_child.rj-qr-menu {
@@ -1227,25 +1244,25 @@ a:hover { color: #6366f1; }
   gap: 8px;
   padding: 12px 12px 10px;
   border-radius: 14px;
-  background: rgba(139, 92, 246, 0.12);
-  border: 1px solid rgba(167, 139, 250, 0.28);
-  color: #e0d7ff !important;
+  background: rgba(8, 18, 38, 0.55);
+  border: 1px solid rgba(125, 165, 255, 0.22);
+  color: rgba(226, 232, 255, 0.92) !important;
   transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
 }
 .rj-qr-item:hover {
   transform: translateY(-3px);
-  background: rgba(139, 92, 246, 0.24);
-  box-shadow: 0 10px 24px rgba(139, 92, 246, 0.35);
+  background: rgba(30, 58, 138, 0.5);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.3);
   color: #fff !important;
 }
-/* 二维码强制方形圆角（压过任何圆形样式），紫光描边 */
+/* 二维码强制方形圆角，深色描边 */
 .rj-qr-item img {
   width: 104px;
   height: 104px;
-  border-radius: 12px !important;
+  border-radius: 10px !important;
   object-fit: cover;
   display: block;
-  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.55), 0 0 10px rgba(139, 92, 246, 0.25);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.55);
 }
 .rj-qr-item span {
   font-size: 12px;
