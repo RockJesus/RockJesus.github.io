@@ -1,4 +1,4 @@
-/* RockJesus site music player — 自托管/QQ 歌单双源 */
+/* RockJesus site music player — fixed mini APlayer（自托管/QQ 歌单双源） */
 (function () {
   if (window.__rjMusicInit) return; // pjax 防重复初始化
   window.__rjMusicInit = true;
@@ -422,7 +422,7 @@
     var cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 8;
     var lon = 0, tex = null, visitor = null, started = false, running = false;
     var TEX_URLS = [
-      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_atmos_2048.jpg',
+      'https://gcore.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_atmos_2048.jpg',
       'https://unpkg.com/three-globe/example/img/earth-night.jpg'
     ];
     function flagEmoji(cc) {
