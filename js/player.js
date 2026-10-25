@@ -706,20 +706,13 @@
       return String.fromCodePoint.apply(null, cc.toUpperCase().split('').map(function (c) { return 127397 + c.charCodeAt(0); }));
     }
     function recordVisit(v) {
-      var key = 'rjGlobeHistory';
-      var arr = [];
-      try { arr = JSON.parse(localStorage.getItem(key)) || []; } catch (e) {}
-      var hit = null;
-      arr.forEach(function (x) { if (x.cc === v.cc) hit = x; });
-      if (hit) { hit.n = (hit.n || 1) + 1; hit.t = Date.now(); }
-      else { arr.push({ cc: v.cc, n: 1, t: Date.now() }); }
-      arr.sort(function (a, b) { return (b.n || 0) - (a.n || 0); });
-      arr = arr.slice(0, 24);
-      try { localStorage.setItem(key, JSON.stringify(arr)); } catch (e) {}
+      if (!v || !/^[A-Za-z]{2}$/.test(v.cc)) return;
+      sessionVisits[v.cc] = (sessionVisits[v.cc] || 0) + 1;
       refreshVisits();
     }
     // —— 云端持久化：/data/visitors.json（GitHub Pages 公开累计基准）∪ 本地增量 ——
     var cloudVisits = null;
+    var sessionVisits = {};
     function mergeVisits() {
       var m = {};
       if (cloudVisits) {
@@ -727,10 +720,12 @@
           if (Object.prototype.hasOwnProperty.call(cloudVisits, k) && /^[A-Za-z]{2}$/.test(k)) m[k] = cloudVisits[k];
         }
       }
-      try {
-        var l = JSON.parse(localStorage.getItem('rjGlobeHistory')) || [];
-        l.forEach(function (x) { if (x && /^[A-Za-z]{2}$/.test(x.cc)) m[x.cc] = Math.max(m[x.cc] || 0, x.n || 1); });
-      } catch (e) {}
+      // 会话内新增国家：即时并入显示（云端基准更新后由发布同步覆盖）
+      for (var s in sessionVisits) {
+        if (Object.prototype.hasOwnProperty.call(sessionVisits, s) && /^[A-Za-z]{2}$/.test(s)) {
+          if (!(s in m)) m[s] = sessionVisits[s];
+        }
+      }
       return Object.keys(m).map(function (k) { return { cc: k, n: m[k] }; })
         .sort(function (a, b) { return (b.n || 0) - (a.n || 0); }).slice(0, 24);
     }
