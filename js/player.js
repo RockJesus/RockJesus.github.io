@@ -209,6 +209,21 @@
     }, 5000);
   }
 
+  // —— 静音自动播放的常驻提示：打开网页音乐已自动播放（被浏览器静音），
+  //    提示条一直停留，直到首次点击/按键恢复声音才消失 ——
+  function showMutedTip() {
+    if (document.getElementById('rj-muted-tip')) return;
+    var t = document.createElement('div');
+    t.id = 'rj-muted-tip';
+    t.className = 'rj-muted-tip';
+    t.textContent = '🔇 音乐已自动播放 · 点击页面任意处开启声音';
+    document.body.appendChild(t);
+  }
+  function hideMutedTip() {
+    var t = document.getElementById('rj-muted-tip');
+    if (t && t.parentNode) t.parentNode.removeChild(t);
+  }
+
   // —— 自动播放：先正常带声播放；被浏览器拦截时转"静音自动播放"（muted 自动播放始终被允许），
   //    首次点击/按键任意处即恢复音量 —— 实现"打开网站后自动播放，无需先点击" ——
   //    注：APlayer 1.10.1 的 play() 不返回 Promise，须直接驱动 audio 元素（UI 由 audio 事件自动同步）
@@ -218,6 +233,7 @@
         if (ap.audio) { ap.audio.muted = false; ap.audio.volume = 0.75; }
         document.body.setAttribute('data-rj-unmuted', JSON.stringify({ m: ap.audio ? ap.audio.muted : null, v: ap.audio ? ap.audio.volume : null }));
       } catch (e) {}
+      hideMutedTip();
       document.removeEventListener('pointerdown', restore);
       document.removeEventListener('keydown', restore);
       document.removeEventListener('touchstart', restore);
@@ -241,7 +257,7 @@
             document.body.setAttribute('data-rj-muted', '1');
             var p2 = a.play();
             if (p2 && p2.catch) p2.catch(function () {});
-            if (!silent) showTip('♪ 已自动播放，点击页面任意处开启声音');
+            if (!silent) showMutedTip();
             unmuteLater(ap);
           } catch (e2) {
             if (!silent) showTip('♪ 点击页面任意处开启音乐');

@@ -647,6 +647,29 @@ img {
 .rj-tip.rj-tip-hide {
   opacity: 0;
 }
+/* —— 静音自动播放的常驻提示（点击任意处开启声音前一直停留） —— */
+.rj-muted-tip {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding: 9px 18px;
+  background: rgba(19, 23, 40, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  border-radius: 999px;
+  color: #e2e8f0;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55), 0 0 16px rgba(167, 139, 250, 0.3);
+  white-space: nowrap;
+  animation: rjTipIn 0.4s ease;
+}
+@media (max-width: 640px) {
+  .rj-muted-tip { font-size: 12px; padding: 8px 14px; white-space: normal; max-width: calc(100vw - 40px); text-align: center; }
+}
 /* 移动端适配 */
 @media (max-width: 767px) {
   .aplayer.aplayer-fixed {
