@@ -1,4 +1,4 @@
-/* RockJesus site music player — fixed mini APlayer（自托管/QQ 歌单双源） */
+/* RockJesus site music player — 自托管/QQ 歌单双源 */
 (function () {
   if (window.__rjMusicInit) return; // pjax 防重复初始化
   window.__rjMusicInit = true;
@@ -304,6 +304,269 @@
       hide();
     });
   })();
+
+
+  // ============ V12 全站增强：破图兜底 / 打赏二维码 / 人生信条 / 3D 旋转地球 ============
+  // —— 破图兜底：任何 img 加载失败 → 优雅紫渐变占位（消灭红叉/损坏图标）——
+  document.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'IMG') {
+      try {
+        if (t.dataset.rjFallback) return;
+        t.dataset.rjFallback = '1';
+        var svg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225">' +
+          '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0" stop-color="#1e1b4b"/><stop offset="1" stop-color="#312e81"/></linearGradient></defs>' +
+          '<rect width="400" height="225" fill="url(#g)"/>' +
+          '<circle cx="200" cy="112" r="30" fill="none" stroke="rgba(139,92,246,.55)" stroke-width="2"/>' +
+          '<path d="M186 112 l10 10 l18 -22" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg>');
+        if (t.onerror) t.onerror = null;
+        t.removeAttribute('onerror');
+        t.src = svg;
+      } catch (err) {}
+    }
+  }, true);
+
+  // 头像等 onerror 指向不存在的 4040.gif → 改为存在的 black.png；black.jpg 纯黑占位 → 隐藏
+  function fixErrorImgRefs() {
+    document.querySelectorAll('img[data-lazy-src*="4040.gif"], img[src*="4040.gif"]').forEach(function (img) {
+      img.removeAttribute('onerror');
+      var good = 'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/black.png';
+      if (img.getAttribute('data-lazy-src')) img.setAttribute('data-lazy-src', good);
+      else img.src = good;
+    });
+    document.querySelectorAll('img[data-lazy-src*="black.jpg"], img[src*="black.jpg"]').forEach(function (img) {
+      img.style.display = 'none';
+    });
+  }
+
+  // —— 打赏菜单：悬停弹出三张可扫码二维码 ——
+  function upgradeRewardMenus() {
+    document.querySelectorAll('#nav .menus_item, #sidebar-menus .menus_item').forEach(function (item) {
+      var a = item.querySelector('a.group');
+      if (!a || a.textContent.indexOf('打赏') < 0) return;
+      var ul = item.querySelector('.menus_item_child');
+      if (!ul || ul.classList.contains('rj-qr-menu')) return;
+      var items = [['微信', 'wx.png'], ['支付宝', 'zfb.png'], ['赞赏', 'zsm.png']];
+      ul.classList.add('rj-qr-menu');
+      ul.innerHTML = '';
+      items.forEach(function (p) {
+        var li = document.createElement('li');
+        var link = document.createElement('a');
+        var href = 'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/' + p[1];
+        link.className = 'site-page child rj-qr-item';
+        link.href = href;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        var img = document.createElement('img');
+        img.src = href;
+        img.alt = p[0];
+        img.loading = 'lazy';
+        var span = document.createElement('span');
+        span.textContent = p[0];
+        link.appendChild(img);
+        link.appendChild(span);
+        li.appendChild(link);
+        ul.appendChild(li);
+      });
+    });
+  }
+
+  // —— 公告卡 → 人生信条 ——
+  function upgradeAnnouncement() {
+    document.querySelectorAll('.card-announcement').forEach(function (card) {
+      if (card.dataset.rjCreed) return;
+      card.dataset.rjCreed = '1';
+      var head = card.querySelector('.item-headline');
+      if (head) {
+        var ic = head.querySelector('i');
+        if (ic) ic.className = 'fas fa-quote-left';
+        var sp = head.querySelector('span');
+        if (sp) sp.textContent = '人生信条';
+      }
+      var content = card.querySelector('.announcement_content');
+      if (content) {
+        content.className = 'announcement_content rj-creed';
+        content.innerHTML = 'Life is all about the journey — 人生是一场旅行，保持热爱，奔赴山海。<b>∞ Keep exploring</b>';
+      }
+    });
+  }
+
+  // —— 3D 旋转地球 + 访客国旗（Canvas 贴图球，IntersectionObserver 懒加载）——
+  var rjGlobeDone = false;
+  function initGlobe() {
+    var host = document.querySelector('.card-webinfo');
+    if (!host || rjGlobeDone) return;
+    rjGlobeDone = true;
+    var box = document.createElement('div');
+    box.id = 'rj-globe';
+    host.appendChild(box);
+    var canvas = document.createElement('canvas');
+    box.appendChild(canvas);
+    var label = document.createElement('div');
+    label.className = 'rj-globe-label';
+    label.textContent = '🌐 定位中…';
+    box.appendChild(label);
+    var ctx = canvas.getContext('2d');
+    var W = 340, H = 236, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    function resize() {
+      W = box.clientWidth || 340;
+      H = box.clientHeight || 236;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    var cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 8;
+    var lon = 0, tex = null, visitor = null, started = false, running = false;
+    var TEX_URLS = [
+      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_atmos_2048.jpg',
+      'https://unpkg.com/three-globe/example/img/earth-night.jpg'
+    ];
+    function flagEmoji(cc) {
+      if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return '🌍';
+      return String.fromCodePoint.apply(null, cc.toUpperCase().split('').map(function (c) { return 127397 + c.charCodeAt(0); }));
+    }
+    function startTex() {
+      if (tex) return;
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () { tex = img; };
+      img.onerror = function () {
+        if (TEX_URLS.length > 1) { TEX_URLS.shift(); img.src = TEX_URLS[0]; }
+      };
+      img.src = TEX_URLS[0];
+    }
+    function locate() {
+      fetch('https://ipinfo.io/json', { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          visitor = {
+            cc: (d.country || '').toUpperCase(),
+            city: d.city || '',
+            lat: parseFloat(d.loc ? d.loc.split(',')[0] : NaN),
+            lon: parseFloat(d.loc ? d.loc.split(',')[1] : NaN)
+          };
+          label.textContent = '🌐 访客 · ' + flagEmoji(visitor.cc) + ' ' + (visitor.city || visitor.cc || '世界各地');
+        })
+        .catch(function () { label.textContent = '🌐 欢迎来自世界各地的访客'; });
+    }
+    function draw() {
+      if (!running) return;
+      ctx.clearRect(0, 0, W, H);
+      lon += 0.22;
+      if (lon >= 360) lon -= 360;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.clip();
+      var g = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.4, R * 0.2, cx, cy, R);
+      g.addColorStop(0, '#1e3a8a');
+      g.addColorStop(0.6, '#0f172a');
+      g.addColorStop(1, '#020617');
+      ctx.fillStyle = g;
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+      if (tex && tex.width) {
+        var w = tex.width, h = tex.height;
+        var sl = (lon / 360) * w;
+        for (var k = -1; k <= 1; k++) {
+          var dx = cx - R + ((k * w - sl) / w) * (R * 2);
+          ctx.drawImage(tex, 0, 0, w, h, dx, cy - R, R * 2, R * 2);
+        }
+      } else {
+        ctx.strokeStyle = 'rgba(139,92,246,.28)';
+        ctx.lineWidth = 1;
+        for (var i = 1; i < 8; i++) {
+          var yy = cy - R + (R * 2 * i / 8);
+          ctx.beginPath(); ctx.moveTo(cx - R, yy); ctx.lineTo(cx + R, yy); ctx.stroke();
+        }
+        for (var j = 1; j < 12; j++) {
+          var xx = cx - R + (R * 2 * j / 12);
+          ctx.beginPath(); ctx.moveTo(xx, cy - R); ctx.lineTo(xx, cy + R); ctx.stroke();
+        }
+      }
+      var shade = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R * 1.05);
+      shade.addColorStop(0, 'rgba(2,6,23,0)');
+      shade.addColorStop(1, 'rgba(2,6,23,.75)');
+      ctx.fillStyle = shade;
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+      var hl = ctx.createRadialGradient(cx - R * 0.4, cy - R * 0.45, 0, cx - R * 0.4, cy - R * 0.45, R * 0.9);
+      hl.addColorStop(0, 'rgba(255,255,255,.22)');
+      hl.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = hl;
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(139,92,246,.5)';
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = 'rgba(139,92,246,.9)';
+      ctx.shadowBlur = 12;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      if (visitor && !isNaN(visitor.lat) && !isNaN(visitor.lon)) {
+        var latR = visitor.lat * Math.PI / 180;
+        var dLon = ((visitor.lon - lon + 540) % 360) - 180;
+        var dLonR = dLon * Math.PI / 180;
+        var px = cx + R * Math.cos(latR) * Math.sin(dLonR);
+        var py = cy - R * Math.sin(latR);
+        if (Math.cos(dLonR) > 0) {
+          ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2);
+          ctx.fillStyle = '#f472b6';
+          ctx.shadowColor = 'rgba(244,114,182,.9)';
+          ctx.shadowBlur = 10;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '13px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(flagEmoji(visitor.cc), px, py - 10);
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+    function start() {
+      if (started) return;
+      started = true;
+      running = true;
+      startTex();
+      locate();
+      requestAnimationFrame(draw);
+    }
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { io.disconnect(); start(); }
+        });
+      }, { rootMargin: '240px' });
+      io.observe(box);
+    } else {
+      start();
+    }
+    window.addEventListener('resize', function () { resize(); cx = W / 2; cy = H / 2; R = Math.min(W, H) / 2 - 8; });
+  }
+
+  // —— 组装执行 ——
+  function rjV12Run() {
+    fixErrorImgRefs();
+    upgradeRewardMenus();
+    upgradeAnnouncement();
+    initGlobe();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', rjV12Run);
+  } else {
+    rjV12Run();
+  }
+  document.addEventListener('pjax:complete', function () {
+    fixErrorImgRefs();
+    upgradeRewardMenus();
+    upgradeAnnouncement();
+    rjGlobeDone = false;
+    initGlobe();
+  });
 
   function load() {
     ensureAplayer(function () {
