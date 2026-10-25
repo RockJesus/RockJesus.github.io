@@ -580,6 +580,26 @@
         DOTS.push({ lat: -72 + rnd() * 144, lng: rnd() * 360, c: i % 2 ? 'rgba(34,211,238,' : 'rgba(232,121,249,' });
       }
     })();
+    // 五大洲轮廓：world-atlas TopoJSON 合并大陆岸线，霓虹描边投影到球面
+    var landGeo = null;
+    function loadLand() {
+      var s = document.createElement('script');
+      s.src = 'https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js';
+      s.onload = function () {
+        if (!window.topojson) return;
+        fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json')
+          .then(function (r) { return r.json(); })
+          .then(function (topo) {
+            try {
+              var fc = topojson.feature(topo, topo.objects.countries);
+              var merged = topojson.merge(topo, fc.features);
+              landGeo = merged && merged.coordinates;
+            } catch (e) { landGeo = null; }
+          })
+          .catch(function () { landGeo = null; });
+      };
+      document.head.appendChild(s);
+    }
     function flagEmoji(cc) {
       if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return '🌍';
       return String.fromCodePoint.apply(null, cc.toUpperCase().split('').map(function (c) { return 127397 + c.charCodeAt(0); }));
@@ -678,6 +698,28 @@
         }
         ctx.stroke();
       }
+      // 五大洲霓虹轮廓（合并大陆岸线，青蓝描边 + 极淡填充）
+      if (landGeo) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(103,232,249,.62)';
+        ctx.shadowColor = 'rgba(34,211,238,.85)';
+        ctx.shadowBlur = 5;
+        ctx.beginPath();
+        for (var gi = 0; gi < landGeo.length; gi++) {
+          var poly = landGeo[gi];
+          for (var pi = 0; pi < poly.length; pi++) {
+            var ring = poly[pi];
+            for (var ri = 0; ri < ring.length; ri++) {
+              var lp = proj(ring[ri][1], ring[ri][0]);
+              if (ri === 0) ctx.moveTo(lp.x, lp.y); else ctx.lineTo(lp.x, lp.y);
+            }
+          }
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(34,211,238,.05)';
+        ctx.fill();
+      }
       // 数据光点（青/洋红闪烁）
       for (i = 0; i < DOTS.length; i++) {
         var d = DOTS[i];
@@ -749,6 +791,7 @@
       started = true;
       running = true;
       locate();
+      loadLand();
       var arr = [];
       try { arr = JSON.parse(localStorage.getItem('rjGlobeHistory')) || []; } catch (e) {}
       if (arr.length) renderStats(arr);
