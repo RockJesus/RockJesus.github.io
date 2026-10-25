@@ -1848,3 +1848,58 @@ a:hover { color: #6366f1; }
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
+
+/* —— 播放器 v1.1.16：封面中央播放/暂停按钮（折叠态常显，紫色主题）—— */
+.aplayer-row .rj-pic-btn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(34, 211, 238, 0.4));
+  border: 1.5px solid rgba(167, 139, 250, 0.8);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.6), inset 0 0 14px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.25s ease;
+}
+.aplayer-row .rj-pic-btn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.85), inset 0 0 14px rgba(255, 255, 255, 0.15);
+}
+.aplayer-row .rj-pic-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #ffffff;
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.95));
+}
+/* 播放器展开（非 mini）时封面按钮淡出（展开态有完整控制条） */
+.aplayer:not(.aplayer-mini) .rj-pic-btn {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.85);
+}
+/* —— 控制按钮放大 + 主题紫 —— */
+.aplayer .aplayer-icon {
+  width: 26px !important;
+  height: 26px !important;
+}
+.aplayer .aplayer-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+.aplayer .aplayer-icon path {
+  fill: #a78bfa;
+  transition: fill 0.2s ease;
+}
+.aplayer .aplayer-icon:hover path {
+  fill: #ffffff;
+}

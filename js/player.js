@@ -181,6 +181,44 @@
       }
       armFold();
     }
+    // —— 封面中央播放/暂停按钮（最小折叠态常显；点击直接播放/暂停）——
+    if (row) {
+      var picBtn = document.createElement('div');
+      picBtn.className = 'rj-pic-btn';
+      picBtn.setAttribute('aria-label', '播放/暂停');
+      picBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+      row.appendChild(picBtn);
+      function syncPicBtn() {
+        if (!ap.audio) return;
+        var paused = ap.audio.paused;
+        picBtn.innerHTML = paused
+          ? '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
+          : '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+        picBtn.classList.toggle('rj-pic-btn-playing', !paused);
+      }
+      picBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        togglePlay();
+      });
+      ap.on('play', syncPicBtn);
+      ap.on('pause', syncPicBtn);
+      ap.on('ended', syncPicBtn);
+      syncPicBtn();
+    }
+    // —— 折叠/展开 ↔ 播放列表联动：播放器折叠时列表收起，展开时列表展开 ——
+    if (window.MutationObserver) {
+      var moFold = new MutationObserver(function () {
+        try {
+          if (container.classList.contains('aplayer-mini')) {
+            if (listEl && !listHidden()) ap.list.hide();
+          } else {
+            if (listEl && listHidden()) ap.list.show();
+          }
+        } catch (e) {}
+      });
+      moFold.observe(container, { attributes: true, attributeFilter: ['class'] });
+    }
     if (row) {
       row.addEventListener('click', function (e) {
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
