@@ -595,8 +595,7 @@
           .then(function (r) { return r.json(); })
           .then(function (topo) {
             try {
-              var fc = topojson.feature(topo, topo.objects.countries);
-              var merged = topojson.merge(topo, fc.features);
+              var merged = topojson.merge(topo, [topo.objects.countries]);
               landGeo = merged && merged.coordinates;
               if (landGeo && landGeo.length) { drawLand(); }
             } catch (e) { landGeo = null; }
