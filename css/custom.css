@@ -481,21 +481,6 @@ img {
   opacity: 0;
   pointer-events: none;
 }
-/* 右下角播放/暂停状态小图标（无圆形底色，不遮挡封面） */
-.aplayer-row::after {
-  content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='13' height='13'><path d='M8 5v14l11-7z' fill='white'/></svg>");
-  position: absolute;
-  right: 10px;
-  bottom: 7px;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0.85;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
-  transition: opacity 0.2s ease;
-}
-.aplayer-row.rj-playing::after {
-  content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='13' height='13'><rect x='6' y='5' width='4.5' height='14' rx='1' fill='white'/><rect x='13.5' y='5' width='4.5' height='14' rx='1' fill='white'/></svg>");
-}
 /* 歌曲信息（叠在封面卡上） */
 .aplayer-row .aplayer-info {
   position: relative;
@@ -1639,18 +1624,6 @@ a:hover { color: #6366f1; }
    V12.4 — 播放器所有按钮统一主题色（渐变紫 #8b5cf6→#6366f1）
    覆盖：右下角播放/暂停状态图标、控制器图标、列表播放指示、进度滑块
    ============================================================ */
-/* 右下角播放状态图标：渐变紫三角 + 紫光晕 */
-.aplayer-row::after {
-  content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='15' height='15'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%238b5cf6'/><stop offset='1' stop-color='%236366f1'/></linearGradient></defs><path d='M8 5v14l11-7z' fill='url(%23g)'/></svg>");
-  filter: drop-shadow(0 1px 5px rgba(139, 92, 246, 0.95));
-  opacity: 0.95;
-}
-/* 暂停状态图标：渐变紫双竖条 + 紫光晕 */
-.aplayer-row.rj-playing::after {
-  content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='15' height='15'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%238b5cf6'/><stop offset='1' stop-color='%236366f1'/></linearGradient></defs><rect x='6' y='5' width='4.5' height='14' rx='1' fill='url(%23g)'/><rect x='13.5' y='5' width='4.5' height='14' rx='1' fill='url(%23g)'/></svg>");
-  filter: drop-shadow(0 1px 5px rgba(139, 92, 246, 0.95));
-  opacity: 0.95;
-}
 /* 控制器所有图标（上一首/下一首/列表/模式等）：统一渐变紫（SVG path 填充主题紫，悬停加深） */
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon path {
   fill: #8b5cf6;
@@ -1855,16 +1828,16 @@ a:hover { color: #6366f1; }
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 3;
-  width: 48px;
-  height: 48px;
+  z-index: 5;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(34, 211, 238, 0.4));
-  border: 1.5px solid rgba(167, 139, 250, 0.8);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.6), inset 0 0 14px rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.85), rgba(139, 92, 246, 0.65) 55%, rgba(34, 211, 238, 0.5));
+  border: 2px solid rgba(216, 195, 255, 0.9);
+  box-shadow: 0 0 26px rgba(139, 92, 246, 0.75), inset 0 0 16px rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
@@ -1876,10 +1849,16 @@ a:hover { color: #6366f1; }
   box-shadow: 0 0 30px rgba(139, 92, 246, 0.85), inset 0 0 14px rgba(255, 255, 255, 0.15);
 }
 .aplayer-row .rj-pic-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   fill: #ffffff;
-  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.95));
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.95));
+}
+/* 折叠态强制显示封面中央按钮 */
+.aplayer-mini .rj-pic-btn {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translate(-50%, -50%) !important;
 }
 /* 播放器展开（非 mini）时封面按钮淡出（展开态有完整控制条） */
 .aplayer:not(.aplayer-mini) .rj-pic-btn {
@@ -1889,12 +1868,12 @@ a:hover { color: #6366f1; }
 }
 /* —— 控制按钮放大 + 主题紫 —— */
 .aplayer .aplayer-icon {
-  width: 26px !important;
-  height: 26px !important;
+  width: 36px !important;
+  height: 36px !important;
 }
 .aplayer .aplayer-icon svg {
-  width: 20px !important;
-  height: 20px !important;
+  width: 26px !important;
+  height: 26px !important;
 }
 .aplayer .aplayer-icon path {
   fill: #a78bfa;
