@@ -588,21 +588,49 @@
     var landGeo = null;
     function loadLand() {
       var s = document.createElement('script');
-      s.src = '/js/topojson-client.min.js';
+      s.src = '/js/topojson-client.min.js?v=110';
       s.onload = function () {
         if (!window.topojson) return;
-        fetch('/data/countries-110m.json')
+        fetch('/data/countries-110m.json', { cache: 'no-cache' })
           .then(function (r) { return r.json(); })
           .then(function (topo) {
             try {
               var fc = topojson.feature(topo, topo.objects.countries);
               var merged = topojson.merge(topo, fc.features);
               landGeo = merged && merged.coordinates;
+              if (landGeo && landGeo.length) { drawLand(); }
             } catch (e) { landGeo = null; }
           })
           .catch(function () { landGeo = null; });
       };
+      s.onerror = function () { landGeo = null; };
       document.head.appendChild(s);
+    }
+    function drawLand() {
+      if (!landGeo) return;
+      var gi, pi, ri, lp, ring, poly;
+      ctx.save();
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = 'rgba(125,240,255,.92)';
+      ctx.shadowColor = 'rgba(34,211,238,.95)';
+      ctx.shadowBlur = 9;
+      ctx.beginPath();
+      for (gi = 0; gi < landGeo.length; gi++) {
+        poly = landGeo[gi];
+        for (pi = 0; pi < poly.length; pi++) {
+          ring = poly[pi];
+          if (ring.length < 3) continue;
+          for (ri = 0; ri < ring.length; ri++) {
+            lp = proj(ring[ri][1], ring[ri][0]);
+            if (ri === 0) ctx.moveTo(lp.x, lp.y); else ctx.lineTo(lp.x, lp.y);
+          }
+        }
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(34,211,238,.07)';
+      ctx.fill();
+      ctx.restore();
     }
     function flagEmoji(cc) {
       if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return '🌍';
@@ -703,27 +731,7 @@
         ctx.stroke();
       }
       // 五大洲霓虹轮廓（合并大陆岸线，青蓝描边 + 极淡填充）
-      if (landGeo) {
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = 'rgba(103,232,249,.62)';
-        ctx.shadowColor = 'rgba(34,211,238,.85)';
-        ctx.shadowBlur = 5;
-        ctx.beginPath();
-        for (var gi = 0; gi < landGeo.length; gi++) {
-          var poly = landGeo[gi];
-          for (var pi = 0; pi < poly.length; pi++) {
-            var ring = poly[pi];
-            for (var ri = 0; ri < ring.length; ri++) {
-              var lp = proj(ring[ri][1], ring[ri][0]);
-              if (ri === 0) ctx.moveTo(lp.x, lp.y); else ctx.lineTo(lp.x, lp.y);
-            }
-          }
-        }
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = 'rgba(34,211,238,.05)';
-        ctx.fill();
-      }
+      if (landGeo) { drawLand(); }
       // 数据光点（青/洋红闪烁）
       for (i = 0; i < DOTS.length; i++) {
         var d = DOTS[i];
