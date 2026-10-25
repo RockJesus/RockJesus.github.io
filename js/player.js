@@ -573,7 +573,7 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     resize();
-    var cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 8;
+    var cx = W / 2, cy = H / 2, R = W / 2 - 4;
     var lon = 0, visitor = null, flagImg = null, started = false, running = false;
     // 赛博朋克数据光点（固定种子伪随机，青/洋红交替）
     var DOTS = [];
@@ -607,7 +607,7 @@
     }
     function drawLand() {
       if (!landGeo) return;
-      var gi, pi, ri, lp, ring, poly;
+      var gi, pi, ri, lp, ring, poly, needMove;
       ctx.save();
       ctx.lineWidth = 1.6;
       ctx.strokeStyle = 'rgba(125,240,255,.92)';
@@ -619,9 +619,12 @@
         for (pi = 0; pi < poly.length; pi++) {
           ring = poly[pi];
           if (ring.length < 3) continue;
+          needMove = true;
           for (ri = 0; ri < ring.length; ri++) {
             lp = proj(ring[ri][1], ring[ri][0]);
-            if (ri === 0) ctx.moveTo(lp.x, lp.y); else ctx.lineTo(lp.x, lp.y);
+            if (lp.z < 0) { needMove = true; continue; }
+            if (needMove) { ctx.moveTo(lp.x, lp.y); needMove = false; }
+            else { ctx.lineTo(lp.x, lp.y); }
           }
         }
       }
@@ -759,17 +762,22 @@
       ctx.fillStyle = hg;
       ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
       ctx.restore();
-      // 访客定位：脉冲圈 + 洋红点 + 国旗（正背面均显示）
+      // 访客定位：脉冲圈 + 洋红点 + 国旗（仅正面显示，转背面时为淡光点）
       if (visitor && !isNaN(visitor.lat) && !isNaN(visitor.lon)) {
         var vp = proj(visitor.lat, visitor.lon);
-        var vz = Math.max(0.05, vp.z);
-        ctx.strokeStyle = 'rgba(232,121,249,' + (0.4 + 0.3 * vz) + ')';
-        ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.arc(vp.x, vp.y, 4 + 2.5 * Math.sin(tt * 3.2), 0, Math.PI * 2); ctx.stroke();
-        ctx.beginPath(); ctx.arc(vp.x, vp.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(232,121,249,.95)'; ctx.fill();
-        if (flagImg && flagImg.width) ctx.drawImage(flagImg, vp.x - 10, vp.y - 26, 20, 14);
-        else { ctx.fillStyle = '#fff'; ctx.font = '11px monospace'; ctx.textAlign = 'center'; ctx.fillText(visitor.cc, vp.x, vp.y - 10); }
+        if (vp.z > 0.05) {
+          var vz = Math.max(0.05, vp.z);
+          ctx.strokeStyle = 'rgba(232,121,249,' + (0.4 + 0.3 * vz) + ')';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.arc(vp.x, vp.y, 4 + 2.5 * Math.sin(tt * 3.2), 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(vp.x, vp.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(232,121,249,.95)'; ctx.fill();
+          if (flagImg && flagImg.width) ctx.drawImage(flagImg, vp.x - 10, vp.y - 26, 20, 14);
+          else { ctx.fillStyle = '#fff'; ctx.font = '11px monospace'; ctx.textAlign = 'center'; ctx.fillText(visitor.cc, vp.x, vp.y - 10); }
+        } else {
+          ctx.beginPath(); ctx.arc(vp.x, vp.y, 2.4, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(232,121,249,.45)'; ctx.fill();
+        }
       }
       // 外光晕（青→紫）
       var halo = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.3);
@@ -818,7 +826,7 @@
     } else {
       start();
     }
-    window.addEventListener('resize', function () { resize(); cx = W / 2; cy = H / 2; R = Math.min(W, H) / 2 - 8; });
+    window.addEventListener('resize', function () { resize(); cx = W / 2; cy = H / 2; R = W / 2 - 4; });
   }
 
   // —— 组装执行 ——
