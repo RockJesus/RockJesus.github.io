@@ -1588,3 +1588,92 @@ a:hover { color: #6366f1; }
   box-shadow: 0 0 12px rgba(139, 92, 246, 1);
   transform: scale(0.8);
 }
+
+/* ============================================================
+   V14 — iOS27 液态玻璃：右上角导航 / 打字字体 / 图标
+   右上角菜单渐变玻璃字 + hover 液态 pill；下拉弹性弹出；
+   打字副标题玻璃渐变字 + 渐变呼吸光标；图标渐变紫光晕
+   ============================================================ */
+/* —— 右上角导航：玻璃渐变字 + 液态 pill hover —— */
+#nav #menus .site-page {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f3e8ff 0%, #c4b5fd 35%, #8b5cf6 70%, #6366f1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: 600;
+  letter-spacing: .4px;
+  transition: all .32s cubic-bezier(.34, 1.56, .64, 1);
+}
+#nav #menus .site-page:hover {
+  background: rgba(139, 92, 246, .16);
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(139, 92, 246, .45),
+    0 0 20px rgba(139, 92, 246, .4),
+    0 6px 18px rgba(2, 6, 23, .35),
+    inset 0 1px 0 rgba(255, 255, 255, .3);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  transform: translateY(-1px);
+}
+/* 导航图标：渐变紫 + 光晕，hover 弹性上浮 */
+#nav #menus .site-page i,
+#nav .menus_item_child .site-page i {
+  background: linear-gradient(135deg, #c4b5fd, #8b5cf6, #6366f1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, .55));
+  transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), filter .3s ease;
+}
+#nav #menus .site-page:hover i {
+  transform: translateY(-2px) scale(1.18);
+  filter: drop-shadow(0 0 14px rgba(139, 92, 246, 1));
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+}
+/* —— 下拉菜单：iOS27 弹性弹出动画 —— */
+#nav .menus_item_child {
+  transform-origin: top center;
+  animation: rjMenuPop .32s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes rjMenuPop {
+  from { opacity: 0; transform: translateY(10px) scale(.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* —— 打字副标题：iOS27 玻璃渐变字 + 高光 —— */
+#site-subtitle #subtitle {
+  background: linear-gradient(135deg, #f3e8ff 0%, #c4b5fd 38%, #8b5cf6 72%, #6366f1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: 600;
+  letter-spacing: .6px;
+  filter: drop-shadow(0 2px 16px rgba(139, 92, 246, .6));
+}
+/* —— 打字光标：渐变紫玻璃竖条 + 呼吸闪烁 —— */
+#site-subtitle .typed-cursor {
+  color: transparent;
+  font-size: 0;
+  width: 3px;
+  height: 1.02em;
+  display: inline-block;
+  margin-left: 5px;
+  vertical-align: -0.12em;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #e9d5ff, #8b5cf6, #6366f1);
+  box-shadow: 0 0 14px rgba(139, 92, 246, .9);
+  animation: rjCursorBlink 1.1s ease-in-out infinite;
+}
+@keyframes rjCursorBlink {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: .25; transform: scaleY(.7); }
+}
