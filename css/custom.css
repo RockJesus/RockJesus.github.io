@@ -1363,3 +1363,188 @@ a:hover { color: #6366f1; }
     max-height: 60vh;
   }
 }
+
+/* ============================================================
+   V12.3 — iOS 27 Liquid Glass 深度美化（全站玻璃拟态）
+   特征：彩色光斑背景 + 高透毛玻璃面板 + 内高光描边 + 弹性动效 + 光泽扫过
+   原则：只叠加视觉层，不动结构与交互
+   ============================================================ */
+/* —— 背景彩色光斑（iOS27 招牌：多彩柔和光晕缓慢漂移） —— */
+#web_bg {
+  position: fixed;
+}
+#web_bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(620px 420px at 12% 8%, rgba(139, 92, 246, 0.4), transparent 62%),
+    radial-gradient(720px 520px at 88% 16%, rgba(99, 102, 241, 0.34), transparent 62%),
+    radial-gradient(640px 480px at 62% 92%, rgba(34, 211, 238, 0.2), transparent 62%),
+    radial-gradient(520px 420px at 26% 68%, rgba(244, 114, 182, 0.16), transparent 62%);
+  opacity: 0.85;
+  mix-blend-mode: screen;
+  animation: rjGlowShift 26s ease-in-out infinite alternate;
+}
+@keyframes rjGlowShift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-2%, 1.5%, 0) scale(1.05); }
+  100% { transform: translate3d(2%, -2%, 0) scale(1.08); }
+}
+
+/* —— 导航栏液态玻璃（含滚动后的紧凑态） —— */
+#nav {
+  background: rgba(15, 18, 32, 0.32) !important;
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 40px rgba(2, 6, 23, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+#nav.nav-fixed {
+  background: rgba(15, 18, 32, 0.62) !important;
+  box-shadow: 0 12px 44px rgba(2, 6, 23, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* —— 卡片深液态玻璃：更强透光、内高光、弹性悬停 —— */
+#recent-posts > .recent-post-item,
+.layout_page > div:first-child:not(.recent-posts),
+.layout_post > #page,
+.layout_post > #post,
+#aside-content .card-widget {
+  position: relative;
+  background: linear-gradient(145deg, rgba(32, 36, 66, 0.55), rgba(17, 21, 38, 0.38));
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  box-shadow:
+    0 4px 14px rgba(2, 6, 23, 0.28),
+    0 18px 50px rgba(2, 6, 23, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(139, 92, 246, 0.12);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+/* 顶部高光线 */
+#recent-posts > .recent-post-item::before,
+.layout_page > div:first-child:not(.recent-posts)::before,
+.layout_post > #page::before,
+.layout_post > #post::before,
+#aside-content .card-widget::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+}
+#recent-posts > .recent-post-item:hover,
+#aside-content .card-widget:hover {
+  transform: translateY(-5px) scale(1.012);
+  border-color: rgba(139, 92, 246, 0.55);
+  box-shadow:
+    0 12px 32px rgba(88, 28, 135, 0.32),
+    0 26px 70px rgba(2, 6, 23, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 34px rgba(139, 92, 246, 0.22);
+}
+
+/* —— 玻璃按钮：内高光 + 光泽扫过 —— */
+#card-info-btn,
+.btn-beautify a,
+.buttons a {
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 6px 20px rgba(139, 92, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -3px 8px rgba(49, 46, 129, 0.35);
+}
+#card-info-btn::after,
+.btn-beautify a::after,
+.buttons a::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -65%;
+  width: 42%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  animation: rjShine 3.4s ease-in-out infinite;
+}
+@keyframes rjShine {
+  0% { left: -65%; }
+  55%, 100% { left: 135%; }
+}
+
+/* —— 头像玻璃圈 —— */
+#aside-content .card-info .author-info__avatar img,
+#aside-content .card-info .avatar-img {
+  border-radius: 50% !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 0 0 5px rgba(139, 92, 246, 0.22),
+    0 10px 28px rgba(2, 6, 23, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* —— 右侧悬浮按钮玻璃化 —— */
+#rightside > div > button {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 16px rgba(2, 6, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* —— 播放器 / 豆包弹窗 / 搜索弹窗：内高光加强 —— */
+.aplayer.aplayer-fixed .aplayer-body {
+  box-shadow:
+    0 10px 38px rgba(0, 0, 0, 0.55),
+    0 0 34px rgba(139, 92, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+#rj-doubao-panel {
+  box-shadow:
+    0 14px 46px rgba(2, 6, 23, 0.65),
+    0 0 34px rgba(139, 92, 246, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.search-dialog {
+  box-shadow:
+    0 24px 70px rgba(2, 6, 23, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* —— 侧栏菜单玻璃化 —— */
+#sidebar #sidebar-menus {
+  background: linear-gradient(145deg, rgba(32, 36, 66, 0.55), rgba(17, 21, 38, 0.4)) !important;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* —— 文章头图玻璃化（页面头图容器） —— */
+#page-header.post-bg {
+  box-shadow: inset 0 -60px 120px rgba(2, 6, 23, 0.45);
+}
+
+/* 移动端：降低模糊半径保性能，圆角同步 */
+@media screen and (max-width: 768px) {
+  #recent-posts > .recent-post-item,
+  .layout_post > #page,
+  .layout_post > #post,
+  #aside-content .card-widget {
+    border-radius: 20px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+  }
+  #nav {
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+  }
+}
