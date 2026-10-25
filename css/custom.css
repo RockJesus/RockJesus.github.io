@@ -1039,10 +1039,216 @@ img {
   }
 }
 
+
 /* ============================================================
    右下角精简 V11 — 删除「设置」（齿轮）与「折叠」（单栏/双栏切换）按钮
    ============================================================ */
 #rightside #rightside_config,
 #rightside #hide-aside-btn {
   display: none !important;
+}
+
+/* ============================================================
+   V12 — 主题渐变紫（Follow Me 同款 135deg #8b5cf6→#6366f1）+ iOS27 液态玻璃
+   #8 主题色统一渐变紫  #12 借鉴 iOS 27 Liquid Glass 全站美化
+   ============================================================ */
+/* —— 全局链接/图标/强调：渐变紫 —— */
+a { color: #8b5cf6; }
+a:hover { color: #6366f1; }
+.framework-info a { color: #8b5cf6; }
+.framework-info a:hover { color: #6366f1; }
+#article-container a:not(.headerlink) { color: #8b5cf6; border-bottom-color: rgba(139,92,246,.5); }
+#article-container a:not(.headerlink):hover { color: #6366f1; border-bottom-color: #6366f1; }
+#article-container h2::before, #article-container h3::before, #article-container h4::before,
+#article-container h5::before, #article-container h6::before { color: #8b5cf6; text-shadow: 0 0 10px rgba(139,92,246,.7); }
+#nav #menus .site-page, #nav .menus_item_child .site-page { color: #8b5cf6; }
+#nav #menus .site-page i, #nav .menus_item_child .site-page i { color: #8b5cf6; }
+#nav #menus .site-page:hover, #nav .menus_item_child .site-page:hover { color: #e0d7ff; }
+#site-subtitle #subtitle { color: #8b5cf6; }
+#site-subtitle .typed-cursor { color: #8b5cf6; }
+#scroll-down i { color: #8b5cf6; }
+.recent-post-info .article-meta-wrap i { color: #8b5cf6; }
+.recent-post-info .article-meta-wrap a { color: #8b5cf6; }
+.recent-post-info .article-meta-wrap a:hover { color: #6366f1; }
+#article-container ul li::marker, #article-container ol li::marker { color: #8b5cf6; }
+.item-headline i { color: #8b5cf6; }
+.webinfo .item-count { color: #8b5cf6; }
+.card-announcement .item-headline i { color: #8b5cf6; }
+#post .post-copyright .post-copyright-meta { color: #8b5cf6; }
+#article-container a.headerlink::after { color: #8b5cf6; }
+#post .tag_share .post-meta__tags { border-color: rgba(139,92,246,.6); background: rgba(139,92,246,.12); color: #c4b5fd; }
+
+/* —— 渐变应用点：Follow Me 同款 135deg #8b5cf6→#6366f1 —— */
+.article-title:hover {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+#site-name {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.pagination .page-number.current, .pagination .page-number:hover {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  border-color: transparent;
+  box-shadow: 0 0 16px rgba(139,92,246,.65);
+}
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #8b5cf6, #6366f1); }
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #a78bfa, #8b5cf6); }
+.aplayer .aplayer-info .aplayer-controller .aplayer-icon path { fill: #8b5cf6; }
+.aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path { fill: #6366f1; }
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
+  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  box-shadow: 0 0 6px rgba(139,92,246,.6);
+}
+.aplayer .aplayer-list ol li.aplayer-list-light {
+  background: linear-gradient(90deg, rgba(139,92,246,.3), rgba(99,102,241,.14));
+  border-left-color: #8b5cf6;
+}
+#footer {
+  background: linear-gradient(-45deg, rgba(139,92,246,.28), rgba(99,102,241,.24), rgba(139,92,246,.16), rgba(99,102,241,.28));
+}
+#article-container blockquote { border-image: linear-gradient(180deg, #8b5cf6, #6366f1) 1; }
+#article-container pre { box-shadow: 0 6px 24px rgba(2,6,23,.5), 0 0 18px rgba(139,92,246,.22); }
+#article-container p code, #article-container li code, #article-container td code {
+  border-color: rgba(139,92,246,.4);
+  background: rgba(139,92,246,.14);
+}
+#article-container table { border-color: rgba(139,92,246,.32); }
+#article-container table thead th {
+  background: linear-gradient(90deg, rgba(139,92,246,.3), rgba(99,102,241,.18));
+}
+#post .tag_share .post-meta__tags:hover { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+.btn-beautify a, .buttons a { background: linear-gradient(135deg, #8b5cf6, #6366f1); border-color: rgba(139,92,246,.3); }
+.aplayer.aplayer-fixed .aplayer-body { border-color: rgba(139,92,246,.45); box-shadow: 0 8px 32px rgba(0,0,0,.55), 0 0 24px rgba(139,92,246,.25); }
+.aplayer .aplayer-list { border-top-color: rgba(139,92,246,.28); }
+#rj-doubao-panel { border-color: rgba(139,92,246,.5); box-shadow: 0 12px 40px rgba(2,6,23,.6), 0 0 24px rgba(139,92,246,.32); }
+.rj-tip { border-color: rgba(139,92,246,.45); box-shadow: 0 4px 20px rgba(0,0,0,.5), 0 0 12px rgba(139,92,246,.3); }
+#rightside > div > button:hover { background: linear-gradient(135deg, #8b5cf6, #6366f1) !important; }
+
+/* —— iOS 27 Liquid Glass：大圆角 + 高饱和毛玻璃 + 内高光 + 弹性动效 —— */
+#recent-posts > .recent-post-item,
+.layout_page > div:first-child:not(.recent-posts),
+.layout_post > #page, .layout_post > #post,
+#aside-content .card-widget {
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.13);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 0 4px 12px rgba(2,6,23,.32), 0 16px 44px rgba(2,6,23,.5), inset 0 1px 0 rgba(255,255,255,.12);
+}
+#recent-posts > .recent-post-item:hover,
+#aside-content .card-widget:hover {
+  transform: translateY(-4px) scale(1.008);
+  border-color: rgba(139,92,246,.5);
+  box-shadow: 0 10px 28px rgba(88,28,135,.3), 0 22px 60px rgba(2,6,23,.55), inset 0 1px 0 rgba(255,255,255,.14);
+}
+#nav .menus_item_child {
+  background: rgba(19,23,40,.72);
+  backdrop-filter: blur(26px) saturate(170%);
+  -webkit-backdrop-filter: blur(26px) saturate(170%);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  box-shadow: 0 14px 38px rgba(2,6,23,.55), inset 0 1px 0 rgba(255,255,255,.1);
+}
+#nav .menus_item_child li a { border-radius: 10px; }
+#sidebar #sidebar-menus { background: rgba(19,23,40,.72); backdrop-filter: blur(26px) saturate(170%); -webkit-backdrop-filter: blur(26px) saturate(170%); }
+.aplayer.aplayer-fixed .aplayer-body {
+  border-radius: 22px;
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-color: rgba(255,255,255,.16);
+  box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 28px rgba(139,92,246,.28), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.aplayer .aplayer-list { border-radius: 0 0 22px 22px; }
+#rj-doubao-panel { border-radius: 22px; backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); }
+.search-dialog { border-radius: 24px; border-color: rgba(255,255,255,.13); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); }
+#article-container img { border-radius: 18px; }
+.post_cover { border-radius: 18px; overflow: hidden; }
+
+/* —— 打赏菜单悬停弹出三张二维码（#7）—— */
+#nav .menus_item_child.rj-qr-menu,
+#sidebar-menus .menus_item_child.rj-qr-menu {
+  display: none;
+  flex-direction: row;
+  gap: 10px;
+  padding: 12px 14px;
+  min-width: 356px;
+  width: auto;
+  border-radius: 18px;
+  background: rgba(19,23,40,.8);
+  backdrop-filter: blur(26px) saturate(170%);
+  -webkit-backdrop-filter: blur(26px) saturate(170%);
+  border: 1px solid rgba(139,92,246,.45);
+  box-shadow: 0 16px 40px rgba(2,6,23,.6), 0 0 26px rgba(139,92,246,.28), inset 0 1px 0 rgba(255,255,255,.1);
+}
+#nav .menus_item:hover .menus_item_child.rj-qr-menu,
+#sidebar-menus .menus_item:hover .menus_item_child.rj-qr-menu { display: flex; }
+.rj-qr-item {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 10px 11px;
+  border-radius: 14px;
+  background: rgba(139,92,246,.13);
+  border: 1px solid rgba(139,92,246,.28);
+  color: #e0d7ff !important;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.rj-qr-item:hover {
+  transform: translateY(-3px);
+  background: rgba(139,92,246,.24);
+  box-shadow: 0 8px 20px rgba(139,92,246,.35);
+  color: #fff !important;
+}
+.rj-qr-item img { width: 104px; height: 104px; border-radius: 12px; display: block; box-shadow: 0 4px 14px rgba(2,6,23,.5); }
+.rj-qr-item span { font-size: 12px; letter-spacing: .5px; }
+
+/* —— 人生信条卡（#10）—— */
+.announcement_content.rj-creed {
+  font-size: 15px;
+  line-height: 1.8;
+  color: rgba(196,205,255,.88);
+}
+.announcement_content.rj-creed b {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
+/* —— 3D 旋转地球（#9）—— */
+#rj-globe {
+  position: relative;
+  margin-top: 14px;
+  height: 236px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 42%, rgba(30,58,138,.35), rgba(7,9,20,.9) 70%);
+  border: 1px solid rgba(139,92,246,.4);
+  box-shadow: 0 0 26px rgba(139,92,246,.22), inset 0 0 44px rgba(2,6,23,.65);
+}
+#rj-globe canvas { width: 100%; height: 100%; display: block; }
+#rj-globe .rj-globe-label {
+  position: absolute;
+  left: 0; right: 0; bottom: 7px;
+  text-align: center;
+  font-size: 11.5px;
+  letter-spacing: .4px;
+  color: rgba(196,205,255,.82);
+  text-shadow: 0 0 8px rgba(139,92,246,.6), 0 1px 4px rgba(0,0,0,.8);
+  pointer-events: none;
+}
+
+/* 移动端微调 */
+@media screen and (max-width: 768px) {
+  #recent-posts > .recent-post-item, .layout_post > #page, .layout_post > #post,
+  #aside-content .card-widget { border-radius: 18px; }
+  #rj-globe { height: 210px; }
+  #nav .menus_item_child.rj-qr-menu { min-width: 300px; }
+  .rj-qr-item img { width: 86px; height: 86px; }
 }
