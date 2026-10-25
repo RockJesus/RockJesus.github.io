@@ -9,14 +9,14 @@
 
   var PLAYLIST_URLS = [
     'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
-    'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
+    'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
     'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'
   ];
   var SEED = {
     name: 'RockJesus Station',
     artist: 'CC0 · Pixabay',
     url: 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus@main/music/seed1.mp3',
-    cover: 'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/header_oc.webp'
+    cover: 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/header_oc.webp'
   };
 
   // 带超时的 fetch：任何源 10s 内无响应即放弃，保证播放器一定初始化
@@ -450,7 +450,11 @@
       var src = img.getAttribute('src') || img.getAttribute('data-lazy-src') || '';
       if (rjIsExtUnreliable(src)) { rjHideBroken(img); return; }
       img.dataset.rjFallback = '1';
-      img.onerror = function () { rjReplaceBroken(this); };
+      img.onerror = function () {
+        var s = this.getAttribute('src') || this.getAttribute('data-lazy-src') || '';
+        if (rjIsExtUnreliable(s)) { rjHideBroken(this); return; }
+        rjReplaceBroken(this);
+      };
       if (img.complete && img.naturalWidth === 0) { rjReplaceBroken(img); }
     });
   }
@@ -470,7 +474,7 @@
   function fixErrorImgRefs() {
     document.querySelectorAll('img[data-lazy-src*="4040.gif"], img[src*="4040.gif"]').forEach(function (img) {
       img.removeAttribute('onerror');
-      var good = 'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/black.png';
+      var good = 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/black.png';
       if (img.getAttribute('data-lazy-src')) img.setAttribute('data-lazy-src', good);
       else img.src = good;
     });
@@ -501,7 +505,7 @@
       items.forEach(function (p) {
         var li = document.createElement('li');
         var link = document.createElement('a');
-        var href = 'https://gcore.jsdelivr.net/gh/rockjesus/rockjesus/img/' + p[1];
+        var href = 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/' + p[1];
         link.className = 'site-page child rj-qr-item';
         link.href = href;
         link.target = '_blank';
@@ -820,6 +824,7 @@
     setTimeout(rjPatchBrokenImgs, 1500);
     setTimeout(rjPatchBrokenImgs, 4000);
     setTimeout(rjPatchBrokenImgs, 8000);
+    setTimeout(rjPatchBrokenImgs, 15000);
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', rjV12Run);
