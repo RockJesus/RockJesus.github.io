@@ -1548,3 +1548,43 @@ a:hover { color: #6366f1; }
     -webkit-backdrop-filter: blur(24px) saturate(180%);
   }
 }
+
+/* ============================================================
+   V12.4 — 播放器所有按钮统一主题色（渐变紫 #8b5cf6→#6366f1）
+   覆盖：右下角播放/暂停状态图标、控制器图标、列表播放指示、进度滑块
+   ============================================================ */
+/* 右下角播放状态图标：渐变紫三角 + 紫光晕 */
+.aplayer-row::after {
+  content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='15' height='15'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%238b5cf6'/><stop offset='1' stop-color='%236366f1'/></linearGradient></defs><path d='M8 5v14l11-7z' fill='url(%23g)'/></svg>");
+  filter: drop-shadow(0 1px 5px rgba(139, 92, 246, 0.95));
+  opacity: 0.95;
+}
+/* 暂停状态图标：渐变紫双竖条 + 紫光晕 */
+.aplayer-row.rj-playing::after {
+  content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='15' height='15'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%238b5cf6'/><stop offset='1' stop-color='%236366f1'/></linearGradient></defs><rect x='6' y='5' width='4.5' height='14' rx='1' fill='url(%23g)'/><rect x='13.5' y='5' width='4.5' height='14' rx='1' fill='url(%23g)'/></svg>");
+  filter: drop-shadow(0 1px 5px rgba(139, 92, 246, 0.95));
+  opacity: 0.95;
+}
+/* 控制器所有图标（上一首/下一首/列表/模式等）：统一渐变紫（SVG path 填充主题紫，悬停加深） */
+.aplayer .aplayer-info .aplayer-controller .aplayer-icon path {
+  fill: #8b5cf6;
+}
+.aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path {
+  fill: #6366f1;
+}
+/* 列表面板中的播放/暂停小图标 */
+.aplayer .aplayer-list ol li .aplayer-icon path,
+.aplayer .aplayer-list ol li .aplayer-list-cur {
+  fill: #8b5cf6;
+  color: #8b5cf6;
+}
+/* 进度条：滑块与已播渐变紫强化（按钮态反馈） */
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
+  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.8);
+}
+.aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 1);
+  transform: scale(0.8);
+}
