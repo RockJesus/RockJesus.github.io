@@ -373,14 +373,23 @@
     });
   }
 
-  // —— 打赏菜单：悬停弹出三张可扫码二维码 ——
+  // —— 打赏 / 加入我们菜单：悬停弹出可扫码二维码 ——
   function upgradeRewardMenus() {
+    var menus = {
+      '打赏': [['微信', 'wx.png'], ['支付宝', 'zfb.png'], ['赞赏', 'zsm.png']],
+      '加入我们': [['QQ群', 'qq.png'], ['公众号', 'gzh.jpg']]
+    };
     document.querySelectorAll('#nav .menus_item, #sidebar-menus .menus_item').forEach(function (item) {
       var a = item.querySelector('a.group');
-      if (!a || a.textContent.indexOf('打赏') < 0) return;
+      if (!a) return;
+      var matched = null;
+      Object.keys(menus).forEach(function (name) {
+        if (a.textContent.indexOf(name) >= 0) matched = name;
+      });
+      if (!matched) return;
       var ul = item.querySelector('.menus_item_child');
       if (!ul || ul.classList.contains('rj-qr-menu')) return;
-      var items = [['微信', 'wx.png'], ['支付宝', 'zfb.png'], ['赞赏', 'zsm.png']];
+      var items = menus[matched];
       ul.classList.add('rj-qr-menu');
       ul.innerHTML = '';
       items.forEach(function (p) {
