@@ -1195,7 +1195,7 @@ a:hover { color: #6366f1; }
 #article-container img { border-radius: 18px; }
 .post_cover { border-radius: 18px; overflow: hidden; }
 
-/* —— 打赏菜单悬停弹出三张二维码（#7）—— */
+/* —— 打赏/加入我们 二维码菜单：主页同套卡片风格（#7）—— */
 #nav .menus_item_child.rj-qr-menu,
 #sidebar-menus .menus_item_child.rj-qr-menu {
   display: none;
@@ -1204,24 +1204,31 @@ a:hover { color: #6366f1; }
   padding: 12px 14px;
   min-width: 356px;
   width: auto;
-  border-radius: 18px;
-  background: rgba(19,23,40,.8);
-  backdrop-filter: blur(26px) saturate(170%);
-  -webkit-backdrop-filter: blur(26px) saturate(170%);
-  border: 1px solid rgba(139,92,246,.45);
-  box-shadow: 0 16px 40px rgba(2,6,23,.6), 0 0 26px rgba(139,92,246,.28), inset 0 1px 0 rgba(255,255,255,.1);
+  border-radius: 16px;
+  background: rgba(19, 23, 40, 0.66);
+  backdrop-filter: saturate(150%) blur(20px);
+  -webkit-backdrop-filter: saturate(150%) blur(20px);
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.6), 0 0 26px rgba(139, 92, 246, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 #nav .menus_item:hover .menus_item_child.rj-qr-menu,
-#sidebar-menus .menus_item:hover .menus_item_child.rj-qr-menu { display: flex; }
+#sidebar-menus .menus_item:hover .menus_item_child.rj-qr-menu {
+  display: flex;
+  animation: rjQrIn 0.25s ease;
+}
+@keyframes rjQrIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 .rj-qr-item {
   display: flex !important;
   flex-direction: column;
   align-items: center;
   gap: 7px;
   padding: 9px 10px 11px;
-  border-radius: 14px;
-  background: rgba(139,92,246,.13);
-  border: 1px solid rgba(139,92,246,.28);
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.14);
+  border: 1px solid rgba(167, 139, 250, 0.3);
   color: #e0d7ff !important;
   transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
 }
