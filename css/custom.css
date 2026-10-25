@@ -22,7 +22,7 @@
 
 /* ---------- 背景：恢复原始背景图（主题配置 background: oc.png） ---------- */
 #web_bg {
-  background: url(https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/oc.png) center/cover no-repeat;
+  background: url(/img/oc.png) center/cover no-repeat;
   background-attachment: local;
 }
 
@@ -337,7 +337,7 @@ a:hover {
    以下为站点原有资产，务必保留（图标字体 / 光标 / 换行规则）
    ============================================================ */
 body {
-  cursor: url(https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/cur.png), auto;
+  cursor: url(/img/cur.png), auto;
 }
 
 .hide-block>.hide-button.open,
@@ -348,7 +348,7 @@ body {
 a,
 button,
 img {
-  cursor: url(https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/cur.png), auto
+  cursor: url(/img/cur.png), auto
 }
 
 @font-face {

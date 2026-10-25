@@ -16,7 +16,7 @@
     name: 'RockJesus Station',
     artist: 'CC0 · Pixabay',
     url: 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus@main/music/seed1.mp3',
-    cover: 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/header_oc.webp'
+    cover: '/img/header_oc.webp'
   };
 
   // 带超时的 fetch：任何源 10s 内无响应即放弃，保证播放器一定初始化
@@ -474,7 +474,7 @@
   function fixErrorImgRefs() {
     document.querySelectorAll('img[data-lazy-src*="4040.gif"], img[src*="4040.gif"]').forEach(function (img) {
       img.removeAttribute('onerror');
-      var good = 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/black.png';
+      var good = '/img/black.png';
       if (img.getAttribute('data-lazy-src')) img.setAttribute('data-lazy-src', good);
       else img.src = good;
     });
@@ -505,7 +505,7 @@
       items.forEach(function (p) {
         var li = document.createElement('li');
         var link = document.createElement('a');
-        var href = 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/img/' + p[1];
+        var href = '/img/' + p[1];
         link.className = 'site-page child rj-qr-item';
         link.href = href;
         link.target = '_blank';
