@@ -567,7 +567,8 @@
     var W = 340, H = 236, dpr = Math.min(window.devicePixelRatio || 1, 2);
     function resize() {
       W = canvas.clientWidth || 340;
-      H = canvas.clientHeight || 236;
+      H = W - 4; // 正方形画布：完整显示左右顶格的球体
+      canvas.style.height = H + 'px';
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
