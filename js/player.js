@@ -570,7 +570,7 @@
     }
     resize();
     var cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 8;
-    var lon = 0, tex = null, visitor = null, started = false, running = false;
+    var lon = 0, tex = null, visitor = null, flagImg = null, started = false, running = false;
     var TEX_URLS = [
       'https://gcore.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_atmos_2048.jpg',
       'https://unpkg.com/three-globe/example/img/earth-night.jpg'
@@ -607,7 +607,10 @@
       if (!wrap) return;
       if (!arr || !arr.length) { wrap.innerHTML = '<span class="rj-globe-stat-item">等待第一位访客…</span>'; return; }
       var h = '';
-      arr.forEach(function (x) { h += '<span class="rj-globe-stat-item">' + flagEmoji(x.cc) + ' ×' + x.n + '</span>'; });
+      arr.forEach(function (x) {
+        var f = /^[A-Za-z]{2}$/.test(x.cc) ? 'https://flagcdn.com/w20/' + x.cc.toLowerCase() + '.png' : '';
+        h += '<span class="rj-globe-stat-item">' + (f ? '<img class="rj-globe-flag" src="' + f + '" alt="' + x.cc + '">' : flagEmoji(x.cc)) + ' ×' + x.n + '</span>';
+      });
       wrap.innerHTML = h;
     }
     function locate() {
@@ -622,6 +625,13 @@
           };
           label.textContent = '🌐 当前访客 · ' + flagEmoji(visitor.cc) + ' ' + (visitor.city || visitor.cc || '世界各地');
           recordVisit(visitor);
+          flagImg = null;
+          if (/^[A-Za-z]{2}$/.test(visitor.cc)) {
+            var fi = new Image();
+            fi.crossOrigin = 'anonymous';
+            fi.onload = function () { flagImg = fi; };
+            fi.src = 'https://flagcdn.com/w40/' + visitor.cc.toLowerCase() + '.png';
+          }
         })
         .catch(function () {
           label.textContent = '🌐 欢迎来自世界各地的访客';
@@ -630,18 +640,17 @@
           renderStats(arr);
         });
     }
-    // 球面映射绘制纹理：逐行按纬度压缩宽度，营造球体包裹感（立体感明显强于平面贴图）
-    function drawSphere(tex) {
+    // 球面映射绘制纹理：逐行按纬度压缩宽度，营造球体包裹感（offsetX 为纹理片左缘绝对坐标）
+    function drawSphere(tex, offsetX) {
       var tw = tex.width, th = tex.height;
       var steps = 64;
       for (var i = 0; i < steps; i++) {
         var lat0 = Math.PI * i / steps - Math.PI / 2;
-        var lat1 = Math.PI * (i + 1) / steps - Math.PI / 2;
         var rowW = R * 2 * Math.cos(lat0);
         if (rowW < 0.7) continue;
         var y0 = cy - R + (R * 2 * i / steps);
         var y1 = cy - R + (R * 2 * (i + 1) / steps);
-        ctx.drawImage(tex, 0, (i / steps) * th, tw, th / steps, cx - rowW / 2, y0, rowW, y1 - y0 + 0.6);
+        ctx.drawImage(tex, 0, (i / steps) * th, tw, th / steps, offsetX - rowW / 2, y0, rowW, y1 - y0 + 0.6);
       }
     }
     function draw() {
@@ -658,10 +667,7 @@
         var sl = (lon / 360) * w;
         for (var k = -1; k <= 1; k++) {
           var dx0 = cx - R + ((k * w - sl) / w) * (R * 2);
-          ctx.save();
-          ctx.translate(dx0, 0);
-          drawSphere(tex);
-          ctx.restore();
+          drawSphere(tex, dx0);
         }
       } else {
         ctx.strokeStyle = 'rgba(139,92,246,.3)';
@@ -712,10 +718,14 @@
           ctx.shadowBlur = 8;
           ctx.fill();
           ctx.shadowBlur = 0;
-          ctx.fillStyle = '#ffffff';
-          ctx.font = '14px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(flagEmoji(visitor.cc), px, py - 9);
+          if (flagImg && flagImg.width) {
+            ctx.drawImage(flagImg, px - 10, py - 24, 20, 14);
+          } else {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(visitor.cc, px, py - 8);
+          }
         }
       }
       requestAnimationFrame(draw);

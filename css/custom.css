@@ -1276,8 +1276,6 @@ a:hover { color: #6366f1; }
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  box-shadow: 0 0 26px rgba(139, 92, 246, 0.22), inset 0 0 44px rgba(2, 6, 23, 0.65);
 }
 #rj-globe canvas { width: 100%; height: 236px; display: block; flex: 0 0 auto; }
 #rj-globe .rj-globe-label {
@@ -1316,6 +1314,16 @@ a:hover { color: #6366f1; }
   border: 1px solid rgba(139, 92, 246, 0.25);
   border-radius: 999px;
   padding: 1px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.rj-globe-flag {
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  vertical-align: -1px;
+  box-shadow: 0 0 4px rgba(139, 92, 246, 0.4);
 }
 
 /* 移动端微调 */
