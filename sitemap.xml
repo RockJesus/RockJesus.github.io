@@ -2,13 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://www.rockjesus.cn/data/countries-110m.json</loc>
-    
-    <lastmod>2026-10-25</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://www.rockjesus.cn/data/visitors.json</loc>
     
     <lastmod>2026-10-25</lastmod>
@@ -17,6 +10,13 @@
   
   <url>
     <loc>http://www.rockjesus.cn/bing.json</loc>
+    
+    <lastmod>2026-10-25</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://www.rockjesus.cn/data/countries-110m.json</loc>
     
     <lastmod>2026-10-25</lastmod>
     
@@ -37,14 +37,14 @@
   </url>
   
   <url>
-    <loc>http://www.rockjesus.cn/about/index.html</loc>
+    <loc>http://www.rockjesus.cn/categories/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
   </url>
   
   <url>
-    <loc>http://www.rockjesus.cn/categories/index.html</loc>
+    <loc>http://www.rockjesus.cn/about/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     

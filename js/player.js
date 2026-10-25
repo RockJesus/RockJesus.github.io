@@ -756,10 +756,15 @@
       if (!v || !/^[A-Za-z]{2}$/.test(v.cc)) return;
       sessionVisits[v.cc] = (sessionVisits[v.cc] || 0) + 1;
       refreshVisits();
+      // 新国家 → 自动并入云端（写回 kvdb，跨设备立即生效）
+      if (!cloudVisits || !(v.cc in cloudVisits)) pushCloud();
     }
     // —— 云端持久化：/data/visitors.json（GitHub Pages 公开累计基准）∪ 本地增量 ——
     var cloudVisits = null;
     var sessionVisits = {};
+    // 云端自动写通道：Upstash Redis REST（GitHub 账号注册，CORS 放行本域）；GitHub Actions 定时同步回仓库备份
+    var UPSTASH_URL = 'https://tight-wren-137459.upstash.io';
+    var UPSTASH_TOKEN = 'gQAAAAAAAhjzAAIgcDFlMWQ3MGViMGI3MTQ0ODg4OTQ1ZDAwMzc5NzQzYjRmNg';
     function mergeVisits() {
       var m = {};
       if (cloudVisits) {
@@ -782,10 +787,36 @@
       renderStats(historyVisits);
     }
     function loadCloudVisits() {
-      fetch('/data/visitors.json?v=' + Math.floor(Date.now() / 86400000), { cache: 'no-store' })
-        .then(function (r) { if (!r.ok) throw new Error('bad'); return r.json(); })
-        .then(function (d) { cloudVisits = (d && typeof d === 'object') ? d : null; refreshVisits(); })
-        .catch(function () {});
+      fetch(UPSTASH_URL + '/get/visits', { headers: { 'Authorization': 'Bearer ' + UPSTASH_TOKEN }, cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('upstash'); return r.json(); })
+        .then(function (j) {
+          var d = null;
+          try { d = JSON.parse(j.result); } catch (e) { throw new Error('parse'); }
+          if (!d || typeof d !== 'object') throw new Error('shape');
+          cloudVisits = d;
+          refreshVisits();
+        })
+        .catch(function () {
+          fetch('/data/visitors.json?v=' + Math.floor(Date.now() / 86400000), { cache: 'no-store' })
+            .then(function (r) { if (!r.ok) throw new Error('bad'); return r.json(); })
+            .then(function (d) { cloudVisits = (d && typeof d === 'object') ? d : null; refreshVisits(); })
+            .catch(function () {});
+        });
+    }
+    // —— 新国家自动并入云端：合并当前云端基准与会话新增，写回 kvdb（跨设备立即生效）——
+    function pushCloud() {
+      if (!cloudVisits) return;
+      var m = {};
+      for (var k in cloudVisits) if (Object.prototype.hasOwnProperty.call(cloudVisits, k)) m[k] = cloudVisits[k];
+      for (var s in sessionVisits) if (Object.prototype.hasOwnProperty.call(sessionVisits, s)) m[s] = (m[s] || 0) + sessionVisits[s];
+      var body = JSON.stringify(m);
+      fetch(UPSTASH_URL + '/set/visits/' + encodeURIComponent(body), {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + UPSTASH_TOKEN },
+        cache: 'no-store'
+      }).then(function (r) {
+        if (r.ok) { cloudVisits = m; refreshVisits(); }
+      }).catch(function () {});
     }
     function renderStats(arr) {
       var wrap = box.querySelector('.rj-globe-stats-flags');
