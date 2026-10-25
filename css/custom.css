@@ -1588,3 +1588,17 @@ a:hover { color: #6366f1; }
   box-shadow: 0 0 12px rgba(139, 92, 246, 1);
   transform: scale(0.8);
 }
+
+/* ============================================================
+   V13 — 页脚站点版本号（每次发布递增，v1.0.0 起）
+   ============================================================ */
+.framework-info #site-version {
+  color: #8b5cf6;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+  letter-spacing: .3px;
+}
+.framework-info #site-version:hover {
+  color: #a78bfa;
+  text-shadow: 0 0 12px rgba(167, 139, 250, 0.85);
+}
