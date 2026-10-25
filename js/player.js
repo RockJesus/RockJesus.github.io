@@ -206,6 +206,53 @@
       ap.on('ended', syncPicBtn);
       syncPicBtn();
     }
+    // —— 自定义控制条（展开态）：上一首/播放暂停/下一首/循环/随机/列表/静音，主题紫圆钮 ——
+    if (row) {
+      var svgI = function (d) { return '<svg viewBox="0 0 24 24"><path d="' + d + '"/></svg>'; };
+      var I = {
+        prev: 'M7 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zm10.6.7a1 1 0 0 1 1.5.8v10.8a1 1 0 0 1-1.5.8l-7.6-5.4a1 1 0 0 1 0-1.6l7.6-5.4z',
+        next: 'M17 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zM5.9 6.7a1 1 0 0 1 1.5-.8l7.6 5.4a1 1 0 0 1 0 1.6l-7.6 5.4a1 1 0 0 1-1.5-.8V6.7z',
+        loop: 'M17 7H7v3L3 6l4-4v3h12v5h-2V7zm-10 10h10v-3l4 4-4 4v-3H5v-5h2v4z',
+        random: 'M5 8h8l-2-2 1.5-1.5L17 8l-4.5 3.5L11 10l2-2H5V8zm14 8h-8l2 2-1.5 1.5L7 16l4.5-3.5L13 14l-2 2h8v-2z',
+        list: 'M4 6h2v2H4V6zm4 0h12v2H8V6zm-4 5h2v2H4v-2zm4 0h12v2H8v-2zm-4 5h2v2H4v-2zm4 0h12v2H8v-2z',
+        vol: 'M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.1v8.2a4.5 4.5 0 0 0 2.5-4.1zm0-7.9V6a7 7 0 0 1 0 12v1.9a9 9 0 0 0 0-16.8z'
+      };
+      var ctrl = document.createElement('div');
+      ctrl.className = 'rj-controls';
+      function mkCtl(cls, d, title, fn) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'rj-ctl ' + cls;
+        b.title = title;
+        b.innerHTML = svgI(d);
+        b.addEventListener('click', function (e) { e.stopPropagation(); e.preventDefault(); fn(); });
+        return b;
+      }
+      var ctrlPlay = mkCtl('rj-ctl-play', 'M8 5v14l11-7z', '播放/暂停', togglePlay);
+      ctrl.appendChild(mkCtl('rj-ctl-prev', I.prev, '上一首', function () { try { ap.list.prev(); } catch (e) {} }));
+      ctrl.appendChild(ctrlPlay);
+      ctrl.appendChild(mkCtl('rj-ctl-next', I.next, '下一首', function () { try { ap.list.next(); } catch (e) {} }));
+      ctrl.appendChild(mkCtl('rj-ctl-loop', I.loop, '循环模式', function () {
+        try { ap.loop = ap.loop === 'all' ? 'one' : ap.loop === 'one' ? 'none' : 'all'; } catch (e) {}
+      }));
+      ctrl.appendChild(mkCtl('rj-ctl-random', I.random, '随机/顺序', function () {
+        try { ap.order = ap.order === 'random' ? 'list' : 'random'; } catch (e) {}
+      }));
+      ctrl.appendChild(mkCtl('rj-ctl-list', I.list, '播放列表', toggleList));
+      ctrl.appendChild(mkCtl('rj-ctl-mute', I.vol, '静音', function () {
+        try { if (ap.audio) ap.audio.muted = !ap.audio.muted; } catch (e) {}
+      }));
+      if (info) info.appendChild(ctrl);
+      var syncCtlPlay = function () {
+        if (!ap.audio) return;
+        ctrlPlay.innerHTML = ap.audio.paused ? svgI('M8 5v14l11-7z') : svgI('M6 5h4v14H6zM14 5h4v14h-4z');
+        ctrlPlay.classList.toggle('rj-ctl-playing', !ap.audio.paused);
+      };
+      ap.on('play', syncCtlPlay);
+      ap.on('pause', syncCtlPlay);
+      ap.on('ended', syncCtlPlay);
+      syncCtlPlay();
+    }
     // —— 折叠/展开 ↔ 播放列表联动：播放器折叠时列表收起，展开时列表展开 ——
     if (window.MutationObserver) {
       var moFold = new MutationObserver(function () {

@@ -1882,3 +1882,60 @@ a:hover { color: #6366f1; }
 .aplayer .aplayer-icon:hover path {
   fill: #ffffff;
 }
+
+/* —— 播放器 v1.1.20：展开态自定义控制条（主题紫圆钮排版）—— */
+.aplayer-row .rj-controls {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 4px 2px 0 0;
+}
+.aplayer:not(.aplayer-mini) .rj-controls {
+  display: flex;
+}
+.aplayer-row .rj-controls .rj-ctl {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(167, 139, 250, 0.55);
+  background: rgba(139, 92, 246, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.aplayer-row .rj-controls .rj-ctl:hover {
+  background: rgba(139, 92, 246, 0.42);
+  transform: scale(1.08);
+}
+.aplayer-row .rj-controls .rj-ctl svg {
+  width: 18px;
+  height: 18px;
+  fill: #a78bfa;
+  transition: fill 0.2s ease;
+}
+.aplayer-row .rj-controls .rj-ctl:hover svg {
+  fill: #ffffff;
+}
+.aplayer-row .rj-controls .rj-ctl.rj-ctl-play {
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(135deg, #a78bfa, #7c5cf5);
+  border-color: rgba(216, 195, 255, 0.9);
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.55);
+}
+.aplayer-row .rj-controls .rj-ctl.rj-ctl-play svg {
+  width: 22px;
+  height: 22px;
+  fill: #ffffff;
+}
+/* 隐藏 APlayer 原生竖排按钮（列表/音量/循环），保留右下角折叠入口 */
+.aplayer .aplayer-menu,
+.aplayer .aplayer-volume-wrap,
+.aplayer .aplayer-loop {
+  display: none !important;
+}
