@@ -555,11 +555,15 @@
     label.className = 'rj-globe-label';
     label.textContent = '🌐 定位中…';
     box.appendChild(label);
+    var stats = document.createElement('div');
+    stats.className = 'rj-globe-stats';
+    stats.innerHTML = '<div class="rj-globe-stats-title">🌍 全世界访客分布</div><div class="rj-globe-stats-flags"></div>';
+    box.appendChild(stats);
     var ctx = canvas.getContext('2d');
     var W = 340, H = 236, dpr = Math.min(window.devicePixelRatio || 1, 2);
     function resize() {
-      W = box.clientWidth || 340;
-      H = box.clientHeight || 236;
+      W = canvas.clientWidth || 340;
+      H = canvas.clientHeight || 236;
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -585,6 +589,27 @@
       };
       img.src = TEX_URLS[0];
     }
+    function recordVisit(v) {
+      var key = 'rjGlobeHistory';
+      var arr = [];
+      try { arr = JSON.parse(localStorage.getItem(key)) || []; } catch (e) {}
+      var hit = null;
+      arr.forEach(function (x) { if (x.cc === v.cc) hit = x; });
+      if (hit) { hit.n = (hit.n || 1) + 1; hit.t = Date.now(); }
+      else { arr.push({ cc: v.cc, n: 1, t: Date.now() }); }
+      arr.sort(function (a, b) { return (b.n || 0) - (a.n || 0); });
+      arr = arr.slice(0, 24);
+      try { localStorage.setItem(key, JSON.stringify(arr)); } catch (e) {}
+      renderStats(arr);
+    }
+    function renderStats(arr) {
+      var wrap = box.querySelector('.rj-globe-stats-flags');
+      if (!wrap) return;
+      if (!arr || !arr.length) { wrap.innerHTML = '<span class="rj-globe-stat-item">等待第一位访客…</span>'; return; }
+      var h = '';
+      arr.forEach(function (x) { h += '<span class="rj-globe-stat-item">' + flagEmoji(x.cc) + ' ×' + x.n + '</span>'; });
+      wrap.innerHTML = h;
+    }
     function locate() {
       fetch('https://ipinfo.io/json', { cache: 'no-store' })
         .then(function (r) { return r.json(); })
@@ -595,9 +620,29 @@
             lat: parseFloat(d.loc ? d.loc.split(',')[0] : NaN),
             lon: parseFloat(d.loc ? d.loc.split(',')[1] : NaN)
           };
-          label.textContent = '🌐 访客 · ' + flagEmoji(visitor.cc) + ' ' + (visitor.city || visitor.cc || '世界各地');
+          label.textContent = '🌐 当前访客 · ' + flagEmoji(visitor.cc) + ' ' + (visitor.city || visitor.cc || '世界各地');
+          recordVisit(visitor);
         })
-        .catch(function () { label.textContent = '🌐 欢迎来自世界各地的访客'; });
+        .catch(function () {
+          label.textContent = '🌐 欢迎来自世界各地的访客';
+          var arr = [];
+          try { arr = JSON.parse(localStorage.getItem('rjGlobeHistory')) || []; } catch (e) {}
+          renderStats(arr);
+        });
+    }
+    // 球面映射绘制纹理：逐行按纬度压缩宽度，营造球体包裹感（立体感明显强于平面贴图）
+    function drawSphere(tex) {
+      var tw = tex.width, th = tex.height;
+      var steps = 64;
+      for (var i = 0; i < steps; i++) {
+        var lat0 = Math.PI * i / steps - Math.PI / 2;
+        var lat1 = Math.PI * (i + 1) / steps - Math.PI / 2;
+        var rowW = R * 2 * Math.cos(lat0);
+        if (rowW < 0.7) continue;
+        var y0 = cy - R + (R * 2 * i / steps);
+        var y1 = cy - R + (R * 2 * (i + 1) / steps);
+        ctx.drawImage(tex, 0, (i / steps) * th, tw, th / steps, cx - rowW / 2, y0, rowW, y1 - y0 + 0.6);
+      }
     }
     function draw() {
       if (!running) return;
@@ -608,21 +653,18 @@
       ctx.beginPath();
       ctx.arc(cx, cy, R, 0, Math.PI * 2);
       ctx.clip();
-      var g = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.4, R * 0.2, cx, cy, R);
-      g.addColorStop(0, '#1e3a8a');
-      g.addColorStop(0.6, '#0f172a');
-      g.addColorStop(1, '#020617');
-      ctx.fillStyle = g;
-      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
       if (tex && tex.width) {
         var w = tex.width, h = tex.height;
         var sl = (lon / 360) * w;
         for (var k = -1; k <= 1; k++) {
-          var dx = cx - R + ((k * w - sl) / w) * (R * 2);
-          ctx.drawImage(tex, 0, 0, w, h, dx, cy - R, R * 2, R * 2);
+          var dx0 = cx - R + ((k * w - sl) / w) * (R * 2);
+          ctx.save();
+          ctx.translate(dx0, 0);
+          drawSphere(tex);
+          ctx.restore();
         }
       } else {
-        ctx.strokeStyle = 'rgba(139,92,246,.28)';
+        ctx.strokeStyle = 'rgba(139,92,246,.3)';
         ctx.lineWidth = 1;
         for (var i = 1; i < 8; i++) {
           var yy = cy - R + (R * 2 * i / 8);
@@ -633,25 +675,30 @@
           ctx.beginPath(); ctx.moveTo(xx, cy - R); ctx.lineTo(xx, cy + R); ctx.stroke();
         }
       }
-      var shade = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R * 1.05);
-      shade.addColorStop(0, 'rgba(2,6,23,0)');
-      shade.addColorStop(1, 'rgba(2,6,23,.75)');
-      ctx.fillStyle = shade;
-      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-      var hl = ctx.createRadialGradient(cx - R * 0.4, cy - R * 0.45, 0, cx - R * 0.4, cy - R * 0.45, R * 0.9);
-      hl.addColorStop(0, 'rgba(255,255,255,.22)');
-      hl.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = hl;
+      // 球面光影：右上高光、左下暗角（增强立体感）
+      var g = ctx.createRadialGradient(cx + R * 0.32, cy - R * 0.45, R * 0.08, cx, cy, R * 1.05);
+      g.addColorStop(0, 'rgba(255,255,255,.32)');
+      g.addColorStop(0.32, 'rgba(255,255,255,.07)');
+      g.addColorStop(0.68, 'rgba(2,6,23,0)');
+      g.addColorStop(1, 'rgba(2,6,23,.62)');
+      ctx.fillStyle = g;
       ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
       ctx.restore();
+      // 大气辉光外圈 + 紫环描边
+      var halo = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.25);
+      halo.addColorStop(0, 'rgba(139,92,246,.18)');
+      halo.addColorStop(1, 'rgba(139,92,246,0)');
+      ctx.fillStyle = halo;
+      ctx.fillRect(cx - R * 1.25, cy - R * 1.25, R * 2.5, R * 2.5);
       ctx.beginPath();
       ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(139,92,246,.5)';
+      ctx.strokeStyle = 'rgba(139,92,246,.55)';
       ctx.lineWidth = 1.5;
       ctx.shadowColor = 'rgba(139,92,246,.9)';
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 14;
       ctx.stroke();
       ctx.shadowBlur = 0;
+      // 国旗标注（紫定位圆标 + 对应国家国旗，不再用粉色点）
       if (visitor && !isNaN(visitor.lat) && !isNaN(visitor.lon)) {
         var latR = visitor.lat * Math.PI / 180;
         var dLon = ((visitor.lon - lon + 540) % 360) - 180;
@@ -659,16 +706,16 @@
         var px = cx + R * Math.cos(latR) * Math.sin(dLonR);
         var py = cy - R * Math.sin(latR);
         if (Math.cos(dLonR) > 0) {
-          ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2);
-          ctx.fillStyle = '#f472b6';
-          ctx.shadowColor = 'rgba(244,114,182,.9)';
-          ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(139,92,246,.6)';
+          ctx.shadowColor = 'rgba(139,92,246,.9)';
+          ctx.shadowBlur = 8;
           ctx.fill();
           ctx.shadowBlur = 0;
           ctx.fillStyle = '#ffffff';
-          ctx.font = '13px sans-serif';
+          ctx.font = '14px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(flagEmoji(visitor.cc), px, py - 10);
+          ctx.fillText(flagEmoji(visitor.cc), px, py - 9);
         }
       }
       requestAnimationFrame(draw);
@@ -679,6 +726,9 @@
       running = true;
       startTex();
       locate();
+      var arr = [];
+      try { arr = JSON.parse(localStorage.getItem('rjGlobeHistory')) || []; } catch (e) {}
+      if (arr.length) renderStats(arr);
       requestAnimationFrame(draw);
     }
     if ('IntersectionObserver' in window) {
