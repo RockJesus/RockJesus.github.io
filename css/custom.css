@@ -1702,3 +1702,88 @@ a:hover { color: #6366f1; }
   0%, 100% { opacity: 1; transform: scaleY(1); }
   50% { opacity: .25; transform: scaleY(.7); }
 }
+
+/* ============================================================
+   弹出窗口统一「主页卡片风格」：深色玻璃拟态 + 紫调描边 + 圆角 + 毛玻璃
+   与 #recent-posts .recent-post-item / .card-widget 同一套视觉语言
+   ============================================================ */
+/* —— 站内搜索弹窗 —— */
+.search-dialog {
+  background: rgba(19, 23, 40, 0.86);
+  color: rgba(226, 232, 255, 0.85);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 18px;
+  backdrop-filter: saturate(150%) blur(22px);
+  -webkit-backdrop-filter: saturate(150%) blur(22px);
+  box-shadow: 0 16px 48px rgba(2, 6, 23, 0.6), 0 0 26px rgba(139, 92, 246, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.search-dialog .search-dialog-title {
+  color: rgba(226, 232, 255, 0.9);
+  font-weight: 600;
+}
+.search-dialog .search-close-button {
+  color: rgba(226, 232, 255, 0.7);
+}
+.search-dialog .search-close-button:hover {
+  color: #ffffff;
+}
+.search-dialog .local-search-box input {
+  background: rgba(15, 18, 32, 0.55);
+  border: 2px solid rgba(139, 92, 246, 0.35);
+  color: rgba(226, 232, 255, 0.92);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 4px rgba(2, 6, 23, 0.4);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.search-dialog .local-search-box input:focus {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.35), inset 0 1px 4px rgba(2, 6, 23, 0.4);
+}
+.search-dialog .local-search__hit-item a {
+  color: rgba(226, 232, 255, 0.88);
+}
+.search-dialog .local-search__hit-item a:hover {
+  color: #a78bfa;
+}
+.search-dialog .local-search__hit-item:before {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+.search-dialog .local-search__hit-item:hover:before {
+  border-color: #a78bfa;
+}
+.search-dialog .search-keyword {
+  color: #f472b6;
+}
+.search-dialog .search-result {
+  color: rgba(226, 232, 255, 0.6);
+}
+
+/* —— 图片灯箱（fancybox v3）卡片化 —— */
+.fancybox-bg {
+  background: rgba(2, 6, 23, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.fancybox-content,
+.fancybox-image,
+.fancybox-slide--image .fancybox-content img {
+  border-radius: 18px;
+}
+.fancybox-slide--image .fancybox-content img {
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 18px 60px rgba(2, 6, 23, 0.7), 0 0 30px rgba(139, 92, 246, 0.3);
+}
+.fancybox-close-small {
+  color: rgba(226, 232, 255, 0.8);
+  background: rgba(19, 23, 40, 0.6);
+  border-radius: 50%;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+.fancybox-navigation .fancybox-button {
+  background: rgba(19, 23, 40, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 12px;
+  color: rgba(226, 232, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
