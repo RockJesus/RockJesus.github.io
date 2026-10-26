@@ -454,61 +454,72 @@
     });
   }
 
-  // —— 右下角聊天按钮：改为豆包对话框（点击弹出豆包网页内嵌聊天） ——
-  (function () {
+  // —— 右下角聊天按钮：改为豆包对话框（点击弹出豆包网页内嵌聊天）——
+  //    pjax 切换文章页时 #rightside-config-show 内的 #chat_btn 会被替换成新页面原始按钮，
+  //    因此豆包样式与交互改为函数 + 事件委托，并在 pjax:complete 后重新应用 ——
+  function setupDoubao() {
     var btn = document.getElementById('chat_btn');
     if (!btn) return;
-    var DOUBAO_CHAT_URL = 'https://www.doubao.com/chat/';
+    if (btn.getAttribute('data-rj-doubao') === '1') return;
+    btn.setAttribute('data-rj-doubao', '1');
     var DOUBAO_AVATAR = 'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao/web/doubao_avatar.png';
-
-    // 换豆包女生头像外观
     btn.className = 'rj-doubao-btn';
     btn.innerHTML = '<img class="rj-doubao-avatar" src="' + DOUBAO_AVATAR + '" alt="豆包">';
     btn.title = '和豆包聊天';
-
-    // 弹窗面板（懒创建）
-    var panel = null;
-    function buildPanel() {
-      if (panel) return panel;
-      panel = document.createElement('div');
-      panel.id = 'rj-doubao-panel';
-      panel.innerHTML =
-        '<div class="rj-doubao-head">' +
-          '<img class="rj-doubao-head-avatar" src="' + DOUBAO_AVATAR + '" alt="">' +
-          '<span>和豆包聊天</span>' +
-          '<button class="rj-doubao-close" title="关闭">×</button>' +
-        '</div>' +
-        '<iframe class="rj-doubao-frame" src="' + DOUBAO_CHAT_URL + '" frameborder="0" allow="clipboard-write; autoplay; microphone" allowtransparency="true"></iframe>';
-      panel.querySelector('.rj-doubao-close').addEventListener('click', function () { hide(); });
-      document.body.appendChild(panel);
-      return panel;
-    }
-    function show() {
+  }
+  var rjPanel = null;
+  function buildPanel() {
+    if (rjPanel) return rjPanel;
+    var DOUBAO_CHAT_URL = 'https://www.doubao.com/chat/';
+    var DOUBAO_AVATAR = 'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao/web/doubao_avatar.png';
+    rjPanel = document.createElement('div');
+    rjPanel.id = 'rj-doubao-panel';
+    rjPanel.innerHTML =
+      '<div class="rj-doubao-head">' +
+        '<img class="rj-doubao-head-avatar" src="' + DOUBAO_AVATAR + '" alt="">' +
+        '<span>和豆包聊天</span>' +
+        '<button class="rj-doubao-close" title="关闭">×</button>' +
+      '</div>' +
+      '<iframe class="rj-doubao-frame" src="' + DOUBAO_CHAT_URL + '" frameborder="0" allow="clipboard-write; autoplay; microphone" allowtransparency="true"></iframe>';
+    rjPanel.querySelector('.rj-doubao-close').addEventListener('click', function () {
+      var b = document.getElementById('chat_btn');
+      rjPanel.classList.remove('rj-doubao-open');
+      if (b) b.classList.remove('rj-doubao-active');
+    });
+    document.body.appendChild(rjPanel);
+    return rjPanel;
+  }
+  function rjToggle(btn) {
+    var open = rjPanel && rjPanel.classList.contains('rj-doubao-open');
+    if (open) {
+      rjPanel.classList.remove('rj-doubao-open');
+      btn.classList.remove('rj-doubao-active');
+    } else {
       buildPanel().classList.add('rj-doubao-open');
       btn.classList.add('rj-doubao-active');
     }
-    function hide() {
-      if (panel) panel.classList.remove('rj-doubao-open');
-      btn.classList.remove('rj-doubao-active');
+  }
+  // 捕获阶段截停：屏蔽 gitter 等对 #chat_btn 的默认触发，改由豆包弹窗接管（委托，实时找当前按钮）
+  document.addEventListener('click', function (e) {
+    var btn = document.getElementById('chat_btn');
+    if (!btn) return;
+    if (btn.contains(e.target)) {
+      e.preventDefault();
+      e.stopPropagation();
+      rjToggle(btn);
     }
-
-    // 捕获阶段截停：屏蔽 gitter 等对 #chat_btn 的默认触发，改由豆包弹窗接管
-    document.addEventListener('click', function (e) {
-      if (btn.contains(e.target)) {
-        e.preventDefault();
-        e.stopPropagation();
-        var open = panel && panel.classList.contains('rj-doubao-open');
-        open ? hide() : show();
-      }
-    }, true);
-
-    // 点击面板外部关闭
-    document.addEventListener('click', function (e) {
-      if (!panel || !panel.classList.contains('rj-doubao-open')) return;
-      if (btn.contains(e.target) || panel.contains(e.target)) return;
-      hide();
-    });
-  })();
+  }, true);
+  // 点击面板外部关闭
+  document.addEventListener('click', function (e) {
+    if (!rjPanel || !rjPanel.classList.contains('rj-doubao-open')) return;
+    var btn = document.getElementById('chat_btn');
+    if (btn && btn.contains(e.target)) return;
+    if (rjPanel.contains(e.target)) return;
+    rjPanel.classList.remove('rj-doubao-open');
+    if (btn) btn.classList.remove('rj-doubao-active');
+  });
+  setupDoubao();
+  document.addEventListener('pjax:complete', function () { setupDoubao(); });
 
 
   // ============ V12 全站增强：破图兜底 / 打赏二维码 / 人生信条 / 3D 旋转地球 ============
