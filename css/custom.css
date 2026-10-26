@@ -1993,3 +1993,133 @@ a:hover { color: #6366f1; }
   border-radius: 50%;
   transform: scale(0.9);
 }
+
+/* ============================================================
+   文章页顶部 & 正文卡片 & 正文排版统一风格 V14
+   顶部：背景图玻璃蒙层 + 渐变标题 + meta 胶囊徽章
+   正文卡：顶部霓虹渐变条 + 玻璃留白
+   正文：图片霓虹相框 / 列表紫标记 / 引用块渐变 / 强调与分隔线
+   ============================================================ */
+/* —— 顶部：背景图玻璃蒙层 —— */
+#page-header.post-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(2, 6, 23, 0.5) 0%, rgba(15, 18, 32, 0.78) 100%);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+#page-header.post-bg > nav,
+#page-header.post-bg #post-info {
+  position: relative;
+  z-index: 2;
+}
+/* —— 标题区：渐变标题 + meta 胶囊 —— */
+#post-info {
+  padding: 42px 24px 34px !important;
+  text-align: center;
+}
+#post-info .post-title {
+  font-size: 2.1em;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #ffffff 10%, #c4b5fd 52%, #67e8f9 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 6px 30px rgba(139, 92, 246, 0.4);
+}
+#post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+#post-meta .post-meta-date,
+#post-meta .post-meta-pv-cv {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 999px;
+  background: rgba(15, 18, 32, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(226, 232, 255, 0.85);
+  font-size: 0.86em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+#post-meta .post-meta-icon { color: #a78bfa; }
+#post-meta .post-meta-separator { display: none; }
+#post-meta .post-meta-label { color: rgba(196, 181, 253, 0.8); }
+/* —— 正文卡片：顶部霓虹渐变条 + 留白 —— */
+.layout_post > #post {
+  padding: 38px 42px 52px;
+  position: relative;
+  background: linear-gradient(180deg, rgba(23, 27, 48, 0.94), rgba(15, 18, 32, 0.92));
+}
+.layout_post > #post::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 3px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(90deg, #8b5cf6, #22d3ee, #8b5cf6);
+  opacity: 0.9;
+}
+#article-container { padding-top: 6px; }
+/* —— 图片：霓虹玻璃相框 —— */
+#article-container img {
+  border-radius: 12px;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  box-shadow: 0 8px 28px rgba(2, 6, 23, 0.45), 0 0 18px rgba(139, 92, 246, 0.14);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#article-container img:hover {
+  transform: scale(1.015);
+  box-shadow: 0 10px 34px rgba(2, 6, 23, 0.55), 0 0 26px rgba(139, 92, 246, 0.3);
+}
+/* —— 列表：紫色标记 + 间距 —— */
+#article-container ul,
+#article-container ol {
+  padding-left: 1.6em;
+  margin-bottom: 18px;
+}
+#article-container li { margin-bottom: 6px; }
+#article-container ul li::marker { color: #a78bfa; }
+#article-container ol li::marker { color: #22d3ee; font-weight: 700; }
+/* —— 引用块：渐变底 + 霓虹侧边 —— */
+#article-container blockquote {
+  border-left: 4px solid transparent;
+  border-image: linear-gradient(180deg, #8b5cf6, #22d3ee) 1;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(34, 211, 238, 0.06));
+  padding: 14px 18px;
+  margin: 22px 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+/* —— 强调文字 —— */
+#article-container strong {
+  color: #c4b5fd;
+  font-weight: 700;
+}
+/* —— 分隔线：霓虹渐变 —— */
+#article-container hr {
+  border: none;
+  height: 2px;
+  margin: 30px auto;
+  border-radius: 2px;
+  max-width: 70%;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.7), rgba(34, 211, 238, 0.7), transparent);
+}
+/* —— 移动端适配 —— */
+@media screen and (max-width: 768px) {
+  .layout_post > #post { padding: 22px 20px 36px; }
+  #post-info { padding: 26px 14px 22px !important; }
+  #post-info .post-title { font-size: 1.6em; }
+}
