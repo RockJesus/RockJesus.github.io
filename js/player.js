@@ -8,7 +8,7 @@
   if (rjCanvasNest) rjCanvasNest.setAttribute('color', '139,92,246');
 
   var PLAYLIST_URLS = [
-    'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
+    '/data/playlist.json?v=1.1.22',
     'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
     'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'
   ];
@@ -53,7 +53,8 @@
         name: t.name,
         artist: t.artist || '',
         url: t.url,
-        cover: t.cover || SEED.cover
+        cover: t.cover || SEED.cover,
+        duration: t.duration || 0
       });
     });
     return out;
@@ -77,6 +78,19 @@
       var list = ap.list && ap.list.audios;
       return (list && list[ap.list.index]) || null;
     }
+    // —— 试听片段检测：vkey 过期时 QQ 只返回 30 秒试听，播放器误以为播完自动切歌 →
+    //    表现为"每首歌都是片段"。若实际时长明显短于歌单标注 → 判定为试听，自动跳过该歌 ——
+    function rjSkipPreview() {
+      try {
+        var a = curAudio();
+        if (!ap.audio || !a || !a.duration || a.duration < 60) return;
+        var real = ap.audio.duration;
+        if (real && real < a.duration * 0.6) {
+          ap.list.next();
+        }
+      } catch (e) {}
+    }
+    if (ap.audio) ap.audio.addEventListener('loadedmetadata', rjSkipPreview);
     // —— 封面同步 V15：预加载新封面成功后再切换（消除旧图残留/跨域加载竞态），
     //    加载失败兜底默认封面；listswitch/play/loadeddata 三事件双保险，封面始终跟随播放中的歌曲 ——
     function syncCover() {
