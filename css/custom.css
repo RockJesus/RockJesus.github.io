@@ -1939,3 +1939,57 @@ a:hover { color: #6366f1; }
 .aplayer .aplayer-loop {
   display: none !important;
 }
+
+/* ============================================================
+   右下角图标统一风格 V13 — 液态玻璃紫调圆钮组（豆包/目录/评论/回顶）
+   统一 42px 圆形：紫玻璃背景 + 细紫边 + 柔和阴影 + 主题紫图标
+   hover：渐变紫填充 + 白图标 + 微上浮 + 紫光晕
+   ============================================================ */
+#rightside > div > button,
+#rightside > div > a {
+  width: 42px;
+  height: 42px;
+  margin: 6px 0;
+  border-radius: 50%;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: rgba(15, 18, 32, 0.55);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  color: #a78bfa;
+  font-size: 17px;
+  line-height: 40px;
+  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: all 0.25s ease;
+}
+#rightside > div > button i,
+#rightside > div > a i {
+  font-size: 17px;
+}
+#rightside > div > button:hover,
+#rightside > div > a:hover {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+  border-color: transparent;
+  color: #fff !important;
+  box-shadow: 0 0 18px rgba(139, 92, 246, 0.6), 0 4px 14px rgba(2, 6, 23, 0.4);
+  transform: translateY(-2px);
+}
+/* 豆包按钮并入统一容器（头像保留） */
+#rightside #chat_btn.rj-doubao-btn {
+  width: 42px;
+  height: 42px;
+  margin: 6px 0;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  background: rgba(15, 18, 32, 0.55);
+  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.35), 0 0 14px rgba(139, 92, 246, 0.45);
+}
+#rightside #chat_btn.rj-doubao-btn:hover {
+  background: rgba(139, 92, 246, 0.35);
+  border-color: rgba(167, 139, 250, 0.85);
+  transform: translateY(-2px);
+}
+#chat_btn.rj-doubao-btn .rj-doubao-avatar {
+  border-radius: 50%;
+  transform: scale(0.9);
+}
