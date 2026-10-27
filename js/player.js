@@ -658,6 +658,9 @@
   var rjGlobeDone = false;
   var rjCounted = false;   // 每次打开网站只统计一次（pjax 站内跳转不重复计）
   var rjGlobeStop = null;  // 旧地球实例的停止回调（pjax 重建时防止残留渲染循环）
+  // 云端计数通道：Upstash Redis REST（GitHub 账号注册，CORS 放行本域）
+  var UPSTASH_URL = 'https://tight-wren-137459.upstash.io';
+  var UPSTASH_TOKEN = 'gQAAAAAAAhjzAAIgcDFlMWQ3MGViMGI3MTQ0ODg4OTQ1ZDAwMzc5NzQzYjRmNg';
   function initGlobe() {
     var host = document.querySelector('.card-webinfo');
     if (!host || rjGlobeDone) return;
@@ -809,9 +812,6 @@
           if (cloudVisits && !(cc in cloudVisits)) pushCloud();
         });
     }
-    // 云端自动写通道：Upstash Redis REST（GitHub 账号注册，CORS 放行本域）；GitHub Actions 定时同步回仓库备份
-    var UPSTASH_URL = 'https://tight-wren-137459.upstash.io';
-    var UPSTASH_TOKEN = 'gQAAAAAAAhjzAAIgcDFlMWQ3MGViMGI3MTQ0ODg4OTQ1ZDAwMzc5NzQzYjRmNg';
     function mergeVisits() {
       var m = {};
       if (cloudVisits) {
@@ -1085,12 +1085,105 @@
     window.addEventListener('resize', function () { resize(); cx = W / 2; cy = H / 2; R = W / 2 - 26; });
   }
 
+  // —— 站点统计（Upstash 原子计数，替代失效的不蒜子 busuanzi）——
+  var rjPvMarked = false;   // 总访问量：每次完整页面加载 +1
+  var rjPvPath = null;      // 文章阅读量：每次进入该文章（含 pjax 跳转）计一次
+  function rjUpstash(key, isIncr) {
+    return fetch(UPSTASH_URL + (isIncr ? '/incr/' : '/get/') + key, {
+      headers: { 'Authorization': 'Bearer ' + UPSTASH_TOKEN },
+      cache: 'no-store'
+    }).then(function (r) {
+      if (!r.ok) throw new Error('upstash');
+      return r.json();
+    }).then(function (j) {
+      var n = parseInt(j && j.result, 10);
+      if (!(n > 0)) throw new Error('value');
+      return n;
+    });
+  }
+  function rjFmt(n) { return n >= 100000 ? (n / 1000).toFixed(1) + 'k' : String(n); }
+  function rjFill(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = val;
+  }
+  function ensureWebinfoItems() {
+    var host = document.querySelector('.card-webinfo .webinfo');
+    if (!host || host.querySelector('#rj-site-pv')) return;
+    function mk(id, name) {
+      var it = document.createElement('div');
+      it.className = 'webinfo-item';
+      var nm = document.createElement('div');
+      nm.className = 'item-name';
+      nm.textContent = name + ' :';
+      var cnt = document.createElement('div');
+      cnt.className = 'item-count';
+      cnt.id = id;
+      cnt.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      it.appendChild(nm);
+      it.appendChild(cnt);
+      return it;
+    }
+    host.appendChild(mk('rj-site-uv', '本站访客数'));
+    host.appendChild(mk('rj-site-pv', '本站总访问量'));
+  }
+  function ensurePagePv() {
+    if (document.getElementById('rj-page-pv')) return;
+    var line = document.querySelector('#post-info .meta-secondline');
+    if (!line) return;
+    var sep = document.createElement('span');
+    sep.className = 'post-meta-separator';
+    sep.textContent = '|';
+    var box = document.createElement('span');
+    box.className = 'post-meta-pv-cv';
+    box.innerHTML = '<i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="rj-page-pv"><i class="fa-solid fa-spinner fa-spin"></i></span>';
+    line.appendChild(sep);
+    line.appendChild(box);
+  }
+  function rjStats() {
+    ensureWebinfoItems();
+    ensurePagePv();
+    var failed = function (id) { rjFill(id, '—'); };
+    // 本站总访问量：每次完整页面加载 +1（pjax 站内跳转不重复计）
+    if (!rjPvMarked) {
+      rjPvMarked = true;
+      rjUpstash('pv_total', true)
+        .then(function (n) { rjFill('rj-site-pv', rjFmt(n)); })
+        .catch(function () { failed('rj-site-pv'); });
+    }
+    // 本站访客数：每个浏览器只计一次（localStorage 标记去重）
+    var uvDone = false;
+    try { uvDone = !!localStorage.getItem('rjUvDone'); } catch (e) {}
+    var uvReq = uvDone
+      ? rjUpstash('uv_total', false)
+      : rjUpstash('uv_total', true).then(function (n) {
+          try { localStorage.setItem('rjUvDone', '1'); } catch (e) {}
+          return n;
+        });
+    uvReq.then(function (n) { rjFill('rj-site-uv', rjFmt(n)); }).catch(function () { failed('rj-site-uv'); });
+    // 文章阅读量：按路径 +1
+    if (document.getElementById('rj-page-pv')) {
+      var path = location.pathname;
+      var pkey = 'pv_' + encodeURIComponent(path);
+      if (rjPvPath !== path) {
+        rjPvPath = path;
+        rjUpstash(pkey, true)
+          .then(function (n) { rjFill('rj-page-pv', rjFmt(n)); })
+          .catch(function () { failed('rj-page-pv'); });
+      } else {
+        rjUpstash(pkey, false)
+          .then(function (n) { rjFill('rj-page-pv', rjFmt(n)); })
+          .catch(function () { failed('rj-page-pv'); });
+      }
+    }
+  }
+
   // —— 组装执行 ——
   function rjV12Run() {
     fixErrorImgRefs();
     upgradeRewardMenus();
     upgradeAnnouncement();
     initGlobe();
+    rjStats();
     rjPatchBrokenImgs();
     setTimeout(rjPatchBrokenImgs, 1500);
     setTimeout(rjPatchBrokenImgs, 4000);
@@ -1108,6 +1201,7 @@
     upgradeAnnouncement();
     rjGlobeDone = false;
     initGlobe();
+    rjStats();
     rjPatchBrokenImgs();
     setTimeout(rjPatchBrokenImgs, 1500);
   });
