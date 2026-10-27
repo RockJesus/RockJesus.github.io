@@ -6,18 +6,18 @@
 
 /* ---------- 设计变量（暗色主基调） ---------- */
 [data-theme='dark'] {
-  --global-bg: #070a14;
-  --card-bg: rgba(19, 23, 40, 0.62);
-  --font-color: rgba(226, 232, 255, 0.82);
-  --btn-bg: linear-gradient(135deg, #8b5cf6, #6366f1);
-  --btn-hover-color: rgba(139, 92, 246, 0.55);
-  --text-bg-hover: rgba(139, 92, 246, 0.32);
-  --pseudo-hover: rgba(34, 211, 238, 0.5);
-  --scrollbar-color: rgba(139, 92, 246, 0.55);
-  --card-box-shadow: 0 8px 24px rgba(2, 6, 23, 0.45);
-  --card-hover-box-shadow: 0 14px 40px rgba(88, 28, 135, 0.35);
-  --blockquote-color: rgba(196, 205, 255, 0.85);
-  --blockquote-bg: rgba(139, 92, 246, 0.08);
+  --global-bg: var(--rj-bg);
+  --card-bg: var(--rj-surface);
+  --font-color: var(--rj-text-soft);
+  --btn-bg: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  --btn-hover-color: color-mix(in srgb, var(--rj-brand) 55%, transparent);
+  --text-bg-hover: color-mix(in srgb, var(--rj-brand) 32%, transparent);
+  --pseudo-hover: color-mix(in srgb, var(--rj-accent) 50%, transparent);
+  --scrollbar-color: color-mix(in srgb, var(--rj-brand) 55%, transparent);
+  --card-box-shadow: 0 8px 24px var(--rj-shadow-4);
+  --card-hover-box-shadow: 0 14px 40px var(--rj-glow);
+  --blockquote-color: color-mix(in srgb, var(--rj-ink-text-blue) 85%, transparent);
+  --blockquote-bg: color-mix(in srgb, var(--rj-brand) 8%, transparent);
 }
 
 /* ---------- 背景：恢复原始背景图（主题配置 background: oc.png） ---------- */
@@ -31,31 +31,31 @@
 .layout_page > div:first-child:not(.recent-posts),
 .layout_post > #page,
 .layout_post > #post {
-  background: rgba(19, 23, 40, 0.86);
-  color: rgba(226, 232, 255, 0.85);
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  background: var(--rj-surface-solid);
+  color: var(--rj-text);
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 40%, transparent);
   border-radius: 18px;
   backdrop-filter: saturate(160%) blur(22px);
   -webkit-backdrop-filter: saturate(160%) blur(22px);
-  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.6), 0 0 30px rgba(139, 92, 246, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px var(--rj-shadow-7), 0 0 30px color-mix(in srgb, var(--rj-brand) 18%, transparent), inset 0 1px 0 var(--rj-hairline-3);
   transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 #aside-content .card-widget {
-  background: rgba(19, 23, 40, 0.62);
-  color: rgba(226, 232, 255, 0.82);
-  border: 1px solid rgba(148, 163, 255, 0.12);
+  background: var(--rj-surface);
+  color: var(--rj-text-soft);
+  border: 1px solid var(--rj-border-soft);
   border-radius: 16px;
   backdrop-filter: saturate(120%) blur(12px);
   -webkit-backdrop-filter: saturate(120%) blur(12px);
-  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.45);
+  box-shadow: 0 8px 24px var(--rj-shadow-4);
   transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 
 #recent-posts > .recent-post-item:hover,
 #aside-content .card-widget:hover {
   transform: translateY(-3px);
-  border-color: rgba(139, 92, 246, 0.45);
-  box-shadow: 0 14px 40px rgba(88, 28, 135, 0.35);
+  border-color: color-mix(in srgb, var(--rj-brand) 45%, transparent);
+  box-shadow: 0 14px 40px var(--rj-glow);
 }
 
 /* 文章封面：圆角 + 悬停微放大 */
@@ -72,45 +72,45 @@
 
 /* ---------- 首屏标题：霓虹渐变字 ---------- */
 #site-title {
-  background: linear-gradient(90deg, #a78bfa 0%, #22d3ee 50%, #f472b6 100%);
+  background: linear-gradient(90deg, var(--rj-brand-3) 0%, var(--rj-accent) 50%, var(--rj-accent-3) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 18px rgba(139, 92, 246, 0.55));
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--rj-brand) 55%, transparent));
   font-weight: 700;
   letter-spacing: 1px;
 }
 
 #site-subtitle {
-  color: rgba(196, 205, 255, 0.9);
-  text-shadow: 0 0 18px rgba(139, 92, 246, 0.6), 0 0 8px rgba(34, 211, 238, 0.45);
+  color: var(--rj-text-quote);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--rj-brand) 60%, transparent), 0 0 8px color-mix(in srgb, var(--rj-accent) 45%, transparent);
 }
 
 /* 副标题打字文字：主题紫→青→粉渐变 */
 #site-subtitle #subtitle {
-  background: linear-gradient(90deg, #c4b5fd 0%, #67e8f9 50%, #f0abfc 100%);
+  background: linear-gradient(90deg, var(--rj-brand-4) 0%, var(--rj-accent-2) 50%, var(--rj-accent-4) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--rj-brand) 50%, transparent));
   font-weight: 500;
   letter-spacing: 0.5px;
 }
 #site-subtitle .typed-cursor {
-  color: #22d3ee;
-  text-shadow: 0 0 10px rgba(34, 211, 238, 0.8);
+  color: var(--rj-accent);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--rj-accent) 80%, transparent);
 }
 
 /* 首屏下滑箭头：主题色 */
 #scroll-down i {
-  color: #a78bfa;
-  text-shadow: 0 0 14px rgba(34, 211, 238, 0.65);
+  color: var(--rj-brand-3);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--rj-accent) 65%, transparent);
 }
 
 #site-name {
-  background: linear-gradient(90deg, #c4b5fd, #67e8f9);
+  background: linear-gradient(90deg, var(--rj-brand-4), var(--rj-accent-2));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -120,11 +120,11 @@
 
 /* ---------- 文章标题与链接 ---------- */
 .article-title {
-  color: rgba(233, 238, 255, 0.95);
+  color: var(--rj-text-strong);
   transition: color .2s ease, text-shadow .2s ease;
 }
 .article-title:hover {
-  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+  background: linear-gradient(90deg, var(--rj-brand-3), var(--rj-accent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -133,53 +133,53 @@
 
 /* ---------- 主页中间（文章卡片）字体：对齐站点主题色 ---------- */
 .recent-post-info .article-meta-wrap {
-  color: rgba(148, 163, 184, 0.85);
+  color: var(--rj-text-mute);
 }
 .recent-post-info .article-meta-wrap i {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 .recent-post-info .article-meta-wrap .article-meta-separator {
-  color: rgba(34, 211, 238, 0.5);
+  color: color-mix(in srgb, var(--rj-accent) 50%, transparent);
 }
 .recent-post-info .article-meta-wrap a {
-  color: #22d3ee;
+  color: var(--rj-accent);
 }
 .recent-post-info .article-meta-wrap a:hover {
-  color: #f472b6;
+  color: var(--rj-accent-3);
 }
 .recent-post-info .content {
-  color: rgba(196, 205, 255, 0.78);
+  color: var(--rj-text-dim);
 }
 
 a {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 a:hover {
-  color: #22d3ee;
+  color: var(--rj-accent);
 }
 
 /* 正文小标题：紫色渐变下划线 */
 .post-content h2,
 .post-content h3 {
-  color: rgba(233, 238, 255, 0.95);
+  color: var(--rj-text-strong);
 }
 .post-content h2::before,
 .post-content h3::before {
-  color: #a78bfa;
-  text-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
+  color: var(--rj-brand-3);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 60%, transparent);
 }
 
 /* ---------- 引用块：霓虹侧边 ---------- */
 .post-content blockquote {
   border-left: 4px solid transparent;
-  border-image: linear-gradient(180deg, #8b5cf6, #22d3ee) 1;
+  border-image: linear-gradient(180deg, var(--rj-brand), var(--rj-accent)) 1;
   border-radius: 4px;
-  background: rgba(139, 92, 246, 0.08);
+  background: color-mix(in srgb, var(--rj-brand) 8%, transparent);
 }
 
 /* ---------- 侧栏 ---------- */
 .card-info .author-info__name {
-  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+  background: linear-gradient(90deg, var(--rj-brand-3), var(--rj-accent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -187,59 +187,59 @@ a:hover {
 }
 
 .item-headline {
-  color: rgba(233, 238, 255, 0.95);
+  color: var(--rj-text-strong);
 }
 .item-headline i {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 
 #card-info-btn {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
   border-radius: 24px;
-  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.45);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--rj-brand) 45%, transparent);
   transition: transform .2s ease, box-shadow .2s ease;
 }
 #card-info-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(34, 211, 238, 0.5);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--rj-accent) 50%, transparent);
 }
 
 /* 公告卡图标 */
 .card-announcement .item-headline i {
-  color: #22d3ee;
+  color: var(--rj-accent);
 }
 
 /* ---------- 分页：霓虹激活 ---------- */
 .pagination .page-number,
 .pagination .space {
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 255, 0.18);
-  background: rgba(19, 23, 40, 0.5);
+  border: 1px solid var(--rj-border-strong);
+  background: var(--rj-overlay);
   transition: all .2s ease;
 }
 .pagination .page-number.current,
 .pagination .page-number:hover {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
-  color: #fff;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  color: var(--rj-text-inverse);
   border-color: transparent;
-  box-shadow: 0 0 14px rgba(139, 92, 246, 0.6);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--rj-brand) 60%, transparent);
 }
 
 /* ---------- 按钮组（btn-beautify） ---------- */
 .btn-beautify a,
 .buttons a {
   border-radius: 24px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
-  border: 1px solid rgba(148, 163, 255, 0.25);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rj-brand) 90%, transparent), color-mix(in srgb, var(--rj-brand-2) 90%, transparent));
+  border: 1px solid var(--rj-border-accent);
+  color: var(--rj-text-inverse);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--rj-brand) 35%, transparent);
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .btn-beautify a:hover,
 .buttons a:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(34, 211, 238, 0.45);
-  color: #fff;
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--rj-accent) 45%, transparent);
+  color: var(--rj-text-inverse);
 }
 
 /* ---------- 滚动条：细霓虹 ---------- */
@@ -248,11 +248,11 @@ a:hover {
   height: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8b5cf6, #22d3ee);
+  background: linear-gradient(180deg, var(--rj-brand), var(--rj-accent));
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #a78bfa, #67e8f9);
+  background: linear-gradient(180deg, var(--rj-brand-3), var(--rj-accent-2));
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -260,8 +260,8 @@ a:hover {
 
 /* ---------- 选中态 ---------- */
 ::selection {
-  background: rgba(139, 92, 246, 0.5);
-  color: #fff;
+  background: color-mix(in srgb, var(--rj-brand) 50%, transparent);
+  color: var(--rj-text-inverse);
 }
 
 /* ---------- 页脚：赛博渐变（保留原动画） ---------- */
@@ -281,7 +281,7 @@ a:hover {
   100% { background-position: 0 50%; }
 }
 #footer {
-  background: linear-gradient(-45deg, rgba(139, 92, 246, 0.22), rgba(244, 114, 182, 0.18), rgba(34, 211, 238, 0.18), rgba(99, 102, 241, 0.22));
+  background: linear-gradient(-45deg, color-mix(in srgb, var(--rj-brand) 22%, transparent), color-mix(in srgb, var(--rj-accent-3) 18%, transparent), color-mix(in srgb, var(--rj-accent) 18%, transparent), color-mix(in srgb, var(--rj-brand-2) 22%, transparent));
   backdrop-filter: saturate(120%) blur(12px);
   background-size: 400% 400%;
   -webkit-animation: Gradient 12s ease infinite;
@@ -295,22 +295,22 @@ a:hover {
   backdrop-filter: saturate(120%) blur(12px);
 }
 .framework-info a {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 .framework-info a:hover {
-  color: #22d3ee;
+  color: var(--rj-accent);
 }
 
 /* ---------- 搜索弹窗 ---------- */
 .search-dialog {
-  border: 1px solid rgba(148, 163, 255, 0.15);
+  border: 1px solid var(--rj-border);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.6);
+  box-shadow: 0 20px 60px var(--rj-shadow-7);
 }
 
 /* ---------- 站点统计 / 资讯 ---------- */
 .webinfo .item-count {
-  color: #22d3ee;
+  color: var(--rj-accent);
 }
 
 /* ---------- 返回顶部等悬浮按钮 ---------- */
@@ -319,8 +319,8 @@ a:hover {
   transition: all .2s ease;
 }
 #rightside > div > button:hover {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
-  color: #fff !important;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important;
+  color: var(--rj-text-inverse) !important;
 }
 
 /* ---------- 移动端适配微调 ---------- */
@@ -440,14 +440,14 @@ img {
 .aplayer.aplayer-fixed .aplayer-body {
   display: flex;
   flex-direction: column;
-  background-color: rgba(15, 18, 32, 0.38);
+  background-color: color-mix(in srgb, var(--rj-ink-input) 38%, transparent);
   background-size: cover;
   background-position: center;
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid rgba(167, 139, 250, 0.45);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 45%, transparent);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 24px rgba(167, 139, 250, 0.22);
+  box-shadow: 0 8px 32px var(--rj-shadow-cast-3), 0 0 24px color-mix(in srgb, var(--rj-brand-3) 22%, transparent);
   overflow: hidden;
 }
 /* —— 全幅毛玻璃封面卡：封面铺满播放器并以半透明毛玻璃透出 —— */
@@ -460,7 +460,7 @@ img {
   min-height: 74px;
   cursor: pointer;
   touch-action: manipulation;
-  background-image: linear-gradient(90deg, rgba(7, 9, 20, 0.5) 0%, rgba(7, 9, 20, 0.15) 55%, rgba(7, 9, 20, 0.42) 100%);
+  background-image: linear-gradient(90deg, var(--rj-media-scrim-strong) 0%, var(--rj-media-scrim-soft) 55%, var(--rj-media-scrim-mid) 100%);
 }
 /* 播放控制：整卡点击层由 .aplayer-row 统一接管（单击播放/暂停、双击开合歌单）。
    pointer-events:none 屏蔽 APlayer 内建绑在 pic 上的 click(toggle)，避免与双击手势打架 */
@@ -500,14 +500,14 @@ img {
   text-overflow: ellipsis;
 }
 .aplayer-row .aplayer-info .aplayer-music .aplayer-title {
-  color: #ffffff;
+  color: var(--rj-text-inverse);
   font-weight: 600;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85), 0 0 16px rgba(139, 92, 246, 0.6);
+  text-shadow: 0 1px 8px color-mix(in srgb, var(--rj-ink-cast) 85%, transparent), 0 0 16px color-mix(in srgb, var(--rj-brand) 60%, transparent);
 }
 .aplayer-row .aplayer-info .aplayer-music .aplayer-author {
-  color: #cbd5e1;
+  color: var(--rjp-slate-300);
   font-size: 11px;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 6px var(--rj-on-media-shadow);
 }
 .aplayer-row .aplayer-info .aplayer-controller {
   height: 22px;
@@ -516,73 +516,73 @@ img {
   padding: 3px 2px 1px;
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
-  background: rgba(255, 255, 255, 0.22);
+  background: color-mix(in srgb, var(--rj-ink-hairline) 22%, transparent);
   height: 3px;
   border-radius: 3px;
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
-  background: rgba(34, 211, 238, 0.3);
+  background: color-mix(in srgb, var(--rj-accent) 30%, transparent);
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
-  background: linear-gradient(90deg, #a78bfa, #22d3ee, #f472b6);
+  background: linear-gradient(90deg, var(--rj-brand-3), var(--rj-accent), var(--rj-accent-3));
   height: 3px;
   border-radius: 3px;
-  box-shadow: 0 0 6px rgba(167, 139, 250, 0.6);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--rj-brand-3) 60%, transparent);
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
-  background: #f472b6;
-  box-shadow: 0 0 10px rgba(244, 114, 182, 0.95);
+  background: var(--rj-accent-3);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-accent-3) 95%, transparent);
   transform: scale(0.7);
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-time {
-  color: #f0e9ff;
+  color: var(--rj-brand-7);
   font-size: 10px;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 6px var(--rj-on-media-shadow);
 }
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon path {
-  fill: #a78bfa;
+  fill: var(--rj-brand-3);
   transition: fill 0.2s ease;
 }
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path {
-  fill: #22d3ee;
+  fill: var(--rj-accent);
 }
 /* —— 播放列表面板 —— */
 .aplayer .aplayer-list {
-  background: rgba(19, 23, 40, 0.92);
+  background: color-mix(in srgb, var(--rj-ink-surface) 92%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(167, 139, 250, 0.25);
+  border-top: 1px solid color-mix(in srgb, var(--rj-brand-3) 25%, transparent);
   border-radius: 0 0 16px 16px;
   overflow: hidden;
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 -8px 24px var(--rj-shadow-cast-1);
 }
 .aplayer .aplayer-list ol {
   max-height: 260px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(167, 139, 250, 0.5) transparent;
+  scrollbar-color: color-mix(in srgb, var(--rj-brand-3) 50%, transparent) transparent;
 }
 .aplayer .aplayer-list ol::-webkit-scrollbar {
   width: 4px;
 }
 .aplayer .aplayer-list ol::-webkit-scrollbar-thumb {
-  background: rgba(167, 139, 250, 0.5);
+  background: color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
   border-radius: 4px;
 }
 .aplayer .aplayer-list ol li {
-  color: #cbd5e1;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--rjp-slate-300);
+  border-top: 1px solid var(--rj-hairline-1);
   padding: 7px 14px;
   transition: background 0.2s ease;
 }
 .aplayer .aplayer-list ol li:hover {
-  background: rgba(167, 139, 250, 0.12);
+  background: color-mix(in srgb, var(--rj-brand-3) 12%, transparent);
 }
 .aplayer .aplayer-list ol li.aplayer-list-light {
-  background: linear-gradient(90deg, rgba(167, 139, 250, 0.3), rgba(34, 211, 238, 0.12));
-  border-left: 2px solid #f472b6;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand-3) 30%, transparent), color-mix(in srgb, var(--rj-accent) 12%, transparent));
+  border-left: 2px solid var(--rj-accent-3);
 }
 .aplayer .aplayer-list ol li .aplayer-list-index {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
   position: relative;
 }
 .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index {
@@ -604,16 +604,16 @@ img {
   50% { transform: translate(-50%, -50%) scaleY(1.15); }
 }
 .aplayer .aplayer-list ol li .aplayer-list-title {
-  color: #e2e8f0;
+  color: var(--rjp-slate-200);
 }
 .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-title {
-  color: #ffffff;
+  color: var(--rj-text-inverse);
 }
 .aplayer .aplayer-list ol li .aplayer-list-author {
-  color: #64748b;
+  color: var(--rjp-slate-500);
 }
 .aplayer .aplayer-list ol li .aplayer-list-cur {
-  color: #f472b6;
+  color: var(--rj-accent-3);
 }
 /* —— 自动播放被拦截时的提示 —— */
 .rj-tip {
@@ -622,14 +622,14 @@ img {
   bottom: 92px;
   z-index: 1000;
   padding: 8px 14px;
-  background: rgba(19, 23, 40, 0.88);
+  background: color-mix(in srgb, var(--rj-ink-surface) 88%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(167, 139, 250, 0.4);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 40%, transparent);
   border-radius: 999px;
-  color: #e2e8f0;
+  color: var(--rjp-slate-200);
   font-size: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(167, 139, 250, 0.25);
+  box-shadow: 0 4px 20px var(--rj-shadow-cast-2), 0 0 12px color-mix(in srgb, var(--rj-brand-3) 25%, transparent);
   opacity: 1;
   transition: opacity 0.6s ease;
   animation: rjTipIn 0.4s ease;
@@ -652,15 +652,15 @@ img {
   max-width: calc(100vw - 36px);
   padding: 9px 18px;
   text-align: center;
-  background: rgba(19, 23, 40, 0.9);
+  background: color-mix(in srgb, var(--rj-ink-surface) 90%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(167, 139, 250, 0.5);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
   border-radius: 999px;
-  color: #e2e8f0;
+  color: var(--rjp-slate-200);
   font-size: 13px;
   letter-spacing: 0.2px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55), 0 0 16px rgba(167, 139, 250, 0.3);
+  box-shadow: 0 6px 24px var(--rj-shadow-cast-3), 0 0 16px color-mix(in srgb, var(--rj-brand-3) 30%, transparent);
   white-space: nowrap;
   animation: rjTipIn 0.4s ease;
 }
@@ -694,7 +694,7 @@ img {
 #article-container {
   font-size: 1.02em;
   line-height: 1.9;
-  color: rgba(226, 232, 255, 0.84);
+  color: color-mix(in srgb, var(--rj-ink-text) 84%, transparent);
 }
 
 /* —— 标题层级：主题渐变前缀 + 悬停微移（保留原动画） —— */
@@ -704,7 +704,7 @@ img {
 #article-container h4,
 #article-container h5,
 #article-container h6 {
-  color: rgba(240, 243, 255, 0.96);
+  color: color-mix(in srgb, var(--rj-ink-text-ghost) 96%, transparent);
   font-weight: 700;
   letter-spacing: 0.3px;
 }
@@ -713,20 +713,20 @@ img {
 #article-container h4::before,
 #article-container h5::before,
 #article-container h6::before {
-  color: #a78bfa;
-  text-shadow: 0 0 10px rgba(139, 92, 246, 0.7);
+  color: var(--rj-brand-3);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 70%, transparent);
 }
 #article-container h2 {
-  border-bottom: 1px solid rgba(167, 139, 250, 0.28);
+  border-bottom: 1px solid color-mix(in srgb, var(--rj-brand-3) 28%, transparent);
   padding-bottom: 8px;
 }
 #article-container h2:hover,
 #article-container h3:hover,
 #article-container h4:hover {
-  color: #ffffff;
+  color: var(--rj-text-inverse);
 }
 #article-container a.headerlink::after {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 
 /* —— 段落 —— */
@@ -741,10 +741,10 @@ img {
 #article-container td code {
   margin: 0 2px;
   padding: 2px 7px;
-  border: 1px solid rgba(167, 139, 250, 0.35);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 35%, transparent);
   border-radius: 6px;
-  background: rgba(139, 92, 246, 0.12);
-  color: #e0d7ff;
+  background: color-mix(in srgb, var(--rj-brand) 12%, transparent);
+  color: var(--rj-brand-5);
   font-size: 0.88em;
   white-space: nowrap;
   word-break: break-all;
@@ -754,12 +754,12 @@ img {
 #article-container pre {
   position: relative;
   padding: 16px 18px;
-  border: 1px solid rgba(167, 139, 250, 0.25);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 25%, transparent);
   border-radius: 12px;
-  background: rgba(9, 12, 24, 0.72) !important;
+  background: color-mix(in srgb, var(--rj-ink-media-2) 72%, transparent) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 6px 24px rgba(2, 6, 23, 0.5), 0 0 18px rgba(139, 92, 246, 0.18);
+  box-shadow: 0 6px 24px var(--rj-shadow-5), 0 0 18px color-mix(in srgb, var(--rj-brand) 18%, transparent);
   overflow-x: auto;
   line-height: 1.6;
 }
@@ -769,13 +769,13 @@ img {
   height: 10px;
   margin-bottom: 12px;
   background-image:
-    radial-gradient(circle 5px at 4px 5px, rgba(244, 114, 182, 0.9) 100%, transparent),
-    radial-gradient(circle 5px at 22px 5px, rgba(167, 139, 250, 0.9) 100%, transparent),
-    radial-gradient(circle 5px at 40px 5px, rgba(34, 211, 238, 0.9) 100%, transparent);
+    radial-gradient(circle 5px at 4px 5px, color-mix(in srgb, var(--rj-accent-3) 90%, transparent) 100%, transparent),
+    radial-gradient(circle 5px at 22px 5px, color-mix(in srgb, var(--rj-brand-3) 90%, transparent) 100%, transparent),
+    radial-gradient(circle 5px at 40px 5px, color-mix(in srgb, var(--rj-accent) 90%, transparent) 100%, transparent);
 }
 #article-container pre code {
   background: transparent !important;
-  color: #d8deff;
+  color: var(--rjp-violet-ice);
   font-family: Consolas, 'JetBrains Mono', 'Courier New', monospace;
   font-size: 0.9em;
   text-shadow: none;
@@ -790,27 +790,27 @@ img {
   margin: 20px 0;
   border-collapse: separate;
   border-spacing: 0;
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 30%, transparent);
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(19, 23, 40, 0.45);
+  background: color-mix(in srgb, var(--rj-ink-surface) 45%, transparent);
 }
 #article-container table thead th {
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.28), rgba(34, 211, 238, 0.16));
-  color: #ffffff;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand) 28%, transparent), color-mix(in srgb, var(--rj-accent) 16%, transparent));
+  color: var(--rj-text-inverse);
   font-weight: 600;
   padding: 10px 14px;
 }
 #article-container table tbody td {
-  border-top: 1px solid rgba(148, 163, 255, 0.15);
+  border-top: 1px solid var(--rj-border);
   padding: 9px 14px;
-  color: rgba(226, 232, 255, 0.85);
+  color: var(--rj-text);
 }
 #article-container table tbody tr:nth-child(even) td {
-  background: rgba(148, 163, 255, 0.04);
+  background: color-mix(in srgb, var(--rj-ink-border) 4%, transparent);
 }
 #article-container table tbody tr:hover td {
-  background: rgba(139, 92, 246, 0.1);
+  background: color-mix(in srgb, var(--rj-brand) 10%, transparent);
 }
 
 /* —— 引用块：霓虹侧边 + 玻璃底 —— */
@@ -819,9 +819,9 @@ img {
   padding: 14px 18px;
   border-radius: 0 12px 12px 0;
   border-left: 4px solid transparent;
-  border-image: linear-gradient(180deg, #8b5cf6, #22d3ee) 1;
-  background: rgba(139, 92, 246, 0.08);
-  color: rgba(196, 205, 255, 0.9);
+  border-image: linear-gradient(180deg, var(--rj-brand), var(--rj-accent)) 1;
+  background: color-mix(in srgb, var(--rj-brand) 8%, transparent);
+  color: var(--rj-text-quote);
 }
 #article-container blockquote p {
   margin-bottom: 6px;
@@ -837,7 +837,7 @@ img {
   height: 2px;
   border: none;
   border-radius: 2px;
-  background: linear-gradient(90deg, transparent, #a78bfa, #22d3ee, #f472b6, transparent);
+  background: linear-gradient(90deg, transparent, var(--rj-brand-3), var(--rj-accent), var(--rj-accent-3), transparent);
   opacity: 0.75;
 }
 
@@ -845,11 +845,11 @@ img {
 #article-container kbd {
   margin: 0 3px;
   padding: 3px 8px;
-  border: 1px solid rgba(167, 139, 250, 0.45);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 45%, transparent);
   border-radius: 6px;
-  background: rgba(139, 92, 246, 0.15);
-  box-shadow: 0 2px 0 rgba(139, 92, 246, 0.35), 0 1px 4px rgba(0, 0, 0, 0.4) inset;
-  color: #e0d7ff;
+  background: color-mix(in srgb, var(--rj-brand) 15%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--rj-brand) 35%, transparent), 0 1px 4px var(--rj-shadow-cast-1) inset;
+  color: var(--rj-brand-5);
   font-weight: 600;
   font-size: 0.9em;
 }
@@ -857,8 +857,8 @@ img {
 /* —— 文章图片：圆角玻璃框 —— */
 #article-container img {
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 255, 0.18);
-  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.45);
+  border: 1px solid var(--rj-border-strong);
+  box-shadow: 0 6px 20px var(--rj-shadow-4);
 }
 #article-container img:hover {
   filter: brightness(1.08);
@@ -866,24 +866,24 @@ img {
 
 /* —— 正文链接：虚线描边 + 悬停变色 —— */
 #article-container a:not(.headerlink) {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
   text-decoration: none;
-  border-bottom: 1px dashed rgba(167, 139, 250, 0.5);
+  border-bottom: 1px dashed color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
   transition: color 0.2s ease, border-color 0.2s ease;
 }
 #article-container a:not(.headerlink):hover {
-  color: #22d3ee;
-  border-bottom-color: #22d3ee;
+  color: var(--rj-accent);
+  border-bottom-color: var(--rj-accent);
 }
 
 /* —— 列表 —— */
 #article-container ul li::marker,
 #article-container ol li::marker {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 #article-container ul li:hover::marker,
 #article-container ol li:hover::marker {
-  color: #22d3ee;
+  color: var(--rj-accent);
 }
 #article-container li {
   margin: 5px 0;
@@ -891,29 +891,29 @@ img {
 
 /* —— 文章标签 chips —— */
 #post .tag_share .post-meta__tags {
-  border-color: rgba(167, 139, 250, 0.6);
-  color: #c4b5fd;
-  background: rgba(139, 92, 246, 0.1);
+  border-color: color-mix(in srgb, var(--rj-brand-3) 60%, transparent);
+  color: var(--rj-brand-4);
+  background: color-mix(in srgb, var(--rj-brand) 10%, transparent);
 }
 #post .tag_share .post-meta__tags:hover {
-  background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent));
   border-color: transparent;
-  color: #fff;
+  color: var(--rj-text-inverse);
 }
 
 /* —— 版权卡：毛玻璃渐变 —— */
 #post .post-copyright {
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 30%, transparent);
   border-radius: 12px;
-  background: rgba(19, 23, 40, 0.5);
+  background: var(--rj-overlay);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 #post .post-copyright:hover {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.35), 0 4px 16px rgba(2, 6, 23, 0.45);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--rj-brand) 35%, transparent), 0 4px 16px var(--rj-shadow-4);
 }
 #post .post-copyright .post-copyright-meta {
-  color: #22d3ee;
+  color: var(--rj-accent);
 }
 
 /* ============================================================
@@ -936,26 +936,26 @@ img {
   -webkit-background-clip: initial;
   background-clip: initial;
   -webkit-text-fill-color: initial;
-  color: #a78bfa;
-  text-shadow: 0 0 12px rgba(139, 92, 246, 0.65);
+  color: var(--rj-brand-3);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 65%, transparent);
 }
 #site-subtitle .typed-cursor {
-  color: #a78bfa;
-  text-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+  color: var(--rj-brand-3);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 80%, transparent);
 }
 
 /* 右上角导航文字全部紫色 */
 #nav #menus .site-page,
 #nav .menus_item_child .site-page {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 #nav #menus .site-page i,
 #nav .menus_item_child .site-page i {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 #nav #menus .site-page:hover,
 #nav .menus_item_child .site-page:hover {
-  color: #e0d7ff;
+  color: var(--rj-brand-5);
 }
 
 /* ============================================================
@@ -968,9 +968,9 @@ img {
   padding: 0;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(167, 139, 250, 0.5);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
   background: transparent;
-  box-shadow: 0 0 14px rgba(139, 92, 246, 0.55), 0 4px 14px rgba(2, 6, 23, 0.5);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--rj-brand) 55%, transparent), 0 4px 14px var(--rj-shadow-5);
 }
 #chat_btn.rj-doubao-btn .rj-doubao-avatar {
   display: block;
@@ -980,8 +980,8 @@ img {
   border-radius: 50%;
 }
 #chat_btn.rj-doubao-btn.rj-doubao-active {
-  border-color: #22d3ee;
-  box-shadow: 0 0 16px rgba(34, 211, 238, 0.6), 0 4px 14px rgba(2, 6, 23, 0.5);
+  border-color: var(--rj-accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--rj-accent) 60%, transparent), 0 4px 14px var(--rj-shadow-5);
 }
 
 #rj-doubao-panel {
@@ -995,12 +995,12 @@ img {
   max-width: calc(100vw - 36px);
   height: min(560px, 72vh);
   overflow: hidden;
-  background: rgba(15, 18, 32, 0.82);
+  background: color-mix(in srgb, var(--rj-ink-input) 82%, transparent);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(167, 139, 250, 0.45);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 45%, transparent);
   border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.6), 0 0 24px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 12px 40px var(--rj-shadow-7), 0 0 24px color-mix(in srgb, var(--rj-brand) 30%, transparent);
   visibility: hidden;
   opacity: 0;
   transform: translateY(12px) scale(0.98);
@@ -1017,9 +1017,9 @@ img {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.25), rgba(34, 211, 238, 0.12));
-  border-bottom: 1px solid rgba(167, 139, 250, 0.3);
-  color: #ffffff;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand) 25%, transparent), color-mix(in srgb, var(--rj-accent) 12%, transparent));
+  border-bottom: 1px solid color-mix(in srgb, var(--rj-brand-3) 30%, transparent);
+  color: var(--rj-text-inverse);
   font-size: 14px;
   font-weight: 600;
 }
@@ -1035,22 +1035,22 @@ img {
   height: 26px;
   border: none;
   border-radius: 50%;
-  background: rgba(148, 163, 255, 0.15);
-  color: #e2e8f0;
+  background: var(--rj-border);
+  color: var(--rjp-slate-200);
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
 .rj-doubao-close:hover {
-  background: rgba(244, 114, 182, 0.35);
-  color: #ffffff;
+  background: color-mix(in srgb, var(--rj-accent-3) 35%, transparent);
+  color: var(--rj-text-inverse);
 }
 .rj-doubao-frame {
   flex: 1;
   width: 100%;
   border: none;
-  background: #ffffff;
+  background: var(--rj-text-inverse);
 }
 @media (max-width: 767px) {
   #rj-doubao-panel {
@@ -1075,79 +1075,79 @@ img {
    #8 主题色统一渐变紫  #12 借鉴 iOS 27 Liquid Glass 全站美化
    ============================================================ */
 /* —— 全局链接/图标/强调：渐变紫 —— */
-a { color: #8b5cf6; }
-a:hover { color: #6366f1; }
-.framework-info a { color: #8b5cf6; }
-.framework-info a:hover { color: #6366f1; }
-#article-container a:not(.headerlink) { color: #8b5cf6; border-bottom-color: rgba(139,92,246,.5); }
-#article-container a:not(.headerlink):hover { color: #6366f1; border-bottom-color: #6366f1; }
+a { color: var(--rj-brand); }
+a:hover { color: var(--rj-brand-2); }
+.framework-info a { color: var(--rj-brand); }
+.framework-info a:hover { color: var(--rj-brand-2); }
+#article-container a:not(.headerlink) { color: var(--rj-brand); border-bottom-color: color-mix(in srgb, var(--rj-brand) 50%, transparent); }
+#article-container a:not(.headerlink):hover { color: var(--rj-brand-2); border-bottom-color: var(--rj-brand-2); }
 #article-container h2::before, #article-container h3::before, #article-container h4::before,
-#article-container h5::before, #article-container h6::before { color: #8b5cf6; text-shadow: 0 0 10px rgba(139,92,246,.7); }
-#nav #menus .site-page, #nav .menus_item_child .site-page { color: #8b5cf6; }
-#nav #menus .site-page i, #nav .menus_item_child .site-page i { color: #8b5cf6; }
-#nav #menus .site-page:hover, #nav .menus_item_child .site-page:hover { color: #e0d7ff; }
-#site-subtitle #subtitle { color: #8b5cf6; }
-#site-subtitle .typed-cursor { color: #8b5cf6; }
-#scroll-down i { color: #8b5cf6; }
-.recent-post-info .article-meta-wrap i { color: #8b5cf6; }
-.recent-post-info .article-meta-wrap a { color: #8b5cf6; }
-.recent-post-info .article-meta-wrap a:hover { color: #6366f1; }
-#article-container ul li::marker, #article-container ol li::marker { color: #8b5cf6; }
-.item-headline i { color: #8b5cf6; }
-.webinfo .item-count { color: #8b5cf6; }
-.card-announcement .item-headline i { color: #8b5cf6; }
-#post .post-copyright .post-copyright-meta { color: #8b5cf6; }
-#article-container a.headerlink::after { color: #8b5cf6; }
-#post .tag_share .post-meta__tags { border-color: rgba(139,92,246,.6); background: rgba(139,92,246,.12); color: #c4b5fd; }
+#article-container h5::before, #article-container h6::before { color: var(--rj-brand); text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 70%, transparent); }
+#nav #menus .site-page, #nav .menus_item_child .site-page { color: var(--rj-brand); }
+#nav #menus .site-page i, #nav .menus_item_child .site-page i { color: var(--rj-brand); }
+#nav #menus .site-page:hover, #nav .menus_item_child .site-page:hover { color: var(--rj-brand-5); }
+#site-subtitle #subtitle { color: var(--rj-brand); }
+#site-subtitle .typed-cursor { color: var(--rj-brand); }
+#scroll-down i { color: var(--rj-brand); }
+.recent-post-info .article-meta-wrap i { color: var(--rj-brand); }
+.recent-post-info .article-meta-wrap a { color: var(--rj-brand); }
+.recent-post-info .article-meta-wrap a:hover { color: var(--rj-brand-2); }
+#article-container ul li::marker, #article-container ol li::marker { color: var(--rj-brand); }
+.item-headline i { color: var(--rj-brand); }
+.webinfo .item-count { color: var(--rj-brand); }
+.card-announcement .item-headline i { color: var(--rj-brand); }
+#post .post-copyright .post-copyright-meta { color: var(--rj-brand); }
+#article-container a.headerlink::after { color: var(--rj-brand); }
+#post .tag_share .post-meta__tags { border-color: color-mix(in srgb, var(--rj-brand) 60%, transparent); background: color-mix(in srgb, var(--rj-brand) 12%, transparent); color: var(--rj-brand-4); }
 
-/* —— 渐变应用点：Follow Me 同款 135deg #8b5cf6→#6366f1 —— */
+/* —— 渐变应用点：Follow Me 同款 135deg var(--rj-brand)→var(--rj-brand-2) —— */
 .article-title:hover {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
 #site-name {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
 .pagination .page-number.current, .pagination .page-number:hover {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
   border-color: transparent;
-  box-shadow: 0 0 16px rgba(139,92,246,.65);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--rj-brand) 65%, transparent);
 }
-::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #8b5cf6, #6366f1); }
-::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #a78bfa, #8b5cf6); }
-.aplayer .aplayer-info .aplayer-controller .aplayer-icon path { fill: #8b5cf6; }
-.aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path { fill: #6366f1; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--rj-brand), var(--rj-brand-2)); }
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--rj-brand-3), var(--rj-brand)); }
+.aplayer .aplayer-info .aplayer-controller .aplayer-icon path { fill: var(--rj-brand); }
+.aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path { fill: var(--rj-brand-2); }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
-  background: linear-gradient(90deg, #8b5cf6, #6366f1);
-  box-shadow: 0 0 6px rgba(139,92,246,.6);
+  background: linear-gradient(90deg, var(--rj-brand), var(--rj-brand-2));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--rj-brand) 60%, transparent);
 }
 .aplayer .aplayer-list ol li.aplayer-list-light {
-  background: linear-gradient(90deg, rgba(139,92,246,.3), rgba(99,102,241,.14));
-  border-left-color: #8b5cf6;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand) 30%, transparent), color-mix(in srgb, var(--rj-brand-2) 14%, transparent));
+  border-left-color: var(--rj-brand);
 }
 #footer {
-  background: linear-gradient(-45deg, rgba(139,92,246,.28), rgba(99,102,241,.24), rgba(139,92,246,.16), rgba(99,102,241,.28));
+  background: linear-gradient(-45deg, color-mix(in srgb, var(--rj-brand) 28%, transparent), color-mix(in srgb, var(--rj-brand-2) 24%, transparent), color-mix(in srgb, var(--rj-brand) 16%, transparent), color-mix(in srgb, var(--rj-brand-2) 28%, transparent));
 }
-#article-container blockquote { border-image: linear-gradient(180deg, #8b5cf6, #6366f1) 1; }
-#article-container pre { box-shadow: 0 6px 24px rgba(2,6,23,.5), 0 0 18px rgba(139,92,246,.22); }
+#article-container blockquote { border-image: linear-gradient(180deg, var(--rj-brand), var(--rj-brand-2)) 1; }
+#article-container pre { box-shadow: 0 6px 24px var(--rj-shadow-5), 0 0 18px color-mix(in srgb, var(--rj-brand) 22%, transparent); }
 #article-container p code, #article-container li code, #article-container td code {
-  border-color: rgba(139,92,246,.4);
-  background: rgba(139,92,246,.14);
+  border-color: color-mix(in srgb, var(--rj-brand) 40%, transparent);
+  background: color-mix(in srgb, var(--rj-brand) 14%, transparent);
 }
-#article-container table { border-color: rgba(139,92,246,.32); }
+#article-container table { border-color: color-mix(in srgb, var(--rj-brand) 32%, transparent); }
 #article-container table thead th {
-  background: linear-gradient(90deg, rgba(139,92,246,.3), rgba(99,102,241,.18));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand) 30%, transparent), color-mix(in srgb, var(--rj-brand-2) 18%, transparent));
 }
-#post .tag_share .post-meta__tags:hover { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
-.btn-beautify a, .buttons a { background: linear-gradient(135deg, #8b5cf6, #6366f1); border-color: rgba(139,92,246,.3); }
-.aplayer.aplayer-fixed .aplayer-body { border-color: rgba(139,92,246,.45); box-shadow: 0 8px 32px rgba(0,0,0,.55), 0 0 24px rgba(139,92,246,.25); }
-.aplayer .aplayer-list { border-top-color: rgba(139,92,246,.28); }
-#rj-doubao-panel { border-color: rgba(139,92,246,.5); box-shadow: 0 12px 40px rgba(2,6,23,.6), 0 0 24px rgba(139,92,246,.32); }
-.rj-tip { border-color: rgba(139,92,246,.45); box-shadow: 0 4px 20px rgba(0,0,0,.5), 0 0 12px rgba(139,92,246,.3); }
-#rightside > div > button:hover { background: linear-gradient(135deg, #8b5cf6, #6366f1) !important; }
+#post .tag_share .post-meta__tags:hover { background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)); }
+.btn-beautify a, .buttons a { background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)); border-color: color-mix(in srgb, var(--rj-brand) 30%, transparent); }
+.aplayer.aplayer-fixed .aplayer-body { border-color: color-mix(in srgb, var(--rj-brand) 45%, transparent); box-shadow: 0 8px 32px var(--rj-shadow-cast-3), 0 0 24px color-mix(in srgb, var(--rj-brand) 25%, transparent); }
+.aplayer .aplayer-list { border-top-color: color-mix(in srgb, var(--rj-brand) 28%, transparent); }
+#rj-doubao-panel { border-color: color-mix(in srgb, var(--rj-brand) 50%, transparent); box-shadow: 0 12px 40px var(--rj-shadow-7), 0 0 24px color-mix(in srgb, var(--rj-brand) 32%, transparent); }
+.rj-tip { border-color: color-mix(in srgb, var(--rj-brand) 45%, transparent); box-shadow: 0 4px 20px var(--rj-shadow-cast-2), 0 0 12px color-mix(in srgb, var(--rj-brand) 30%, transparent); }
+#rightside > div > button:hover { background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important; }
 
 /* —— iOS 27 Liquid Glass：大圆角 + 高饱和毛玻璃 + 内高光 + 弹性动效 —— */
 #recent-posts > .recent-post-item,
@@ -1155,37 +1155,37 @@ a:hover { color: #6366f1; }
 .layout_post > #page, .layout_post > #post,
 #aside-content .card-widget {
   border-radius: 22px;
-  border: 1px solid rgba(255,255,255,.13);
+  border: 1px solid color-mix(in srgb, var(--rj-ink-hairline) 13%, transparent);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  box-shadow: 0 4px 12px rgba(2,6,23,.32), 0 16px 44px rgba(2,6,23,.5), inset 0 1px 0 rgba(255,255,255,.12);
+  box-shadow: 0 4px 12px var(--rj-shadow-1), 0 16px 44px var(--rj-shadow-5), inset 0 1px 0 var(--rj-hairline-5);
 }
 #recent-posts > .recent-post-item:hover,
 #aside-content .card-widget:hover {
   transform: translateY(-4px) scale(1.008);
-  border-color: rgba(139,92,246,.5);
-  box-shadow: 0 10px 28px rgba(88,28,135,.3), 0 22px 60px rgba(2,6,23,.55), inset 0 1px 0 rgba(255,255,255,.14);
+  border-color: color-mix(in srgb, var(--rj-brand) 50%, transparent);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--rj-ink-glow) 30%, transparent), 0 22px 60px var(--rj-shadow-6), inset 0 1px 0 var(--rj-hairline-6);
 }
 #nav .menus_item_child {
-  background: rgba(19,23,40,.72);
+  background: color-mix(in srgb, var(--rj-ink-surface) 72%, transparent);
   backdrop-filter: blur(26px) saturate(170%);
   -webkit-backdrop-filter: blur(26px) saturate(170%);
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid var(--rj-hairline-5);
   border-radius: 18px;
-  box-shadow: 0 14px 38px rgba(2,6,23,.55), inset 0 1px 0 rgba(255,255,255,.1);
+  box-shadow: 0 14px 38px var(--rj-shadow-6), inset 0 1px 0 var(--rj-hairline-4);
 }
 #nav .menus_item_child li a { border-radius: 10px; }
-#sidebar #sidebar-menus { background: rgba(19,23,40,.72); backdrop-filter: blur(26px) saturate(170%); -webkit-backdrop-filter: blur(26px) saturate(170%); }
+#sidebar #sidebar-menus { background: color-mix(in srgb, var(--rj-ink-surface) 72%, transparent); backdrop-filter: blur(26px) saturate(170%); -webkit-backdrop-filter: blur(26px) saturate(170%); }
 .aplayer.aplayer-fixed .aplayer-body {
   border-radius: 22px;
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border-color: rgba(255,255,255,.16);
-  box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 28px rgba(139,92,246,.28), inset 0 1px 0 rgba(255,255,255,.14);
+  border-color: var(--rj-hairline-7);
+  box-shadow: 0 8px 32px var(--rj-shadow-cast-2), 0 0 28px color-mix(in srgb, var(--rj-brand) 28%, transparent), inset 0 1px 0 var(--rj-hairline-6);
 }
 .aplayer .aplayer-list { border-radius: 0 0 22px 22px; }
 #rj-doubao-panel { border-radius: 22px; backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); }
-.search-dialog { border-radius: 24px; border-color: rgba(255,255,255,.13); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); }
+.search-dialog { border-radius: 24px; border-color: color-mix(in srgb, var(--rj-ink-hairline) 13%, transparent); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); }
 #article-container img { border-radius: 18px; }
 .post_cover { border-radius: 18px; overflow: hidden; }
 
@@ -1221,12 +1221,12 @@ a:hover { color: #6366f1; }
   padding: 4px;
   background: transparent;
   border: none;
-  color: rgba(226, 232, 255, 0.95) !important;
+  color: color-mix(in srgb, var(--rj-ink-text) 95%, transparent) !important;
   transition: transform .2s ease;
 }
 .rj-qr-item:hover {
   transform: translateY(-2px);
-  color: #fff !important;
+  color: var(--rj-text-inverse) !important;
 }
 /* 二维码方形圆角，无背景无描边 */
 .rj-qr-item img {
@@ -1239,20 +1239,20 @@ a:hover { color: #6366f1; }
 .rj-qr-item span {
   font-size: 12px;
   letter-spacing: 1px;
-  color: rgba(226, 232, 255, 0.9);
+  color: var(--rj-text-md);
 }
 
 /* —— 人生信条卡（#10）—— */
 .announcement_content.rj-creed {
   font-size: 15px;
   line-height: 1.8;
-  color: rgba(196,205,255,.88);
+  color: color-mix(in srgb, var(--rj-ink-text-blue) 88%, transparent);
 }
 .announcement_content.rj-creed b {
   display: block;
   margin-top: 6px;
   font-size: 13px;
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
@@ -1273,13 +1273,13 @@ a:hover { color: #6366f1; }
   padding: 6px 8px 2px;
   font-size: 11.5px;
   letter-spacing: .4px;
-  color: rgba(196, 205, 255, 0.82);
-  text-shadow: 0 0 8px rgba(139, 92, 246, 0.6), 0 1px 4px rgba(0, 0, 0, 0.8);
+  color: color-mix(in srgb, var(--rj-ink-text-blue) 82%, transparent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--rj-brand) 60%, transparent), 0 1px 4px var(--rj-on-media-shadow);
   pointer-events: none;
 }
 /* —— 全世界访客分布统计（地球下方累积国旗） —— */
 .rj-globe-stats {
-  border-top: 1px dashed rgba(139, 92, 246, 0.25);
+  border-top: 1px dashed color-mix(in srgb, var(--rj-brand) 25%, transparent);
   margin-top: 8px;
   padding: 8px 10px 10px;
 }
@@ -1287,7 +1287,7 @@ a:hover { color: #6366f1; }
   font-size: 12px;
   font-weight: 600;
   letter-spacing: .5px;
-  color: rgba(226, 232, 255, 0.9);
+  color: var(--rj-text-md);
   margin-bottom: 6px;
 }
 .rj-globe-stats-flags {
@@ -1298,9 +1298,9 @@ a:hover { color: #6366f1; }
 .rj-globe-stat-item {
   font-size: 11.5px;
   line-height: 1.5;
-  color: rgba(226, 232, 255, 0.85);
-  background: rgba(139, 92, 246, 0.12);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: var(--rj-text);
+  background: color-mix(in srgb, var(--rj-brand) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 25%, transparent);
   border-radius: 999px;
   padding: 1px 9px;
   display: inline-flex;
@@ -1312,7 +1312,7 @@ a:hover { color: #6366f1; }
   height: 12px;
   border-radius: 2px;
   vertical-align: -1px;
-  box-shadow: 0 0 4px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--rj-brand) 40%, transparent);
 }
 
 /* 移动端微调 */
@@ -1330,47 +1330,47 @@ a:hover { color: #6366f1; }
    ============================================================ */
 /* —— 分割线：紫系渐变 —— */
 #article-container hr {
-  background: linear-gradient(90deg, transparent, #8b5cf6, #6366f1, transparent);
+  background: linear-gradient(90deg, transparent, var(--rj-brand), var(--rj-brand-2), transparent);
 }
 /* —— 代码块窗口装饰点：紫系三色 —— */
 #article-container pre::before {
   background-image:
-    radial-gradient(circle 5px at 4px 5px, rgba(139,92,246,.9) 100%, transparent),
-    radial-gradient(circle 5px at 22px 5px, rgba(99,102,241,.9) 100%, transparent),
-    radial-gradient(circle 5px at 40px 5px, rgba(167,139,250,.9) 100%, transparent);
+    radial-gradient(circle 5px at 4px 5px, color-mix(in srgb, var(--rj-brand) 90%, transparent) 100%, transparent),
+    radial-gradient(circle 5px at 22px 5px, color-mix(in srgb, var(--rj-brand-2) 90%, transparent) 100%, transparent),
+    radial-gradient(circle 5px at 40px 5px, color-mix(in srgb, var(--rj-brand-3) 90%, transparent) 100%, transparent);
 }
 /* —— 播放器：加载进度 / 滑块 / 当前曲目 / 播放指示 —— */
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
-  background: rgba(139,92,246,.3);
+  background: color-mix(in srgb, var(--rj-brand) 30%, transparent);
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
-  background: #8b5cf6;
-  box-shadow: 0 0 10px rgba(139,92,246,.95);
+  background: var(--rj-brand);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 95%, transparent);
 }
-.aplayer .aplayer-list ol li .aplayer-list-cur { color: #8b5cf6; }
+.aplayer .aplayer-list ol li .aplayer-list-cur { color: var(--rj-brand); }
 .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index::before {
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 12'><rect x='0' y='4' width='2.5' height='8' rx='1' fill='%238b5cf6'/><rect x='5' y='0' width='2.5' height='12' rx='1' fill='%23a78bfa'/><rect x='10' y='2.5' width='2.5' height='9' rx='1' fill='%236366f1'/></svg>") center/contain no-repeat;
 }
 /* —— 正文列表 marker hover：紫 —— */
 #article-container ul li:hover::marker,
-#article-container ol li:hover::marker { color: #8b5cf6; }
+#article-container ol li:hover::marker { color: var(--rj-brand); }
 /* —— 首屏下滑箭头光晕：紫 —— */
-#scroll-down i { text-shadow: 0 0 14px rgba(139,92,246,.65); }
+#scroll-down i { text-shadow: 0 0 14px color-mix(in srgb, var(--rj-brand) 65%, transparent); }
 /* —— 按钮 hover 光晕：紫 —— */
-#card-info-btn:hover { box-shadow: 0 10px 26px rgba(139,92,246,.5); }
+#card-info-btn:hover { box-shadow: 0 10px 26px color-mix(in srgb, var(--rj-brand) 50%, transparent); }
 .btn-beautify a:hover,
-.buttons a:hover { box-shadow: 0 8px 22px rgba(99,102,241,.45); }
+.buttons a:hover { box-shadow: 0 8px 22px color-mix(in srgb, var(--rj-brand-2) 45%, transparent); }
 /* —— 主题 hover 伪变量：紫 —— */
-[data-theme='dark'] { --pseudo-hover: rgba(139,92,246,.5); }
+[data-theme='dark'] { --pseudo-hover: color-mix(in srgb, var(--rj-brand) 50%, transparent); }
 /* —— 分页普通页号边框：紫 —— */
 .pagination .page-number,
-.pagination .space { border-color: rgba(139,92,246,.22); }
+.pagination .space { border-color: color-mix(in srgb, var(--rj-brand) 22%, transparent); }
 /* —— 豆包弹窗：激活态 / 关闭按钮 hover 紫 —— */
 #chat_btn.rj-doubao-btn.rj-doubao-active {
-  border-color: #8b5cf6;
-  box-shadow: 0 0 16px rgba(139,92,246,.6), 0 4px 14px rgba(2,6,23,.5);
+  border-color: var(--rj-brand);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--rj-brand) 60%, transparent), 0 4px 14px var(--rj-shadow-5);
 }
-.rj-doubao-close:hover { background: rgba(139,92,246,.35); }
+.rj-doubao-close:hover { background: color-mix(in srgb, var(--rj-brand) 35%, transparent); }
 
 /* ============================================================
    V12.2 — 文章排版优化补充：图片自适应居中 / 巨图限高 / 表格横滚
@@ -1408,7 +1408,7 @@ a:hover { color: #6366f1; }
   height: 6px;
 }
 #article-container pre::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  background: linear-gradient(90deg, var(--rj-brand), var(--rj-brand-2));
   border-radius: 3px;
 }
 /* —— 列表排版：缩进与间距更透气 —— */
@@ -1450,10 +1450,10 @@ a:hover { color: #6366f1; }
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(620px 420px at 12% 8%, rgba(139, 92, 246, 0.4), transparent 62%),
-    radial-gradient(720px 520px at 88% 16%, rgba(99, 102, 241, 0.34), transparent 62%),
-    radial-gradient(640px 480px at 62% 92%, rgba(34, 211, 238, 0.2), transparent 62%),
-    radial-gradient(520px 420px at 26% 68%, rgba(244, 114, 182, 0.16), transparent 62%);
+    radial-gradient(620px 420px at 12% 8%, color-mix(in srgb, var(--rj-brand) 40%, transparent), transparent 62%),
+    radial-gradient(720px 520px at 88% 16%, color-mix(in srgb, var(--rj-brand-2) 34%, transparent), transparent 62%),
+    radial-gradient(640px 480px at 62% 92%, color-mix(in srgb, var(--rj-accent) 20%, transparent), transparent 62%),
+    radial-gradient(520px 420px at 26% 68%, color-mix(in srgb, var(--rj-accent-3) 16%, transparent), transparent 62%);
   opacity: 0.85;
   mix-blend-mode: screen;
   animation: rjGlowShift 26s ease-in-out infinite alternate;
@@ -1466,15 +1466,15 @@ a:hover { color: #6366f1; }
 
 /* —— 导航栏液态玻璃（含滚动后的紧凑态） —— */
 #nav {
-  background: rgba(15, 18, 32, 0.32) !important;
+  background: color-mix(in srgb, var(--rj-ink-input) 32%, transparent) !important;
   backdrop-filter: blur(32px) saturate(190%);
   -webkit-backdrop-filter: blur(32px) saturate(190%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 10px 40px rgba(2, 6, 23, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid var(--rj-hairline-6);
+  box-shadow: 0 10px 40px var(--rj-shadow-1), inset 0 1px 0 var(--rj-hairline-5);
 }
 #nav.nav-fixed {
-  background: rgba(15, 18, 32, 0.62) !important;
-  box-shadow: 0 12px 44px rgba(2, 6, 23, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, var(--rj-ink-input) 62%, transparent) !important;
+  box-shadow: 0 12px 44px var(--rj-shadow-5), inset 0 1px 0 var(--rj-hairline-6);
 }
 
 /* —— 卡片深液态玻璃：更强透光、内高光、弹性悬停 —— */
@@ -1484,16 +1484,16 @@ a:hover { color: #6366f1; }
 .layout_post > #post,
 #aside-content .card-widget {
   position: relative;
-  background: linear-gradient(145deg, rgba(32, 36, 66, 0.55), rgba(17, 21, 38, 0.38));
+  background: linear-gradient(145deg, var(--rj-surface-raised), color-mix(in srgb, var(--rj-ink-surface-2) 38%, transparent));
   border-radius: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--rj-hairline-7);
   backdrop-filter: blur(36px) saturate(200%);
   -webkit-backdrop-filter: blur(36px) saturate(200%);
   box-shadow:
-    0 4px 14px rgba(2, 6, 23, 0.28),
-    0 18px 50px rgba(2, 6, 23, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 rgba(139, 92, 246, 0.12);
+    0 4px 14px color-mix(in srgb, var(--rj-ink-shadow) 28%, transparent),
+    0 18px 50px var(--rj-shadow-5),
+    inset 0 1px 0 var(--rj-hairline-8),
+    inset 0 -1px 0 color-mix(in srgb, var(--rj-brand) 12%, transparent);
   transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease;
 }
 /* 顶部高光线 */
@@ -1509,17 +1509,17 @@ a:hover { color: #6366f1; }
   top: 0;
   height: 1px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, var(--rj-hairline-10), transparent);
 }
 #recent-posts > .recent-post-item:hover,
 #aside-content .card-widget:hover {
   transform: translateY(-5px) scale(1.012);
-  border-color: rgba(139, 92, 246, 0.55);
+  border-color: color-mix(in srgb, var(--rj-brand) 55%, transparent);
   box-shadow:
-    0 12px 32px rgba(88, 28, 135, 0.32),
-    0 26px 70px rgba(2, 6, 23, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 0 34px rgba(139, 92, 246, 0.22);
+    0 12px 32px color-mix(in srgb, var(--rj-ink-glow) 32%, transparent),
+    0 26px 70px var(--rj-shadow-7),
+    inset 0 1px 0 color-mix(in srgb, var(--rj-ink-hairline) 22%, transparent),
+    0 0 34px color-mix(in srgb, var(--rj-brand) 22%, transparent);
 }
 
 /* —— 玻璃按钮：内高光 + 光泽扫过 —— */
@@ -1529,9 +1529,9 @@ a:hover { color: #6366f1; }
   position: relative;
   overflow: hidden;
   box-shadow:
-    0 6px 20px rgba(139, 92, 246, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -3px 8px rgba(49, 46, 129, 0.35);
+    0 6px 20px color-mix(in srgb, var(--rj-brand) 40%, transparent),
+    inset 0 1px 0 var(--rj-hairline-9),
+    inset 0 -3px 8px color-mix(in srgb, var(--rj-ink-glow-2) 35%, transparent);
 }
 #card-info-btn::after,
 .btn-beautify a::after,
@@ -1543,7 +1543,7 @@ a:hover { color: #6366f1; }
   width: 42%;
   height: 100%;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, var(--rj-hairline-9), transparent);
   transform: skewX(-20deg);
   animation: rjShine 3.4s ease-in-out infinite;
 }
@@ -1556,52 +1556,52 @@ a:hover { color: #6366f1; }
 #aside-content .card-info .author-info__avatar img,
 #aside-content .card-info .avatar-img {
   border-radius: 50% !important;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid var(--rj-hairline-9);
   box-shadow:
-    0 0 0 5px rgba(139, 92, 246, 0.22),
-    0 10px 28px rgba(2, 6, 23, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 0 0 5px color-mix(in srgb, var(--rj-brand) 22%, transparent),
+    0 10px 28px var(--rj-shadow-4),
+    inset 0 1px 0 color-mix(in srgb, var(--rj-ink-hairline) 30%, transparent);
 }
 
 /* —— 右侧悬浮按钮玻璃化 —— */
 #rightside > div > button {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: var(--rj-hairline-3) !important;
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 16px rgba(2, 6, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--rj-hairline-8);
+  box-shadow: 0 4px 16px var(--rj-shadow-2), inset 0 1px 0 var(--rj-hairline-8);
 }
 
 /* —— 播放器 / 豆包弹窗 / 搜索弹窗：内高光加强 —— */
 .aplayer.aplayer-fixed .aplayer-body {
   box-shadow:
-    0 10px 38px rgba(0, 0, 0, 0.55),
-    0 0 34px rgba(139, 92, 246, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 10px 38px var(--rj-shadow-cast-3),
+    0 0 34px color-mix(in srgb, var(--rj-brand) 30%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--rj-ink-hairline) 20%, transparent);
 }
 #rj-doubao-panel {
   box-shadow:
-    0 14px 46px rgba(2, 6, 23, 0.65),
-    0 0 34px rgba(139, 92, 246, 0.36),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 14px 46px color-mix(in srgb, var(--rj-ink-shadow) 65%, transparent),
+    0 0 34px color-mix(in srgb, var(--rj-brand) 36%, transparent),
+    inset 0 1px 0 var(--rj-hairline-8);
 }
 .search-dialog {
   box-shadow:
-    0 24px 70px rgba(2, 6, 23, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 24px 70px color-mix(in srgb, var(--rj-ink-shadow) 65%, transparent),
+    inset 0 1px 0 var(--rj-hairline-8);
 }
 
 /* —— 侧栏菜单玻璃化 —— */
 #sidebar #sidebar-menus {
-  background: linear-gradient(145deg, rgba(32, 36, 66, 0.55), rgba(17, 21, 38, 0.4)) !important;
+  background: linear-gradient(145deg, var(--rj-surface-raised), color-mix(in srgb, var(--rj-ink-surface-2) 40%, transparent)) !important;
   border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--rj-hairline-6);
+  box-shadow: inset 0 1px 0 var(--rj-hairline-6);
 }
 
 /* —— 文章头图玻璃化（页面头图容器） —— */
 #page-header.post-bg {
-  box-shadow: inset 0 -60px 120px rgba(2, 6, 23, 0.45);
+  box-shadow: inset 0 -60px 120px var(--rj-shadow-4);
 }
 
 /* 移动端：降低模糊半径保性能，圆角同步 */
@@ -1626,25 +1626,25 @@ a:hover { color: #6366f1; }
    ============================================================ */
 /* 控制器所有图标（上一首/下一首/列表/模式等）：统一渐变紫（SVG path 填充主题紫，悬停加深） */
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon path {
-  fill: #8b5cf6;
+  fill: var(--rj-brand);
 }
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path {
-  fill: #6366f1;
+  fill: var(--rj-brand-2);
 }
 /* 列表面板中的播放/暂停小图标 */
 .aplayer .aplayer-list ol li .aplayer-icon path,
 .aplayer .aplayer-list ol li .aplayer-list-cur {
-  fill: #8b5cf6;
-  color: #8b5cf6;
+  fill: var(--rj-brand);
+  color: var(--rj-brand);
 }
 /* 进度条：滑块与已播渐变紫强化（按钮态反馈） */
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
-  background: linear-gradient(90deg, #8b5cf6, #6366f1);
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.8);
+  background: linear-gradient(90deg, var(--rj-brand), var(--rj-brand-2));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--rj-brand) 80%, transparent);
 }
 .aplayer-row .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
-  box-shadow: 0 0 12px rgba(139, 92, 246, 1);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 100%, transparent);
   transform: scale(0.8);
 }
 
@@ -1657,7 +1657,7 @@ a:hover { color: #6366f1; }
 #nav #menus .site-page {
   padding: 6px 14px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #f3e8ff 0%, #c4b5fd 35%, #8b5cf6 70%, #6366f1 100%);
+  background: linear-gradient(135deg, var(--rj-brand-6) 0%, var(--rj-brand-4) 35%, var(--rj-brand) 70%, var(--rj-brand-2) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1667,16 +1667,16 @@ a:hover { color: #6366f1; }
   transition: all .32s cubic-bezier(.34, 1.56, .64, 1);
 }
 #nav #menus .site-page:hover {
-  background: rgba(139, 92, 246, .16);
+  background: color-mix(in srgb, var(--rj-brand) 16%, transparent);
   -webkit-background-clip: initial;
   background-clip: initial;
-  -webkit-text-fill-color: #fff;
-  color: #fff;
+  -webkit-text-fill-color: var(--rj-text-inverse);
+  color: var(--rj-text-inverse);
   box-shadow:
-    0 0 0 1px rgba(139, 92, 246, .45),
-    0 0 20px rgba(139, 92, 246, .4),
-    0 6px 18px rgba(2, 6, 23, .35),
-    inset 0 1px 0 rgba(255, 255, 255, .3);
+    0 0 0 1px color-mix(in srgb, var(--rj-brand) 45%, transparent),
+    0 0 20px color-mix(in srgb, var(--rj-brand) 40%, transparent),
+    0 6px 18px var(--rj-shadow-2),
+    inset 0 1px 0 color-mix(in srgb, var(--rj-ink-hairline) 30%, transparent);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   transform: translateY(-1px);
@@ -1684,19 +1684,19 @@ a:hover { color: #6366f1; }
 /* 导航图标：渐变紫 + 光晕，hover 弹性上浮 */
 #nav #menus .site-page i,
 #nav .menus_item_child .site-page i {
-  background: linear-gradient(135deg, #c4b5fd, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, var(--rj-brand-4), var(--rj-brand), var(--rj-brand-2));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 0 8px rgba(139, 92, 246, .55));
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--rj-brand) 55%, transparent));
   transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), filter .3s ease;
 }
 #nav #menus .site-page:hover i {
   transform: translateY(-2px) scale(1.18);
-  filter: drop-shadow(0 0 14px rgba(139, 92, 246, 1));
-  -webkit-text-fill-color: #fff;
-  color: #fff;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--rj-brand) 100%, transparent));
+  -webkit-text-fill-color: var(--rj-text-inverse);
+  color: var(--rj-text-inverse);
 }
 /* —— 下拉菜单：iOS27 弹性弹出动画 —— */
 #nav .menus_item_child {
@@ -1709,14 +1709,14 @@ a:hover { color: #6366f1; }
 }
 /* —— 打字副标题：iOS27 玻璃渐变字 + 高光 —— */
 #site-subtitle #subtitle {
-  background: linear-gradient(135deg, #f3e8ff 0%, #c4b5fd 38%, #8b5cf6 72%, #6366f1 100%);
+  background: linear-gradient(135deg, var(--rj-brand-6) 0%, var(--rj-brand-4) 38%, var(--rj-brand) 72%, var(--rj-brand-2) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
   font-weight: 600;
   letter-spacing: .6px;
-  filter: drop-shadow(0 2px 16px rgba(139, 92, 246, .6));
+  filter: drop-shadow(0 2px 16px color-mix(in srgb, var(--rj-brand) 60%, transparent));
 }
 /* —— 打字光标：渐变紫玻璃竖条 + 呼吸闪烁 —— */
 #site-subtitle .typed-cursor {
@@ -1728,8 +1728,8 @@ a:hover { color: #6366f1; }
   margin-left: 5px;
   vertical-align: -0.12em;
   border-radius: 3px;
-  background: linear-gradient(180deg, #e9d5ff, #8b5cf6, #6366f1);
-  box-shadow: 0 0 14px rgba(139, 92, 246, .9);
+  background: linear-gradient(180deg, var(--rjp-violet-pale), var(--rj-brand), var(--rj-brand-2));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--rj-brand) 90%, transparent);
   animation: rjCursorBlink 1.1s ease-in-out infinite;
 }
 @keyframes rjCursorBlink {
@@ -1743,58 +1743,58 @@ a:hover { color: #6366f1; }
    ============================================================ */
 /* —— 站内搜索弹窗 —— */
 .search-dialog {
-  background: rgba(19, 23, 40, 0.86);
-  color: rgba(226, 232, 255, 0.85);
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  background: var(--rj-surface-solid);
+  color: var(--rj-text);
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 40%, transparent);
   border-radius: 18px;
   backdrop-filter: saturate(150%) blur(22px);
   -webkit-backdrop-filter: saturate(150%) blur(22px);
-  box-shadow: 0 16px 48px rgba(2, 6, 23, 0.6), 0 0 26px rgba(139, 92, 246, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 48px var(--rj-shadow-7), 0 0 26px color-mix(in srgb, var(--rj-brand) 28%, transparent), inset 0 1px 0 var(--rj-hairline-5);
 }
 .search-dialog .search-dialog-title {
-  color: rgba(226, 232, 255, 0.9);
+  color: var(--rj-text-md);
   font-weight: 600;
 }
 .search-dialog .search-close-button {
-  color: rgba(226, 232, 255, 0.7);
+  color: color-mix(in srgb, var(--rj-ink-text) 70%, transparent);
 }
 .search-dialog .search-close-button:hover {
-  color: #ffffff;
+  color: var(--rj-text-inverse);
 }
 .search-dialog .local-search-box input {
-  background: rgba(15, 18, 32, 0.55);
-  border: 2px solid rgba(139, 92, 246, 0.35);
-  color: rgba(226, 232, 255, 0.92);
+  background: var(--rj-surface-input);
+  border: 2px solid color-mix(in srgb, var(--rj-brand) 35%, transparent);
+  color: color-mix(in srgb, var(--rj-ink-text) 92%, transparent);
   border-radius: 999px;
-  box-shadow: inset 0 1px 4px rgba(2, 6, 23, 0.4);
+  box-shadow: inset 0 1px 4px var(--rj-shadow-3);
   transition: border-color .2s ease, box-shadow .2s ease;
 }
 .search-dialog .local-search-box input:focus {
-  border-color: rgba(139, 92, 246, 0.7);
-  box-shadow: 0 0 14px rgba(139, 92, 246, 0.35), inset 0 1px 4px rgba(2, 6, 23, 0.4);
+  border-color: color-mix(in srgb, var(--rj-brand) 70%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--rj-brand) 35%, transparent), inset 0 1px 4px var(--rj-shadow-3);
 }
 .search-dialog .local-search__hit-item a {
-  color: rgba(226, 232, 255, 0.88);
+  color: color-mix(in srgb, var(--rj-ink-text) 88%, transparent);
 }
 .search-dialog .local-search__hit-item a:hover {
-  color: #a78bfa;
+  color: var(--rj-brand-3);
 }
 .search-dialog .local-search__hit-item:before {
-  border-color: rgba(139, 92, 246, 0.5);
+  border-color: color-mix(in srgb, var(--rj-brand) 50%, transparent);
 }
 .search-dialog .local-search__hit-item:hover:before {
-  border-color: #a78bfa;
+  border-color: var(--rj-brand-3);
 }
 .search-dialog .search-keyword {
-  color: #f472b6;
+  color: var(--rj-accent-3);
 }
 .search-dialog .search-result {
-  color: rgba(226, 232, 255, 0.6);
+  color: color-mix(in srgb, var(--rj-ink-text) 60%, transparent);
 }
 
 /* —— 图片灯箱（fancybox v3）卡片化 —— */
 .fancybox-bg {
-  background: rgba(2, 6, 23, 0.88);
+  background: color-mix(in srgb, var(--rj-ink-shadow) 88%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -1804,20 +1804,20 @@ a:hover { color: #6366f1; }
   border-radius: 18px;
 }
 .fancybox-slide--image .fancybox-content img {
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  box-shadow: 0 18px 60px rgba(2, 6, 23, 0.7), 0 0 30px rgba(139, 92, 246, 0.3);
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 40%, transparent);
+  box-shadow: 0 18px 60px color-mix(in srgb, var(--rj-ink-shadow) 70%, transparent), 0 0 30px color-mix(in srgb, var(--rj-brand) 30%, transparent);
 }
 .fancybox-close-small {
-  color: rgba(226, 232, 255, 0.8);
-  background: rgba(19, 23, 40, 0.6);
+  color: color-mix(in srgb, var(--rj-ink-text) 80%, transparent);
+  background: var(--rj-overlay-strong);
   border-radius: 50%;
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 40%, transparent);
 }
 .fancybox-navigation .fancybox-button {
-  background: rgba(19, 23, 40, 0.6);
-  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: var(--rj-overlay-strong);
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 35%, transparent);
   border-radius: 12px;
-  color: rgba(226, 232, 255, 0.85);
+  color: var(--rj-text);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -1835,9 +1835,9 @@ a:hover { color: #6366f1; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.85), rgba(139, 92, 246, 0.65) 55%, rgba(34, 211, 238, 0.5));
-  border: 2px solid rgba(216, 195, 255, 0.9);
-  box-shadow: 0 0 26px rgba(139, 92, 246, 0.75), inset 0 0 16px rgba(255, 255, 255, 0.18);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rj-brand-3) 85%, transparent), color-mix(in srgb, var(--rj-brand) 65%, transparent) 55%, color-mix(in srgb, var(--rj-accent) 50%, transparent));
+  border: 2px solid color-mix(in srgb, var(--rj-brand-8) 90%, transparent);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--rj-brand) 75%, transparent), inset 0 0 16px var(--rj-hairline-8);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
@@ -1846,13 +1846,13 @@ a:hover { color: #6366f1; }
 }
 .aplayer-row .rj-pic-btn:hover {
   transform: translate(-50%, -50%) scale(1.1);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.85), inset 0 0 14px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--rj-brand) 85%, transparent), inset 0 0 14px color-mix(in srgb, var(--rj-ink-hairline) 15%, transparent);
 }
 .aplayer-row .rj-pic-btn svg {
   width: 30px;
   height: 30px;
-  fill: #ffffff;
-  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.95));
+  fill: var(--rj-text-inverse);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--rj-brand) 95%, transparent));
 }
 /* 折叠态强制显示封面中央按钮 */
 .aplayer-mini .rj-pic-btn {
@@ -1876,11 +1876,11 @@ a:hover { color: #6366f1; }
   height: 26px !important;
 }
 .aplayer .aplayer-icon path {
-  fill: #a78bfa;
+  fill: var(--rj-brand-3);
   transition: fill 0.2s ease;
 }
 .aplayer .aplayer-icon:hover path {
-  fill: #ffffff;
+  fill: var(--rj-text-inverse);
 }
 
 /* —— 播放器 v1.1.20：展开态自定义控制条（主题紫圆钮排版）—— */
@@ -1899,8 +1899,8 @@ a:hover { color: #6366f1; }
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  border: 1px solid rgba(167, 139, 250, 0.55);
-  background: rgba(139, 92, 246, 0.16);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 55%, transparent);
+  background: color-mix(in srgb, var(--rj-brand) 16%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1909,29 +1909,29 @@ a:hover { color: #6366f1; }
   transition: background 0.2s ease, transform 0.15s ease;
 }
 .aplayer-row .rj-controls .rj-ctl:hover {
-  background: rgba(139, 92, 246, 0.42);
+  background: color-mix(in srgb, var(--rj-brand) 42%, transparent);
   transform: scale(1.08);
 }
 .aplayer-row .rj-controls .rj-ctl svg {
   width: 18px;
   height: 18px;
-  fill: #a78bfa;
+  fill: var(--rj-brand-3);
   transition: fill 0.2s ease;
 }
 .aplayer-row .rj-controls .rj-ctl:hover svg {
-  fill: #ffffff;
+  fill: var(--rj-text-inverse);
 }
 .aplayer-row .rj-controls .rj-ctl.rj-ctl-play {
   width: 46px;
   height: 46px;
-  background: linear-gradient(135deg, #a78bfa, #7c5cf5);
-  border-color: rgba(216, 195, 255, 0.9);
-  box-shadow: 0 0 16px rgba(139, 92, 246, 0.55);
+  background: linear-gradient(135deg, var(--rj-brand-3), var(--rjp-purple-alt));
+  border-color: color-mix(in srgb, var(--rj-brand-8) 90%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--rj-brand) 55%, transparent);
 }
 .aplayer-row .rj-controls .rj-ctl.rj-ctl-play svg {
   width: 22px;
   height: 22px;
-  fill: #ffffff;
+  fill: var(--rj-text-inverse);
 }
 /* 隐藏 APlayer 原生竖排按钮（列表/音量/循环），保留右下角折叠入口 */
 .aplayer .aplayer-menu,
@@ -1951,14 +1951,14 @@ a:hover { color: #6366f1; }
   height: 42px;
   margin: 6px 0;
   border-radius: 50%;
-  border: 1px solid rgba(167, 139, 250, 0.35);
-  background: rgba(15, 18, 32, 0.55);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 35%, transparent);
+  background: var(--rj-surface-input);
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
-  color: #a78bfa;
+  color: var(--rj-brand-3);
   font-size: 17px;
   line-height: 40px;
-  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 14px var(--rj-shadow-2), inset 0 1px 0 var(--rj-hairline-2);
   transition: all 0.25s ease;
 }
 #rightside > div > button i,
@@ -1967,10 +1967,10 @@ a:hover { color: #6366f1; }
 }
 #rightside > div > button:hover,
 #rightside > div > a:hover {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important;
   border-color: transparent;
-  color: #fff !important;
-  box-shadow: 0 0 18px rgba(139, 92, 246, 0.6), 0 4px 14px rgba(2, 6, 23, 0.4);
+  color: var(--rj-text-inverse) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--rj-brand) 60%, transparent), 0 4px 14px var(--rj-shadow-3);
   transform: translateY(-2px);
 }
 /* 豆包按钮并入统一容器（头像保留） */
@@ -1980,13 +1980,13 @@ a:hover { color: #6366f1; }
   margin: 6px 0;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(167, 139, 250, 0.5);
-  background: rgba(15, 18, 32, 0.55);
-  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.35), 0 0 14px rgba(139, 92, 246, 0.45);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
+  background: var(--rj-surface-input);
+  box-shadow: 0 4px 14px var(--rj-shadow-2), 0 0 14px color-mix(in srgb, var(--rj-brand) 45%, transparent);
 }
 #rightside #chat_btn.rj-doubao-btn:hover {
-  background: rgba(139, 92, 246, 0.35);
-  border-color: rgba(167, 139, 250, 0.85);
+  background: color-mix(in srgb, var(--rj-brand) 35%, transparent);
+  border-color: color-mix(in srgb, var(--rj-brand-3) 85%, transparent);
   transform: translateY(-2px);
 }
 #chat_btn.rj-doubao-btn .rj-doubao-avatar {
@@ -2006,7 +2006,7 @@ a:hover { color: #6366f1; }
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(180deg, rgba(2, 6, 23, 0.5) 0%, rgba(15, 18, 32, 0.78) 100%);
+  background: linear-gradient(180deg, var(--rj-shadow-5) 0%, color-mix(in srgb, var(--rj-ink-input) 78%, transparent) 100%);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
@@ -2025,11 +2025,11 @@ a:hover { color: #6366f1; }
   font-weight: 800;
   letter-spacing: 0.6px;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, #ffffff 10%, #c4b5fd 52%, #67e8f9 96%);
+  background: linear-gradient(135deg, var(--rj-text-inverse) 10%, var(--rj-brand-4) 52%, var(--rj-accent-2) 96%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 6px 30px rgba(139, 92, 246, 0.4);
+  text-shadow: 0 6px 30px color-mix(in srgb, var(--rj-brand) 40%, transparent);
 }
 #post-meta {
   display: flex;
@@ -2043,23 +2043,23 @@ a:hover { color: #6366f1; }
   align-items: center;
   gap: 6px;
   padding: 5px 14px;
-  border: 1px solid rgba(167, 139, 250, 0.4);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 40%, transparent);
   border-radius: 999px;
-  background: rgba(15, 18, 32, 0.55);
+  background: var(--rj-surface-input);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  color: rgba(226, 232, 255, 0.85);
+  color: var(--rj-text);
   font-size: 0.86em;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 var(--rj-hairline-2);
 }
-#post-meta .post-meta-icon { color: #a78bfa; }
+#post-meta .post-meta-icon { color: var(--rj-brand-3); }
 #post-meta .post-meta-separator { display: none; }
-#post-meta .post-meta-label { color: rgba(196, 181, 253, 0.8); }
+#post-meta .post-meta-label { color: color-mix(in srgb, var(--rj-brand-4) 80%, transparent); }
 /* —— 正文卡片：顶部霓虹渐变条 + 留白 —— */
 .layout_post > #post {
   padding: 38px 42px 52px;
   position: relative;
-  background: linear-gradient(180deg, rgba(23, 27, 48, 0.94), rgba(15, 18, 32, 0.92));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rj-ink-surface-3) 94%, transparent), color-mix(in srgb, var(--rj-ink-input) 92%, transparent));
 }
 .layout_post > #post::before {
   content: '';
@@ -2069,20 +2069,20 @@ a:hover { color: #6366f1; }
   right: 24px;
   height: 3px;
   border-radius: 0 0 6px 6px;
-  background: linear-gradient(90deg, #8b5cf6, #22d3ee, #8b5cf6);
+  background: linear-gradient(90deg, var(--rj-brand), var(--rj-accent), var(--rj-brand));
   opacity: 0.9;
 }
 #article-container { padding-top: 6px; }
 /* —— 图片：霓虹玻璃相框 —— */
 #article-container img {
   border-radius: 12px;
-  border: 1px solid rgba(167, 139, 250, 0.3);
-  box-shadow: 0 8px 28px rgba(2, 6, 23, 0.45), 0 0 18px rgba(139, 92, 246, 0.14);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 30%, transparent);
+  box-shadow: 0 8px 28px var(--rj-shadow-4), 0 0 18px color-mix(in srgb, var(--rj-brand) 14%, transparent);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 #article-container img:hover {
   transform: scale(1.015);
-  box-shadow: 0 10px 34px rgba(2, 6, 23, 0.55), 0 0 26px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 10px 34px var(--rj-shadow-6), 0 0 26px color-mix(in srgb, var(--rj-brand) 30%, transparent);
 }
 /* —— 列表：紫色标记 + 间距 —— */
 #article-container ul,
@@ -2091,21 +2091,21 @@ a:hover { color: #6366f1; }
   margin-bottom: 18px;
 }
 #article-container li { margin-bottom: 6px; }
-#article-container ul li::marker { color: #a78bfa; }
-#article-container ol li::marker { color: #22d3ee; font-weight: 700; }
+#article-container ul li::marker { color: var(--rj-brand-3); }
+#article-container ol li::marker { color: var(--rj-accent); font-weight: 700; }
 /* —— 引用块：渐变底 + 霓虹侧边 —— */
 #article-container blockquote {
   border-left: 4px solid transparent;
-  border-image: linear-gradient(180deg, #8b5cf6, #22d3ee) 1;
+  border-image: linear-gradient(180deg, var(--rj-brand), var(--rj-accent)) 1;
   border-radius: 10px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(34, 211, 238, 0.06));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rj-brand) 12%, transparent), color-mix(in srgb, var(--rj-accent) 6%, transparent));
   padding: 14px 18px;
   margin: 22px 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 0 var(--rj-hairline-1);
 }
 /* —— 强调文字 —— */
 #article-container strong {
-  color: #c4b5fd;
+  color: var(--rj-brand-4);
   font-weight: 700;
 }
 /* —— 分隔线：霓虹渐变 —— */
@@ -2115,7 +2115,7 @@ a:hover { color: #6366f1; }
   margin: 30px auto;
   border-radius: 2px;
   max-width: 70%;
-  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.7), rgba(34, 211, 238, 0.7), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rj-brand) 70%, transparent), color-mix(in srgb, var(--rj-accent) 70%, transparent), transparent);
 }
 /* —— 移动端适配 —— */
 @media screen and (max-width: 768px) {
@@ -2129,15 +2129,15 @@ a:hover { color: #6366f1; }
    ============================================================ */
 #rj-doubao-panel {
   border-radius: 24px;
-  border: 1px solid rgba(167, 139, 250, 0.55);
-  background: linear-gradient(180deg, rgba(23, 27, 48, 0.92), rgba(13, 16, 32, 0.94));
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 55%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rj-ink-surface-3) 92%, transparent), color-mix(in srgb, var(--rj-ink-input-2) 94%, transparent));
   backdrop-filter: blur(32px) saturate(190%);
   -webkit-backdrop-filter: blur(32px) saturate(190%);
   box-shadow:
-    0 6px 18px rgba(2, 6, 23, 0.4),
-    0 26px 70px rgba(2, 6, 23, 0.6),
-    0 0 34px rgba(139, 92, 246, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 6px 18px var(--rj-shadow-3),
+    0 26px 70px var(--rj-shadow-7),
+    0 0 34px color-mix(in srgb, var(--rj-brand) 38%, transparent),
+    inset 0 1px 0 var(--rj-hairline-5);
 }
 /* 顶部霓虹渐变条 */
 #rj-doubao-panel::before {
@@ -2148,7 +2148,7 @@ a:hover { color: #6366f1; }
   right: 18px;
   height: 3px;
   border-radius: 0 0 6px 6px;
-  background: linear-gradient(90deg, #8b5cf6, #22d3ee, #8b5cf6);
+  background: linear-gradient(90deg, var(--rj-brand), var(--rj-accent), var(--rj-brand));
   opacity: 0.95;
   z-index: 2;
   pointer-events: none;
@@ -2157,17 +2157,17 @@ a:hover { color: #6366f1; }
 .rj-doubao-head {
   padding: 12px 16px 10px;
   gap: 10px;
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.32), rgba(34, 211, 238, 0.14));
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand) 32%, transparent), color-mix(in srgb, var(--rj-accent) 14%, transparent));
+  border-bottom: 1px solid var(--rj-hairline-4);
 }
 .rj-doubao-head-avatar {
   width: 28px;
   height: 28px;
-  border: 1px solid rgba(167, 139, 250, 0.5);
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.45);
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 45%, transparent);
 }
 .rj-doubao-head span {
-  background: linear-gradient(135deg, #ffffff, #c4b5fd);
+  background: linear-gradient(135deg, var(--rj-text-inverse), var(--rj-brand-4));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2180,16 +2180,16 @@ a:hover { color: #6366f1; }
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(148, 163, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--rj-border-strong);
+  border: 1px solid var(--rj-hairline-4);
   font-size: 15px;
   transition: all 0.2s ease;
 }
 .rj-doubao-close:hover {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
   border-color: transparent;
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.55);
-  color: #ffffff;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 55%, transparent);
+  color: var(--rj-text-inverse);
 }
 /* iframe 底部圆角衔接 */
 .rj-doubao-frame {
@@ -2199,4 +2199,118 @@ a:hover { color: #6366f1; }
 @media (max-width: 767px) {
   #rj-doubao-panel { border-radius: 20px; }
   .rj-doubao-frame { border-radius: 0 0 20px 20px; }
+}
+
+/* ============================================================
+   P1 — 亮色模式专项层
+   暗色玻璃体系在浅底上会失效：深色背景图透过半透明卡片发灰、
+   霓虹色对比度不足。本层只做亮色覆盖，暗色表现零影响。
+   取值全部来自 tokens.css，不引入颜色字面量。
+   ============================================================ */
+[data-theme='light'] {
+  /* Butterfly 主题变量（暗色版只在 [data-theme='dark'] 定义过） */
+  --global-bg: var(--rj-bg);
+  --card-bg: var(--rj-surface-solid);
+  --font-color: var(--rj-text-soft);
+  --btn-bg: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  --btn-hover-color: color-mix(in srgb, var(--rj-brand) 70%, transparent);
+  --text-bg-hover: color-mix(in srgb, var(--rj-brand) 14%, transparent);
+  --pseudo-hover: color-mix(in srgb, var(--rj-brand) 60%, transparent);
+  --scrollbar-color: color-mix(in srgb, var(--rj-brand) 40%, transparent);
+  --card-box-shadow: 0 2px 8px color-mix(in srgb, var(--rj-ink-shadow) 8%, transparent);
+  --card-hover-box-shadow: 0 12px 32px color-mix(in srgb, var(--rj-ink-shadow) 14%, transparent);
+  --blockquote-color: var(--rj-text-quote);
+  --blockquote-bg: color-mix(in srgb, var(--rj-brand) 5%, transparent);
+}
+
+/* 画布：暗色背景图 → 浅色光斑底 */
+[data-theme='light'] #web_bg {
+  background:
+    radial-gradient(920px 640px at 6% -4%, var(--rj-bg-tint-1), transparent 62%),
+    radial-gradient(840px 580px at 94% 4%, var(--rj-bg-tint-2), transparent 64%),
+    radial-gradient(780px 540px at 48% 104%, var(--rj-bg-tint-3), transparent 62%),
+    var(--rj-bg);
+}
+
+/* 光斑层：screen 在白底上无效，改 multiply 做柔和染色 */
+[data-theme='light'] #web_bg::after {
+  mix-blend-mode: multiply;
+  opacity: 0.30;
+}
+
+/* 导航栏：深色玻璃 → 白色玻璃 */
+[data-theme='light'] #nav,
+[data-theme='light'] #nav.nav-fixed {
+  background: color-mix(in srgb, var(--rjp-white) 90%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--rj-ink-border) 8%, transparent);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--rj-ink-shadow) 8%, transparent), inset 0 1px 0 var(--rjp-white);
+}
+[data-theme='light'] #nav .site-name,
+[data-theme='light'] #nav a,
+[data-theme='light'] #nav #search-button {
+  color: var(--rj-text-strong);
+}
+[data-theme='light'] #nav .menus_item_child {
+  background: color-mix(in srgb, var(--rjp-white) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rj-ink-border) 10%, transparent);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--rj-ink-shadow) 12%, transparent);
+}
+[data-theme='light'] #nav .menus_item_child a:hover {
+  background: color-mix(in srgb, var(--rj-brand) 10%, transparent);
+}
+
+/* 卡片：提高不透明度，让浅底不被深图污染 */
+[data-theme='light'] #recent-posts > .recent-post-item,
+[data-theme='light'] .layout_page > div:first-child:not(.recent-posts),
+[data-theme='light'] .layout_post > #page,
+[data-theme='light'] .layout_post > #post,
+[data-theme='light'] #aside-content .card-widget {
+  background: linear-gradient(145deg, var(--rj-surface-solid), var(--rj-surface-raised));
+  border-color: color-mix(in srgb, var(--rj-ink-border) 10%, transparent);
+  box-shadow:
+    0 1px 3px color-mix(in srgb, var(--rj-ink-shadow) 6%, transparent),
+    0 10px 30px color-mix(in srgb, var(--rj-ink-shadow) 8%, transparent),
+    inset 0 1px 0 var(--rjp-white);
+}
+[data-theme='light'] #recent-posts > .recent-post-item:hover,
+[data-theme='light'] #aside-content .card-widget:hover {
+  border-color: color-mix(in srgb, var(--rj-brand) 35%, transparent);
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--rj-brand) 16%, transparent),
+    0 18px 46px color-mix(in srgb, var(--rj-ink-shadow) 10%, transparent);
+}
+
+/* 图标组与悬浮按钮 */
+[data-theme='light'] #rightside > div > button,
+[data-theme='light'] #rightside > div > a {
+  background: color-mix(in srgb, var(--rjp-white) 86%, transparent);
+  color: var(--rj-text-md);
+  border: 1px solid color-mix(in srgb, var(--rj-ink-border) 10%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--rj-ink-shadow) 10%, transparent);
+}
+[data-theme='light'] #rightside > div > button:hover {
+  color: var(--rj-text-inverse);
+}
+
+/* 排版细节：浅底上不要发光描边 */
+[data-theme='light'] .post-title,
+[data-theme='light'] #site-title {
+  text-shadow: none;
+}
+
+/* 页脚：浅紫渐变 + 白字 = 对比度不足，亮色下改深紫实底 */
+[data-theme='light'] #footer {
+  background: linear-gradient(-45deg, var(--rj-brand), var(--rj-brand-2), color-mix(in srgb, var(--rj-brand) 78%, var(--rj-brand-3)), var(--rj-brand-2));
+  background-size: 400% 400%;
+}
+[data-theme='light'] #footer,
+[data-theme='light'] #footer .copyright,
+[data-theme='light'] #footer .framework-info {
+  color: color-mix(in srgb, var(--rjp-white) 92%, transparent);
+}
+[data-theme='light'] .framework-info a {
+  color: color-mix(in srgb, var(--rjp-white) 88%, transparent);
+}
+[data-theme='light'] .framework-info a:hover {
+  color: var(--rjp-white);
 }

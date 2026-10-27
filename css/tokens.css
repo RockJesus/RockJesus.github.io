@@ -1,0 +1,320 @@
+/* ============================================================
+   RockJesus.cn — Design Tokens（设计令牌层）
+   ------------------------------------------------------------
+   三层结构：
+     Tier 1  Primitive  原始色板    --rjp-*    永不在组件里直接用
+     Tier 2  Semantic   语义令牌    --rj-*     组件只消费这一层
+     Tier 3  Component  组件令牌    （按需，见文件末）
+
+   规则：
+     1. custom.css 不得再出现颜色字面量，只允许 var(--rj-*) / color-mix(--rj-*)
+     2. 新增颜色 → 先进 Tier 1，再在 Tier 2 建立语义映射
+     3. 双模式：:root 与 [data-theme='dark'] 等价（站点默认暗色）；
+        [data-theme='light'] 覆盖语义层，Tier 1 不变
+     4. 叠在封面图/视频上的文字用 --rj-on-media-*，两种模式都不跟随主题
+     5. 品牌色透明度统一用 color-mix()，不新增 alpha 令牌
+   ============================================================ */
+
+/* ---------- Tier 1 · 原始色板 ---------- */
+:root {
+  /* 品牌紫（Follow Me 渐变主色） */
+  --rjp-purple:      #8b5cf6;
+  --rjp-indigo:      #6366f1;
+
+  /* 品牌紫的浅色阶 */
+  --rjp-violet:      #a78bfa;
+  --rjp-violet-lt:   #c4b5fd;
+  --rjp-violet-lilac:#d8c3ff;
+  --rjp-violet-xl:   #e0d7ff;
+  --rjp-violet-2xl:  #f3e8ff;
+  --rjp-violet-3xl:  #f0e9ff;
+  --rjp-violet-ice:  #d8deff;
+
+  /* 辅助色（霓虹青 / 霓虹粉） */
+  --rjp-cyan:        #22d3ee;
+  --rjp-cyan-lt:     #67e8f9;
+  --rjp-pink:        #f472b6;
+  --rjp-fuchsia:     #f0abfc;
+
+  /* 中性色 */
+  --rjp-slate-200:   #e2e8f0;
+  --rjp-slate-500:   #64748b;
+  --rjp-purple-alt:  #7c5cf5;
+  --rjp-violet-pale: #e9d5ff;
+  --rjp-slate-300:   #cbd5e1;
+  --rjp-ink-900:     #070a14;
+  --rjp-white:       #ffffff;
+
+  /* 浅色模式专用中性色 */
+  --rjp-paper-100:   #eef0f9;
+  --rjp-graphite-900:#14162b;
+}
+
+/* ============================================================
+   Tier 2 · 语义令牌
+   ============================================================ */
+
+/* ---------- 品牌语义（双模式常量，不随主题偏移） ---------- */
+:root {
+  /* 主品牌紫：暗色 #8b5cf6；亮色加深到 #7c3aed 以保证白字按钮 ≥4.5:1 */
+  --rj-brand:        var(--rjp-purple);
+  --rj-brand-2:      var(--rjp-indigo);
+  --rj-brand-3:      var(--rjp-violet);
+  --rj-brand-4:      var(--rjp-violet-lt);
+  --rj-brand-5:      var(--rjp-violet-xl);
+  --rj-brand-6:      var(--rjp-violet-2xl);
+  --rj-brand-7:      var(--rjp-violet-3xl);
+  --rj-brand-8:      var(--rjp-violet-lilac);
+
+  /* 辅助霓虹色 */
+  --rj-accent:       var(--rjp-cyan);
+  --rj-accent-2:     var(--rjp-cyan-lt);
+  --rj-accent-3:     var(--rjp-pink);
+  --rj-accent-4:     var(--rjp-fuchsia);
+
+  /* 主渐变（Follow Me 同款 135deg） */
+
+  /* 封面图遮罩：两种模式都不变 */
+  --rj-media-scrim-strong: rgba(7, 9, 20, 0.50);
+  --rj-media-scrim-soft:   rgba(7, 9, 20, 0.15);
+  --rj-media-scrim-mid:    rgba(7, 9, 20, 0.42);
+}
+
+/* ---------- 暗色（站点默认） ---------- */
+:root,
+[data-theme='dark'] {
+
+  /* 画布与容器 */
+  --rj-bg:              var(--rjp-ink-900);
+  --rj-surface:         rgba(19, 23, 40, 0.62);
+  --rj-surface-solid:   rgba(19, 23, 40, 0.86);
+  --rj-surface-raised:  rgba(32, 36, 66, 0.55);
+  --rj-surface-input:   rgba(15, 18, 32, 0.55);
+  --rj-overlay:         rgba(19, 23, 40, 0.50);
+  --rj-overlay-strong:  rgba(19, 23, 40, 0.60);
+
+  /* 文字 */
+  --rj-text:            rgba(226, 232, 255, 0.85);
+  --rj-text-strong:     rgba(233, 238, 255, 0.95);
+  --rj-text-md:         rgba(226, 232, 255, 0.90);
+  --rj-text-soft:       rgba(226, 232, 255, 0.82);
+  --rj-text-dim:        rgba(196, 205, 255, 0.78);
+  --rj-text-quote:      rgba(196, 205, 255, 0.90);
+  --rj-text-mute:       rgba(148, 163, 184, 0.85);
+  --rj-text-inverse:    var(--rjp-white);
+
+  /* 边框与分隔线 */
+  --rj-border:          rgba(148, 163, 255, 0.15);
+  --rj-border-soft:     rgba(148, 163, 255, 0.12);
+  --rj-border-strong:   rgba(148, 163, 255, 0.18);
+  --rj-border-accent:   rgba(148, 163, 255, 0.25);
+
+  /* 玻璃质感高光（内描边/顶光） */
+  --rj-hairline-1:      rgba(255, 255, 255, 0.05);
+  --rj-hairline-2:      rgba(255, 255, 255, 0.06);
+  --rj-hairline-3:      rgba(255, 255, 255, 0.08);
+  --rj-hairline-4:      rgba(255, 255, 255, 0.10);
+  --rj-hairline-5:      rgba(255, 255, 255, 0.12);
+  --rj-hairline-6:      rgba(255, 255, 255, 0.14);
+  --rj-hairline-7:      rgba(255, 255, 255, 0.16);
+  --rj-hairline-8:      rgba(255, 255, 255, 0.18);
+  --rj-hairline-9:      rgba(255, 255, 255, 0.40);
+  --rj-hairline-10:     rgba(255, 255, 255, 0.50);
+
+  /* 阴影阶梯（数字越大越重） */
+  --rj-shadow-1:        rgba(2, 6, 23, 0.32);
+  --rj-shadow-2:        rgba(2, 6, 23, 0.35);
+  --rj-shadow-3:        rgba(2, 6, 23, 0.40);
+  --rj-shadow-4:        rgba(2, 6, 23, 0.45);
+  --rj-shadow-5:        rgba(2, 6, 23, 0.50);
+  --rj-shadow-6:        rgba(2, 6, 23, 0.55);
+  --rj-shadow-7:        rgba(2, 6, 23, 0.60);
+
+  /* 投射阴影（浮层压在内容上） */
+  --rj-shadow-cast-1:   rgba(0, 0, 0, 0.40);
+  --rj-shadow-cast-2:   rgba(0, 0, 0, 0.50);
+  --rj-shadow-cast-3:   rgba(0, 0, 0, 0.55);
+
+  /* 叠在封面图上的文字：不随主题变化 */
+
+  /* 图上文字投影 */
+  --rj-on-media-shadow: rgba(0, 0, 0, 0.80);
+
+  /* 品牌光晕 */
+  --rj-glow:            rgba(88, 28, 135, 0.35);
+
+  /* 交互 */
+  --rj-ring:            var(--rjp-violet);
+  --rj-focus-shadow:    0 0 0 3px rgba(139, 92, 246, 0.55);
+
+  /* 圆角阶梯（P2/P3 接入组件） */
+  --rj-radius-xs: 6px;
+  --rj-radius-sm: 10px;
+  --rj-radius-md: 14px;
+  --rj-radius-lg: 18px;
+  --rj-radius-xl: 24px;
+  --rj-radius-pill: 999px;
+
+  /* 毛玻璃模糊阶梯（P2/P3 接入组件） */
+  --rj-blur-sm: 8px;
+  --rj-blur-md: 14px;
+  --rj-blur-lg: 20px;
+  --rj-blur-xl: 32px;
+
+  /* 间距（4px 基准，P2/P3 接入） */
+  --rj-space-1: 4px;
+  --rj-space-2: 8px;
+  --rj-space-3: 12px;
+  --rj-space-4: 16px;
+  --rj-space-5: 20px;
+  --rj-space-6: 24px;
+  --rj-space-8: 32px;
+  --rj-space-10: 40px;
+  --rj-space-12: 48px;
+
+  /* 动效（P2 接入 prefers-reduced-motion） */
+  --rj-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --rj-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --rj-dur-fast: 150ms;
+  --rj-dur-base: 260ms;
+  --rj-dur-slow: 420ms;
+
+  /* 层级（P3 接入浮层） */
+  --rj-z-nav: 100;
+  --rj-z-rightside: 120;
+  --rj-z-panel: 200;
+  --rj-z-modal: 300;
+
+  /* 墨色基元：用于未命名的一次性透明度，配合 color-mix 使用 */
+  --rj-ink-surface:     #131728;
+  --rj-ink-input:       #0f1220;
+  --rj-ink-shadow:      #020617;
+  --rj-ink-cast:        #000000;
+  --rj-ink-hairline:    #ffffff;
+  --rj-ink-text:        #e2e8ff;
+  --rj-ink-text-blue:   #c4cdff;
+  --rj-ink-text-ghost:  #f0f3ff;
+  --rj-ink-border:      #94a3ff;
+  --rj-ink-media-2:     #090c18;
+  --rj-ink-surface-2:   #ffffff;
+  --rj-ink-surface-3:   #ffffff;
+  --rj-ink-input-2:     #ffffff;
+  --rj-ink-glow:        #a78bfa;
+  --rj-ink-glow-2:      #c4b5fd;
+  --rj-ink-surface-2:   #111526;
+  --rj-ink-surface-3:   #171b30;
+  --rj-ink-input-2:     #0d1020;
+  --rj-ink-glow:        #581c87;
+  --rj-ink-glow-2:      #312e81;
+}
+
+/* ---------- 亮色 ---------- */
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* 品牌紫在浅底上加深，保证按钮白字对比度 ≥ 4.5:1 */
+  --rj-brand:           #7c3aed;
+  --rj-brand-2:         #4f46e5;
+  --rj-brand-3:         #6d28d9;
+  --rj-brand-4:         #5b21b6;
+  --rj-brand-8:         #8b5cf6;
+
+  /* 霓虹色在白底上必须压深，否则文字不可读（原 #22d3ee 对比度仅 1.7:1） */
+  --rj-accent:          #0e7490;
+  --rj-accent-2:        #0891b2;
+  --rj-accent-3:        #be185d;
+  --rj-accent-4:        #a21caf;
+
+  /* 画布与容器 */
+  --rj-bg:              #f7f8fd;
+  --rj-bg-tint-1:       #ede9fe;
+  --rj-bg-tint-2:       #e0e7ff;
+  --rj-bg-tint-3:       #fce7f3;
+  --rj-surface:         rgba(255, 255, 255, 0.74);
+  --rj-surface-solid:   rgba(255, 255, 255, 0.93);
+  --rj-surface-raised:  rgba(255, 255, 255, 0.82);
+  --rj-surface-input:   rgba(255, 255, 255, 0.80);
+  --rj-overlay:         rgba(255, 255, 255, 0.55);
+  --rj-overlay-strong:  rgba(255, 255, 255, 0.70);
+
+  /* 文字 */
+  --rj-text:            rgba(42, 45, 67, 0.88);
+  --rj-text-strong:     var(--rjp-graphite-900);
+  --rj-text-md:         rgba(42, 45, 67, 0.90);
+  --rj-text-soft:       rgba(42, 45, 67, 0.84);
+  --rj-text-dim:        rgba(42, 45, 67, 0.72);
+  --rj-text-quote:      rgba(42, 45, 67, 0.80);
+  --rj-text-mute:       rgba(42, 45, 67, 0.55);
+  --rj-text-inverse:    var(--rjp-white);
+
+  /* 边框与分隔线 */
+  --rj-border:          rgba(20, 22, 43, 0.10);
+  --rj-border-soft:     rgba(20, 22, 43, 0.07);
+  --rj-border-strong:   rgba(20, 22, 43, 0.14);
+  --rj-border-accent:   rgba(123, 84, 230, 0.28);
+
+  /* 玻璃质感高光：亮色下改为浅灰描边 */
+  --rj-hairline-1:      rgba(20, 22, 43, 0.04);
+  --rj-hairline-2:      rgba(20, 22, 43, 0.05);
+  --rj-hairline-3:      rgba(20, 22, 43, 0.06);
+  --rj-hairline-4:      rgba(20, 22, 43, 0.08);
+  --rj-hairline-5:      rgba(255, 255, 255, 0.90);
+  --rj-hairline-6:      rgba(255, 255, 255, 0.95);
+  --rj-hairline-7:      rgba(20, 22, 43, 0.12);
+  --rj-hairline-8:      rgba(20, 22, 43, 0.14);
+  --rj-hairline-9:      rgba(20, 22, 43, 0.20);
+  --rj-hairline-10:     rgba(255, 255, 255, 0.75);
+
+  /* 阴影阶梯：亮色下同阶更轻 */
+  --rj-shadow-1:        rgba(20, 22, 43, 0.07);
+  --rj-shadow-2:        rgba(20, 22, 43, 0.08);
+  --rj-shadow-3:        rgba(20, 22, 43, 0.09);
+  --rj-shadow-4:        rgba(20, 22, 43, 0.11);
+  --rj-shadow-5:        rgba(20, 22, 43, 0.12);
+  --rj-shadow-6:        rgba(20, 22, 43, 0.14);
+  --rj-shadow-7:        rgba(20, 22, 43, 0.16);
+
+  /* 投射阴影 */
+  --rj-shadow-cast-1:   rgba(20, 22, 43, 0.10);
+  --rj-shadow-cast-2:   rgba(20, 22, 43, 0.12);
+  --rj-shadow-cast-3:   rgba(20, 22, 43, 0.14);
+
+  /* 叠在封面图上的文字：仍为白，图是暗的 */
+
+  /* 图上文字投影：图是暗的，白字照旧 */
+  --rj-on-media-shadow: rgba(0, 0, 0, 0.80);
+
+  /* 品牌光晕 */
+  --rj-glow:            rgba(139, 92, 246, 0.22);
+
+  /* 交互 */
+  --rj-ring:            var(--rjp-indigo);
+  --rj-focus-shadow:    0 0 0 3px rgba(99, 102, 241, 0.35);
+
+  --rj-ink-surface:     #ffffff;
+  --rj-ink-input:       #ffffff;
+  --rj-ink-shadow:      #8b90ad;
+  --rj-ink-cast:        #5b6080;
+  --rj-ink-hairline:    #14162b;
+  --rj-ink-text:        #2a2d43;
+  --rj-ink-text-blue:   #3a3d5c;
+  --rj-ink-text-ghost:  #14162b;
+  --rj-ink-border:      #14162b;
+  --rj-ink-media-2:     #090c18;
+}
+
+/* ============================================================
+   Tier 3 · 组件令牌（按需扩展，当前仅占位说明）
+   ------------------------------------------------------------
+   组件级差异请写在 custom.css 对应分区，消费 Tier 2；
+   只有跨 3 个以上组件复用的差异才提升到这里。
+   ============================================================ */
+
+/* 尊重系统「减少动态效果」偏好 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rj-dur-fast: 0.01ms;
+    --rj-dur-base: 0.01ms;
+    --rj-dur-slow: 0.01ms;
+  }
+}
