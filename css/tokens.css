@@ -48,6 +48,52 @@
   /* 浅色模式专用中性色 */
   --rjp-paper-100:   #eef0f9;
   --rjp-graphite-900:#14162b;
+
+  /* ---- Alienware Legend · AlienFX 青与碳纤维黑阶 ---- */
+  --rjp-alien-cyan:     #00f0ff;   /* AlienFX 灯效青，暗底上的标志色 */
+  --rjp-alien-cyan-lt:  #7ff9ff;   /* 高亮态，用于 HUD 文字 */
+  --rjp-alien-cyan-dim: #00b8c9;   /* 次级线框 */
+  --rjp-alien-deep:     #00666f;   /* 白底可读的深青 */
+  --rjp-alien-black:    #06080b;   /* 机甲底壳 */
+  --rjp-alien-carbon:   #0d1016;   /* 碳纤维面板 */
+  --rjp-alien-steel:    #1b2029;   /* 金属边框 */
+
+  /* ---- Apple · 官网灰阶与交互蓝 ---- */
+  --rjp-apple-bg:       #f5f5f7;   /* apple.com 页底 */
+  --rjp-apple-line:     #d2d2d7;   /* 卡片 hairline */
+  --rjp-apple-gray:     #86868b;   /* 次要文字 */
+  --rjp-apple-ink:      #1d1d1f;   /* 主文字 */
+  --rjp-apple-blue:     #0071e3;   /* 官网按钮蓝 */
+}
+
+/* ---------- 字体与形态（双模式常量，不随主题变化） ---------- */
+:root {
+  /* Apple 的系统字体优先：macOS/iOS 上是真 SF，Windows 退到 Segoe UI Variable */
+  --rj-font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+
+  /* 展示级字体：标题用 Display 光学尺寸，字距收紧 */
+  --rj-font-display:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display",
+    "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* HUD 等宽：Alienware 信息层标签专用 */
+  --rj-font-mono:
+    "SF Mono", ui-monospace, "JetBrains Mono", "Cascadia Code",
+    Menlo, Consolas, "Courier New", monospace;
+
+  /* 字距阶梯：拉丁标题收紧，CJK 微收，HUD 拉开 */
+  --rj-track-display: -0.022em;
+  --rj-track-tight:   -0.011em;
+  --rj-track-wide:     0.06em;
+  --rj-track-hud:      0.18em;
+
+  /* 切角尺寸（Alienware 机甲倒角） */
+  --rj-chamfer:      14px;
+  --rj-chamfer-sm:    7px;
 }
 
 /* ============================================================
@@ -143,6 +189,18 @@
   /* 品牌光晕 */
   --rj-glow:            rgba(88, 28, 135, 0.35);
 
+  /* ---- Alienware Legend · 技术信息层（青色只走这一层，不进正文） ---- */
+  --rj-hud:             var(--rjp-alien-cyan);
+  --rj-hud-text:        var(--rjp-alien-cyan-lt);
+  --rj-hud-quiet:       var(--rjp-alien-cyan-dim);
+  --rj-hud-line:        rgba(0, 240, 255, 0.26);
+  --rj-hud-line-soft:   rgba(0, 240, 255, 0.14);
+  --rj-hud-fill:        rgba(0, 240, 255, 0.08);
+  --rj-hud-glow:        rgba(0, 240, 255, 0.45);
+  --rj-carbon:          var(--rjp-alien-black);
+  --rj-carbon-2:        var(--rjp-alien-carbon);
+  --rj-steel:           var(--rjp-alien-steel);
+
   /* 交互 */
   --rj-ring:            var(--rjp-violet);
   --rj-focus-shadow:    0 0 0 3px rgba(139, 92, 246, 0.55);
@@ -226,10 +284,10 @@
   --rj-accent-4:        #a21caf;
 
   /* 画布与容器 */
-  --rj-bg:              #f7f8fd;
-  --rj-bg-tint-1:       #ede9fe;
-  --rj-bg-tint-2:       #e0e7ff;
-  --rj-bg-tint-3:       #fce7f3;
+  --rj-bg:              var(--rjp-apple-bg);
+  --rj-bg-tint-1:       #ececf1;
+  --rj-bg-tint-2:       #e8eaf3;
+  --rj-bg-tint-3:       #f2ecf2;
   --rj-surface:         rgba(255, 255, 255, 0.74);
   --rj-surface-solid:   rgba(255, 255, 255, 0.93);
   --rj-surface-raised:  rgba(255, 255, 255, 0.82);
@@ -238,19 +296,19 @@
   --rj-overlay-strong:  rgba(255, 255, 255, 0.70);
 
   /* 文字 */
-  --rj-text:            rgba(42, 45, 67, 0.88);
-  --rj-text-strong:     var(--rjp-graphite-900);
-  --rj-text-md:         rgba(42, 45, 67, 0.90);
-  --rj-text-soft:       rgba(42, 45, 67, 0.84);
-  --rj-text-dim:        rgba(42, 45, 67, 0.72);
-  --rj-text-quote:      rgba(42, 45, 67, 0.80);
-  --rj-text-mute:       rgba(42, 45, 67, 0.55);
+  --rj-text:            rgba(29, 29, 31, 0.86);
+  --rj-text-strong:     var(--rjp-apple-ink);
+  --rj-text-md:         rgba(29, 29, 31, 0.90);
+  --rj-text-soft:       rgba(29, 29, 31, 0.82);
+  --rj-text-dim:        rgba(29, 29, 31, 0.68);
+  --rj-text-quote:      rgba(29, 29, 31, 0.78);
+  --rj-text-mute:       var(--rjp-apple-gray);
   --rj-text-inverse:    var(--rjp-white);
 
   /* 边框与分隔线 */
-  --rj-border:          rgba(20, 22, 43, 0.10);
-  --rj-border-soft:     rgba(20, 22, 43, 0.07);
-  --rj-border-strong:   rgba(20, 22, 43, 0.14);
+  --rj-border:          rgba(0, 0, 0, 0.10);
+  --rj-border-soft:     rgba(0, 0, 0, 0.06);
+  --rj-border-strong:   rgba(0, 0, 0, 0.14);
   --rj-border-accent:   rgba(123, 84, 230, 0.28);
 
   /* 玻璃质感高光：亮色下改为浅灰描边 */
@@ -286,6 +344,18 @@
 
   /* 品牌光晕 */
   --rj-glow:            rgba(139, 92, 246, 0.22);
+
+  /* ---- Alienware Legend · 技术信息层（白底必须压深才可读） ---- */
+  --rj-hud:             var(--rjp-alien-deep);
+  --rj-hud-text:        #005f68;
+  --rj-hud-quiet:       #0a8a96;
+  --rj-hud-line:        rgba(0, 102, 111, 0.22);
+  --rj-hud-line-soft:   rgba(0, 102, 111, 0.12);
+  --rj-hud-fill:        rgba(0, 102, 111, 0.06);
+  --rj-hud-glow:        rgba(0, 102, 111, 0.18);
+  --rj-carbon:          var(--rjp-apple-bg);
+  --rj-carbon-2:        var(--rjp-white);
+  --rj-steel:           var(--rjp-apple-line);
 
   /* 交互 */
   --rj-ring:            var(--rjp-indigo);

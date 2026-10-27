@@ -2010,9 +2010,13 @@ a:hover { color: var(--rj-brand-2); }
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
-#page-header.post-bg > nav,
-#page-header.post-bg #post-info {
+#page-header.post-bg > nav {
   position: relative;
+  z-index: 2;
+}
+/* 注意：不要给 #post-info 加 position，主题依赖 absolute + bottom:100px
+   把它压在横幅下沿；改成 relative 会让标题顶到导航栏里并与之重叠（V14 遗留） */
+#page-header.post-bg #post-info {
   z-index: 2;
 }
 /* —— 标题区：渐变标题 + meta 胶囊 —— */
@@ -2407,3 +2411,442 @@ a:hover { color: var(--rj-brand-2); }
 #article-container h4 { font-size: 1.17em; }
 #article-container h5 { font-size: 1em; }
 #article-container h6 { font-size: 0.83em; }
+
+/* ============================================================
+   V16 — Alienware Legend × Apple 品牌层
+   ------------------------------------------------------------
+   两条品牌线不争抢，按模式分工：
+     暗色（站点默认）→ Alienware Legend
+        AlienFX 青进入「技术信息层」：HUD 角标、状态条、切角、线框
+     亮色            → Apple
+        SF 字体节奏、大圆角、hairline 描边、柔和多层阴影、中性灰阶
+
+   紫色仍是主品牌色。青色只出现在 HUD / 状态 / 装饰线上，
+   不参与正文与按钮文字 —— 这是 V12.1「统一主题色」之后
+   有意保留的第二语义层，不是回退到散落霓虹装饰。
+   ============================================================ */
+
+/* ---------- 1. 字体基座（Apple 骨架） ---------- */
+body {
+  font-family: var(--rj-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 展示级标题：Display 光学尺寸 + 收紧字距（Apple 标题的呼吸感来源） */
+#site-name,
+.post-title,
+#article-container h1,
+#article-container h2,
+#article-container h3,
+.article-title,
+#page-header #post-info .post-title,
+.card-info .author-info__name {
+  font-family: var(--rj-font-display);
+  letter-spacing: var(--rj-track-tight);
+}
+
+/* 拉丁文标题收得更紧；CJK 保持微收，避免汉字挤在一起 */
+#site-name,
+#page-header #post-info .post-title {
+  letter-spacing: var(--rj-track-display);
+}
+
+/* HUD 等宽层：只给状态/标签/计数用 */
+.article-meta,
+.post-meta-date,
+#footer .framework-info,
+.rj-hud-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 2. AlienFX 青：全站签名 ---------- */
+::selection {
+  background: color-mix(in srgb, var(--rj-hud) 30%, transparent);
+  color: var(--rj-text-strong);
+}
+
+/* 滚动条：紫 → 青 的双品牌渐变 */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,
+    var(--rj-brand),
+    color-mix(in srgb, var(--rj-hud) 80%, var(--rj-brand-2)));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg,
+    var(--rj-brand-3),
+    var(--rj-hud));
+}
+
+/* ---------- 3. 导航：Alienware 铭牌 ---------- */
+#blog_name {
+  display: flex;
+  align-items: center;
+}
+
+#site-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 六边形 AlienFX 徽标：clip-path 绘制，带外发光 */
+#site-name::before {
+  content: '';
+  flex: none;
+  width: 15px;
+  height: 17px;
+  background:
+    radial-gradient(circle at 50% 52%,
+      var(--rj-carbon) 0 22%,
+      transparent 23%),
+    linear-gradient(160deg,
+      var(--rj-hud) 0%,
+      color-mix(in srgb, var(--rj-brand) 75%, var(--rj-hud)) 100%);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--rj-hud-glow) 90%, transparent));
+  transition: filter var(--rj-dur-base) var(--rj-ease-out);
+}
+
+#site-name:hover::before {
+  filter: drop-shadow(0 0 11px var(--rj-hud));
+}
+
+/* 导航下沿：紫→青 的接缝光，替代纯白描边 */
+#nav::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--rj-hud) 45%, transparent) 22%,
+    color-mix(in srgb, var(--rj-brand-3) 40%, transparent) 62%,
+    transparent 100%);
+  opacity: 0.75;
+}
+
+/* ---------- 4. 首屏：HUD 取景框 ---------- */
+#page-header.full_page::before {
+  content: '';
+  position: absolute;
+  inset: 86px 26px 26px;
+  /* 主题给 :before 定了 width/height:100%，必须还原为 auto 才能按 inset 收缩，
+     否则取景框会溢出到视口右侧之外 */
+  width: auto;
+  height: auto;
+  pointer-events: none;
+  opacity: 0.42;
+  /* 四角取景括号：8 条渐变一次画完，不占额外 DOM。
+     必须用 background 简写才能写 position/size；主题的蒙层在暗色下 alpha 为 0，
+     因此不会损失原有压暗效果 */
+  background:
+    linear-gradient(var(--rj-hud), var(--rj-hud)) left top / 24px 1px no-repeat,
+    linear-gradient(var(--rj-hud), var(--rj-hud)) left top / 1px 24px no-repeat,
+    linear-gradient(var(--rj-hud), var(--rj-hud)) right top / 24px 1px no-repeat,
+    linear-gradient(var(--rj-hud), var(--rj-hud)) right top / 1px 24px no-repeat,
+    linear-gradient(var(--rj-hud), var(--rj-hud)) left bottom / 24px 1px no-repeat,
+    linear-gradient(var(--rj-hud), var(--rj-hud)) left bottom / 1px 24px no-repeat,
+    linear-gradient(var(--rj-hud), var(--rj-hud)) right bottom / 24px 1px no-repeat,
+    linear-gradient(var(--rj-hud), var(--rj-hud)) right bottom / 1px 24px no-repeat;
+}
+
+/* 横扫扫描线：Alienware 开机自检的一次性动效 */
+#page-header.full_page::after {
+  content: '';
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  top: 86px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--rj-hud) 70%, transparent),
+    transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--rj-hud) 50%, transparent);
+  animation: rjHudSweep 4.2s cubic-bezier(0.4, 0, 0.2, 1) 1 both;
+}
+
+@keyframes rjHudSweep {
+  0%   { transform: translateY(0);     opacity: 0; }
+  8%   { opacity: 0.9; }
+  62%  { opacity: 0.55; }
+  100% { transform: translateY(70vh);  opacity: 0; }
+}
+
+/* 打字副标题下方的 HUD 状态条 */
+#page-header.full_page #site-info::after {
+  content: 'ALIENWARE · HACKINTOSH · macOS';
+  display: block;
+  margin: 20px auto 0;
+  width: fit-content;
+  padding-left: 9px;
+  border-left: 2px solid color-mix(in srgb, var(--rj-hud) 70%, transparent);
+  font-family: var(--rj-font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: var(--rj-track-hud);
+  color: color-mix(in srgb, var(--rj-hud-text) 78%, transparent);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--rj-hud) 35%, transparent);
+}
+
+/* ---------- 5. 卡片：机甲切角 + 角落括号 ---------- */
+#recent-posts > .recent-post-item::after,
+#aside-content .card-widget::after {
+  content: '';
+  position: absolute;
+  /* 内缩到圆角切线之内，否则会被 overflow:hidden 的圆角切掉 */
+  top: 12px;
+  right: 12px;
+  width: 26px;
+  height: 26px;
+  pointer-events: none;
+  opacity: 0.5;
+  background:
+    linear-gradient(var(--rj-hud), var(--rj-hud)) 100% 0 / 16px 1px no-repeat,
+    linear-gradient(var(--rj-hud), var(--rj-hud)) 100% 0 / 1px 16px no-repeat;
+  transition: opacity var(--rj-dur-base) var(--rj-ease-out),
+              width var(--rj-dur-base) var(--rj-ease-out),
+              height var(--rj-dur-base) var(--rj-ease-out);
+}
+
+#recent-posts > .recent-post-item:hover::after,
+#aside-content .card-widget:hover::after {
+  opacity: 1;
+  width: 40px;
+  height: 40px;
+}
+
+/* hover 时描边从单紫转为紫青双色，并在底部透出青光 */
+#recent-posts > .recent-post-item:hover {
+  border-color: color-mix(in srgb, var(--rj-brand) 40%, var(--rj-hud));
+  box-shadow:
+    0 12px 32px color-mix(in srgb, var(--rj-ink-glow) 30%, transparent),
+    0 26px 70px var(--rj-shadow-7),
+    0 0 0 1px color-mix(in srgb, var(--rj-hud) 22%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--rj-hud) 22%, transparent);
+}
+
+/* ---------- 6. 文章正文：H2 青色定位标 ---------- */
+#article-container h2 {
+  position: relative;
+  padding-left: 16px;
+}
+#article-container h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.16em;
+  bottom: 0.16em;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg,
+    var(--rj-hud),
+    color-mix(in srgb, var(--rj-brand) 80%, var(--rj-hud)));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-hud-glow) 70%, transparent);
+}
+
+/* 正文里的引用块：左侧改为双品牌渐变条 */
+#article-container blockquote {
+  border-left-color: color-mix(in srgb, var(--rj-hud) 55%, var(--rj-brand));
+}
+
+/* ---------- 7. 页脚：双品牌铭文 ---------- */
+.footer_custom_text::before {
+  content: 'ALIENWARE × APPLE';
+  display: block;
+  margin: 0 auto 18px;
+  padding-top: 20px;
+  width: fit-content;
+  font-family: var(--rj-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  color: color-mix(in srgb, var(--rjp-white) 86%, transparent);
+  background:
+    linear-gradient(90deg,
+      transparent,
+      color-mix(in srgb, var(--rjp-white) 42%, transparent),
+      transparent) top center / 120px 1px no-repeat;
+}
+
+/* ---------- 8. 亮色：Apple 形态 ---------- */
+[data-theme='light'] #nav,
+[data-theme='light'] #nav.nav-fixed {
+  /* Safari 式工具条：更薄、更白、只留一根 hairline */
+  background: color-mix(in srgb, var(--rjp-white) 82%, transparent) !important;
+  border-bottom: 1px solid var(--rjp-apple-line);
+  box-shadow: none;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+[data-theme='light'] #site-name::before {
+  filter: none;
+}
+
+/* 卡片：apple.com 式「白面 + hairline + 极淡投影」 */
+[data-theme='light'] #recent-posts > .recent-post-item,
+[data-theme='light'] .layout_page > div:first-child:not(.recent-posts),
+[data-theme='light'] .layout_post > #page,
+[data-theme='light'] .layout_post > #post,
+[data-theme='light'] #aside-content .card-widget {
+  background: var(--rjp-white);
+  border: 1px solid var(--rjp-apple-line);
+  border-radius: 18px;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--rj-shadow-1) 60%, transparent);
+}
+
+[data-theme='light'] #recent-posts > .recent-post-item:hover,
+[data-theme='light'] #aside-content .card-widget:hover {
+  border-color: var(--rjp-apple-line);
+  box-shadow:
+    0 4px 16px var(--rj-shadow-1),
+    0 16px 40px color-mix(in srgb, var(--rj-shadow-1) 85%, transparent);
+  transform: translateY(-3px);
+}
+
+/* 亮色下不要青色括号抢戏，降为中性 hairline */
+[data-theme='light'] #recent-posts > .recent-post-item::after,
+[data-theme='light'] #aside-content .card-widget::after {
+  opacity: 0.35;
+  background:
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) 100% 0 / 16px 1px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) 100% 0 / 1px 16px no-repeat;
+}
+
+/* 正文阅读节奏：Apple 的大行距与克制字距 */
+[data-theme='light'] #article-container {
+  letter-spacing: 0;
+}
+
+[data-theme='light'] #article-container h2::before {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--rj-brand) 70%, var(--rj-hud)),
+    var(--rj-brand));
+  box-shadow: none;
+}
+
+/* 亮色页脚：Apple 的深灰细字，不再是紫渐变 */
+[data-theme='light'] #footer {
+  background: var(--rjp-apple-bg);
+}
+[data-theme='light'] #footer,
+[data-theme='light'] #footer .copyright,
+[data-theme='light'] #footer .framework-info {
+  color: var(--rjp-apple-gray);
+}
+[data-theme='light'] .framework-info a {
+  color: var(--rjp-apple-ink);
+}
+[data-theme='light'] .framework-info a:hover {
+  color: var(--rj-brand);
+}
+[data-theme='light'] .footer_custom_text::before {
+  color: var(--rjp-apple-gray);
+  background:
+    linear-gradient(90deg,
+      transparent,
+      var(--rjp-apple-line),
+      transparent) top center / 120px 1px no-repeat;
+}
+
+/* 亮色首屏取景框：中性灰，避免青在白底上过暗显脏 */
+[data-theme='light'] #page-header.full_page::before {
+  opacity: 0.5;
+  background:
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) left top / 24px 1px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) left top / 1px 24px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) right top / 24px 1px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) right top / 1px 24px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) left bottom / 24px 1px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) left bottom / 1px 24px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) right bottom / 24px 1px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) right bottom / 1px 24px no-repeat;
+}
+[data-theme='light'] #page-header.full_page::after {
+  display: none;
+}
+
+/* ---------- 9. 减动效：HUD 扫描线不参与 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  #page-header.full_page::after {
+    animation: none !important;
+    opacity: 0;
+  }
+  #site-name::before {
+    transition: none;
+  }
+}
+
+/* ---------- 10. 亮色下的「图上文字」修正 ----------
+   首屏永远是深色照片，HUD 文字不能跟随亮色令牌（会变成深青、几乎看不见），
+   必须固定用媒体安全色；同时补回被 background 简写覆盖掉的主题压暗蒙层。 */
+[data-theme='light'] #page-header.full_page::before {
+  background-color: var(--rj-media-scrim-mid);
+}
+
+[data-theme='light'] #page-header.full_page #site-info::after {
+  border-left-color: color-mix(in srgb, var(--rjp-alien-cyan) 70%, transparent);
+  color: color-mix(in srgb, var(--rjp-alien-cyan-lt) 80%, transparent);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--rjp-alien-cyan) 45%, transparent);
+}
+
+/* 音乐提示条：亮色下曾是白底白字（P1 遗留），补对比 */
+[data-theme='light'] .rj-muted-tip {
+  background: color-mix(in srgb, var(--rjp-white) 92%, transparent);
+  border-color: color-mix(in srgb, var(--rjp-purple) 30%, transparent);
+  color: var(--rj-text-strong);
+  box-shadow:
+    0 4px 18px var(--rj-shadow-2),
+    0 0 0 1px color-mix(in srgb, var(--rj-shadow-1) 40%, transparent);
+}
+
+/* 文章页标题渐变：暗色从白起笔，亮色下横幅被压成浅色，白字起笔会消失 */
+[data-theme='light'] #post-info .post-title {
+  background: linear-gradient(135deg,
+    var(--rj-text-strong) 8%,
+    var(--rj-brand-4) 50%,
+    var(--rj-accent) 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+/* 移动端：首屏底部已被看板娘与播放提示占据，HUD 状态条不再叠加 */
+@media (max-width: 768px) {
+  #page-header.full_page #site-info::after {
+    display: none;
+  }
+  #page-header.full_page::before {
+    inset: 70px 16px 16px;
+  }
+}
+
+/* ---------- 11. 非首页横幅：补一层 Alienware 碳纤维压暗 ----------
+   归档/标签/分类等页面用 .not-home-page，V14 只给 .post-bg 做了玻璃蒙层，
+   这些页面于是把亮色横幅原样露出，导航的紫色文字压在上面读不清。
+   这里补同族遮罩：保留图片质感，只保证文字对比度。 */
+#page-header.not-home-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--rj-carbon) 66%, transparent) 0%,
+    color-mix(in srgb, var(--rj-carbon) 34%, transparent) 100%);
+}
+
+[data-theme='light'] #page-header.not-home-page::before {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--rjp-apple-ink) 26%, transparent) 0%,
+    color-mix(in srgb, var(--rjp-apple-ink) 10%, transparent) 100%);
+}
