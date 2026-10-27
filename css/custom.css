@@ -716,7 +716,7 @@ img {
   color: var(--rj-brand-3);
   text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 70%, transparent);
 }
-#article-container h2 {
+#article-container h3 {
   border-bottom: 1px solid color-mix(in srgb, var(--rj-brand-3) 28%, transparent);
   padding-bottom: 8px;
 }
@@ -1942,13 +1942,13 @@ a:hover { color: var(--rj-brand-2); }
 
 /* ============================================================
    右下角图标统一风格 V13 — 液态玻璃紫调圆钮组（豆包/目录/评论/回顶）
-   统一 42px 圆形：紫玻璃背景 + 细紫边 + 柔和阴影 + 主题紫图标
+   统一 44px 圆形：紫玻璃背景 + 细紫边 + 柔和阴影 + 主题紫图标
    hover：渐变紫填充 + 白图标 + 微上浮 + 紫光晕
    ============================================================ */
 #rightside > div > button,
 #rightside > div > a {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   margin: 6px 0;
   border-radius: 50%;
   border: 1px solid color-mix(in srgb, var(--rj-brand-3) 35%, transparent);
@@ -1957,7 +1957,7 @@ a:hover { color: var(--rj-brand-2); }
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   color: var(--rj-brand-3);
   font-size: 17px;
-  line-height: 40px;
+  line-height: 42px;
   box-shadow: 0 4px 14px var(--rj-shadow-2), inset 0 1px 0 var(--rj-hairline-2);
   transition: all 0.25s ease;
 }
@@ -1975,8 +1975,8 @@ a:hover { color: var(--rj-brand-2); }
 }
 /* 豆包按钮并入统一容器（头像保留） */
 #rightside #chat_btn.rj-doubao-btn {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   margin: 6px 0;
   border-radius: 50%;
   overflow: hidden;
@@ -2314,3 +2314,96 @@ a:hover { color: var(--rj-brand-2); }
 [data-theme='light'] .framework-info a:hover {
   color: var(--rjp-white);
 }
+
+/* ============================================================
+   P2 — 无障碍层
+   1) 键盘焦点环（focus-visible）
+   2) 减动效偏好降级（prefers-reduced-motion）
+   两项都只做「增强」，不改变默认观感。
+   ============================================================ */
+
+/* ---------- 1. 键盘焦点环 ---------- */
+:focus-visible {
+  outline: 2px solid var(--rj-brand);
+  outline-offset: 2px;
+}
+
+/* 品牌色/深色底上用白环，避免同色不可见 */
+#footer a:focus-visible,
+#footer :focus-visible,
+#nav .menus_item_child a:focus-visible,
+#pagination a:focus-visible,
+.btn:focus-visible {
+  outline-color: var(--rjp-white);
+}
+
+/* 卡片内链接：焦点环贴合卡片圆角 */
+#recent-posts > .recent-post-item a:focus-visible,
+#aside-content .card-widget a:focus-visible,
+#article-container a:focus-visible {
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* 圆形悬浮按钮：环形跟随圆角 */
+#rightside > div > button:focus-visible,
+#rightside > div > a:focus-visible {
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+/* 播放器控件：白环更清楚 */
+.aplayer button:focus-visible,
+.aplayer .aplayer-list ol li:focus-visible {
+  outline-color: var(--rjp-white);
+  outline-offset: -1px;
+}
+
+/* ---------- 2. 减动效偏好 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  /* 全局兜底：动画与过渡降到瞬时，循环动画只播一次 */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* 背景光斑：直接静止，避免停在一帧偏移位置 */
+  #web_bg::after {
+    animation: none !important;
+  }
+
+  /* 页脚渐变：停掉无限流动 */
+  #footer {
+    animation: none !important;
+  }
+
+  /* 悬停位移与缩放：只保留颜色反馈，不做几何变化 */
+  #recent-posts > .recent-post-item:hover,
+  #aside-content .card-widget:hover,
+  #rightside > div > button:hover,
+  #rightside > div > a:hover,
+  #rightside #chat_btn.rj-doubao-btn:hover,
+  .recent-post-item:hover .post_cover img {
+    transform: none !important;
+  }
+
+  .post_cover img {
+    transition: none !important;
+  }
+}
+
+/* ---------- 正文标题字号阶梯补齐 ----------
+   渲染时 h1–h5 统一降一级（脚本 scripts/heading-level.js），语义正确了，
+   但字号会跟着掉一档。这里把整梯上移一级，视觉与改造前完全一致：
+   作者写 #  → 渲染 h2 → 2em    （原 h1 尺寸）
+   作者写 ## → 渲染 h3 → 1.5em  （原 h2 尺寸）
+   依此类推。 */
+#article-container h2 { font-size: 2em; }
+#article-container h3 { font-size: 1.5em; }
+#article-container h4 { font-size: 1.17em; }
+#article-container h5 { font-size: 1em; }
+#article-container h6 { font-size: 0.83em; }
