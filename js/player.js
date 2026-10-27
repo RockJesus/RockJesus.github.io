@@ -656,10 +656,15 @@
 
   // —— 3D 旋转地球 + 访客国旗（Canvas 贴图球，IntersectionObserver 懒加载）——
   var rjGlobeDone = false;
+  var rjCounted = false;   // 每次打开网站只统计一次（pjax 站内跳转不重复计）
+  var rjGlobeStop = null;  // 旧地球实例的停止回调（pjax 重建时防止残留渲染循环）
   function initGlobe() {
     var host = document.querySelector('.card-webinfo');
     if (!host || rjGlobeDone) return;
     rjGlobeDone = true;
+    if (rjGlobeStop) { rjGlobeStop(); rjGlobeStop = null; }
+    var oldBox = host.querySelector('#rj-globe');
+    if (oldBox) oldBox.remove();
     var box = document.createElement('div');
     box.id = 'rj-globe';
     host.appendChild(box);
@@ -778,15 +783,32 @@
       return String.fromCodePoint.apply(null, cc.toUpperCase().split('').map(function (c) { return 127397 + c.charCodeAt(0); }));
     }
     function recordVisit(v) {
-      if (!v || !/^[A-Za-z]{2}$/.test(v.cc)) return;
+      if (!v || !/^[A-Za-z]{2}$/.test(v.cc) || rjCounted) return;
+      rjCounted = true; // 每次打开网站统计一次
       sessionVisits[v.cc] = (sessionVisits[v.cc] || 0) + 1;
       refreshVisits();
-      // 新国家 → 自动并入云端（写回 kvdb，跨设备立即生效）
-      if (!cloudVisits || !(v.cc in cloudVisits)) pushCloud();
+      incrCloud(v.cc);
     }
     // —— 云端持久化：/data/visitors.json（GitHub Pages 公开累计基准）∪ 本地增量 ——
     var cloudVisits = null;
     var sessionVisits = {};
+    // 每次访问原子 +1：Upstash INCR 按国家独立计数（并发访客互不覆盖、打开即生效）
+    function incrCloud(cc) {
+      fetch(UPSTASH_URL + '/incr/visits_' + cc, { headers: { 'Authorization': 'Bearer ' + UPSTASH_TOKEN }, cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('incr'); return r.json(); })
+        .then(function (j) {
+          var n = parseInt(j && j.result, 10);
+          if (n > 0) {
+            if (!cloudVisits) cloudVisits = {};
+            cloudVisits[cc] = Math.max(cloudVisits[cc] || 0, n);
+            refreshVisits();
+          }
+        })
+        .catch(function () {
+          // Upstash 不可用 → 回落旧通道：新国家并入 /data/visitors.json 基准
+          if (cloudVisits && !(cc in cloudVisits)) pushCloud();
+        });
+    }
     // 云端自动写通道：Upstash Redis REST（GitHub 账号注册，CORS 放行本域）；GitHub Actions 定时同步回仓库备份
     var UPSTASH_URL = 'https://tight-wren-137459.upstash.io';
     var UPSTASH_TOKEN = 'gQAAAAAAAhjzAAIgcDFlMWQ3MGViMGI3MTQ0ODg4OTQ1ZDAwMzc5NzQzYjRmNg';
@@ -812,21 +834,43 @@
       renderStats(historyVisits);
     }
     function loadCloudVisits() {
-      fetch(UPSTASH_URL + '/get/visits', { headers: { 'Authorization': 'Bearer ' + UPSTASH_TOKEN }, cache: 'no-store' })
-        .then(function (r) { if (!r.ok) throw new Error('upstash'); return r.json(); })
-        .then(function (j) {
-          var d = null;
-          try { d = JSON.parse(j.result); } catch (e) { throw new Error('parse'); }
-          if (!d || typeof d !== 'object') throw new Error('shape');
-          cloudVisits = d;
+      var H = { 'Authorization': 'Bearer ' + UPSTASH_TOKEN };
+      Promise.all([
+        fetch(UPSTASH_URL + '/keys/visits_*', { headers: H, cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return { result: [] }; }),
+        fetch(UPSTASH_URL + '/get/visits', { headers: H, cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return { result: null }; })
+      ]).then(function (rs) {
+        var ks = (rs[0].result || []).filter(function (k) { return /^visits_[A-Za-z]{2}$/.test(k); });
+        var legacy = null;
+        try { legacy = JSON.parse(rs[1].result); } catch (e) {}
+        if (!ks.length) {
+          // 尚无按国家键 → 沿用旧格式基准
+          cloudVisits = (legacy && typeof legacy === 'object') ? legacy : null;
           refreshVisits();
-        })
-        .catch(function () {
-          fetch('/data/visitors.json?v=' + Math.floor(Date.now() / 86400000), { cache: 'no-store' })
-            .then(function (r) { if (!r.ok) throw new Error('bad'); return r.json(); })
-            .then(function (d) { cloudVisits = (d && typeof d === 'object') ? d : null; refreshVisits(); })
-            .catch(function () {});
-        });
+          if (cloudVisits) return;
+          throw new Error('empty');
+        }
+        return fetch(UPSTASH_URL + '/mget/' + ks.map(encodeURIComponent).join('/'), { headers: H, cache: 'no-store' })
+          .then(function (r) { return r.json(); })
+          .then(function (mj) {
+            var d = {};
+            var vals = mj.result || [];
+            ks.forEach(function (k, i) {
+              var n = parseInt(vals[i], 10);
+              if (n > 0) d[k.slice(7)] = n;
+            });
+            // 兼容旧格式键（老版本客户端仍可能写入）
+            if (legacy) for (var c in legacy) if (/^[A-Za-z]{2}$/.test(c) && legacy[c] > (d[c] || 0)) d[c] = legacy[c];
+            // 合并本会话已 INCR 的瞬时结果，避免竞态覆盖
+            if (cloudVisits) for (var c2 in cloudVisits) if (cloudVisits[c2] > (d[c2] || 0)) d[c2] = cloudVisits[c2];
+            cloudVisits = d;
+            refreshVisits();
+          });
+      }).catch(function () {
+        fetch('/data/visitors.json?v=' + Math.floor(Date.now() / 86400000), { cache: 'no-store' })
+          .then(function (r) { if (!r.ok) throw new Error('bad'); return r.json(); })
+          .then(function (d) { cloudVisits = (d && typeof d === 'object') ? d : null; refreshVisits(); })
+          .catch(function () {});
+      });
     }
     // —— 新国家自动并入云端：合并当前云端基准与会话新增，写回 kvdb（跨设备立即生效）——
     function pushCloud() {
@@ -854,29 +898,36 @@
       });
       wrap.innerHTML = h;
     }
+    function applyVisitor(d) {
+      visitor = {
+        cc: ((d && (d.country || d.country_code)) || '').toUpperCase(),
+        city: (d && d.city) || '',
+        lat: parseFloat(d && d.loc ? d.loc.split(',')[0] : (d && d.latitude != null ? d.latitude : NaN)),
+        lon: parseFloat(d && d.loc ? d.loc.split(',')[1] : (d && d.longitude != null ? d.longitude : NaN))
+      };
+      label.textContent = '🌐 当前访客 · ' + flagEmoji(visitor.cc) + ' ' + (visitor.city || visitor.cc || '世界各地');
+      recordVisit(visitor);
+      flagImg = null;
+      if (/^[A-Za-z]{2}$/.test(visitor.cc)) {
+        var fi = new Image();
+        fi.crossOrigin = 'anonymous';
+        fi.onload = function () { flagImg = fi; };
+        fi.src = 'https://flagcdn.com/w40/' + visitor.cc.toLowerCase() + '.png';
+      }
+    }
     function locate() {
       fetch('https://ipinfo.io/json', { cache: 'no-store' })
-        .then(function (r) { return r.json(); })
-        .then(function (d) {
-          visitor = {
-            cc: (d.country || '').toUpperCase(),
-            city: d.city || '',
-            lat: parseFloat(d.loc ? d.loc.split(',')[0] : NaN),
-            lon: parseFloat(d.loc ? d.loc.split(',')[1] : NaN)
-          };
-          label.textContent = '🌐 当前访客 · ' + flagEmoji(visitor.cc) + ' ' + (visitor.city || visitor.cc || '世界各地');
-          recordVisit(visitor);
-          flagImg = null;
-          if (/^[A-Za-z]{2}$/.test(visitor.cc)) {
-            var fi = new Image();
-            fi.crossOrigin = 'anonymous';
-            fi.onload = function () { flagImg = fi; };
-            fi.src = 'https://flagcdn.com/w40/' + visitor.cc.toLowerCase() + '.png';
-          }
-        })
+        .then(function (r) { if (!r.ok) throw new Error('ipinfo'); return r.json(); })
+        .then(applyVisitor)
         .catch(function () {
-          label.textContent = '🌐 欢迎来自世界各地的访客';
-          refreshVisits();
+          // 备用定位源：ipinfo 失败（限流/被墙）时保证访客仍被统计
+          fetch('https://ipapi.co/json/', { cache: 'no-store' })
+            .then(function (r) { if (!r.ok) throw new Error('ipapi'); return r.json(); })
+            .then(applyVisitor)
+            .catch(function () {
+              label.textContent = '🌐 欢迎来自世界各地的访客';
+              refreshVisits();
+            });
         });
     }
     // 球面投影（含旋转 lon），返回屏幕坐标与深度 z（正面 z>0）
@@ -1014,6 +1065,7 @@
       if (started) return;
       started = true;
       running = true;
+      rjGlobeStop = function () { running = false; };
       locate();
       loadLand();
       refreshVisits();
