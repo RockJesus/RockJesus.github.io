@@ -3,10 +3,6 @@
   if (window.__rjMusicInit) return; // pjax 防重复初始化
   window.__rjMusicInit = true;
 
-  // —— 鼠标互动线条（canvas-nest）改为主题紫 #8b5cf6 ——
-  var rjCanvasNest = document.getElementById('canvas_nest');
-  if (rjCanvasNest) rjCanvasNest.setAttribute('color', '139,92,246');
-
   // 只保留两个源。jsDelivr 已移除：它对 @main 有 12 小时缓存，素材仓更新后
   // 仍返回旧歌单，而它恰恰响应最快（~250ms）——只要前一个源慢一点，它就会
   // 抢先返回旧数据，表现成「列表又变回 30 首」。宁可少一个兜底，也不要错数据。
