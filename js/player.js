@@ -21,11 +21,12 @@
     cover: '/img/header_oc.webp'
   };
 
-  // 带超时的 fetch：任何源 10s 内无响应即放弃，保证播放器一定初始化
-  function fetchJson(url, timeout) {
+  // 带超时的 fetch。歌单 583KB，CDN 冷回源时可能十几秒，超时给短了会直接掉到
+  // 种子曲（表现为「播放列表只剩 1 首」）。所以：单次 20s，同一个源再试一遍。
+  function fetchOnce(url, timeout) {
     return new Promise(function (resolve, reject) {
       var ctrl = new AbortController();
-      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 12000);
+      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 20000);
       // 不要用 cache:'no-cache'：它会带 Cache-Control: no-cache 强制回源，
       // 583KB 的 JSON 每次都要等源头，首屏能卡到 30s+。
       // 版本更新靠 URL 上的 ?v= 控制（换版本 = 换缓存键），默认缓存策略即可。
@@ -34,6 +35,9 @@
         .then(function (d) { clearTimeout(timer); resolve(d); })
         .catch(function (e) { clearTimeout(timer); reject(e); });
     });
+  }
+  function fetchJson(url, timeout) {
+    return fetchOnce(url, timeout).catch(function () { return fetchOnce(url, timeout); });
   }
 
   function fetchPlaylist(i) {
