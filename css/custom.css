@@ -471,9 +471,9 @@ img {
   border-radius: 18px;
   overflow: hidden;
   isolation: isolate;
-  background-color: rgba(8, 11, 21, 0.9) !important;
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  background-color: rgba(8, 11, 21, 0.58) !important;   /* 半透明玻璃：页面内容能透出来 */
+  backdrop-filter: blur(26px) saturate(165%);
+  -webkit-backdrop-filter: blur(26px) saturate(165%);
   border: 1px solid rgba(139, 92, 246, 0.32);
   box-shadow:
     0 16px 40px rgba(2, 6, 18, 0.62),
@@ -491,8 +491,8 @@ img {
   background-image: var(--rj-pl-cover, none);
   background-size: cover;
   background-position: center;
-  filter: blur(22px) saturate(155%);
-  opacity: 0.45;
+  filter: blur(22px) saturate(160%);
+  opacity: 0.5;
   transform: scale(1.06);
   pointer-events: none;
 }
@@ -502,7 +502,7 @@ img {
   inset: 0;
   z-index: 1;
   background:
-    linear-gradient(104deg, rgba(7, 10, 20, 0.86) 0%, rgba(10, 14, 28, 0.76) 48%, rgba(22, 12, 40, 0.7) 100%);
+    linear-gradient(104deg, rgba(7, 10, 20, 0.52) 0%, rgba(10, 14, 28, 0.42) 48%, rgba(22, 12, 40, 0.4) 100%);
   pointer-events: none;
 }
 /* 原生控件兜底隐藏（正常已在 JS 里隐藏） */
@@ -890,16 +890,16 @@ img {
   position: relative;
   z-index: 3;
   margin-bottom: 6px !important;   /* 原生带 margin-bottom:65px，改 6px：歌单悬在卡片上方 */
-  background: color-mix(in srgb, var(--rj-ink-surface) 92%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--rj-ink-surface) 74%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid color-mix(in srgb, var(--rj-brand-3) 26%, transparent);
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 -8px 24px var(--rj-shadow-cast-1);
 }
 .aplayer .aplayer-list ol {
-  max-height: 222px;   /* 7 行整高（行高 32 + 容器 1px 描边），避免半行被卡片压住 */
+  max-height: 230px;   /* 7 行整高：首行 32，其后每行 32+1px 描边 → 32+33*6=230，不再露半行 */
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--rj-brand-3) 50%, transparent) transparent;
 }
@@ -914,7 +914,12 @@ img {
   /* 用双模式语义色：亮色下列表是浅底，写死的 slate-300 会白到看不见 */
   color: var(--rj-ink-text);
   border-top: 1px solid var(--rj-hairline-1);
-  padding: 7px 14px;
+  /* 行改 flex：歌名占满剩余宽度并自动省略，歌手固定靠右，
+     否则长歌名会顶到歌手名上（AA.css 用 float:right 布局，天然会重叠） */
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px !important;
   transition: background 0.2s ease;
 }
 .aplayer .aplayer-list ol li:hover {
@@ -923,42 +928,43 @@ img {
 }
 .aplayer .aplayer-list ol li.aplayer-list-light {
   background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand) 26%, transparent), color-mix(in srgb, var(--rj-brand-2) 10%, transparent)) !important;
-  border-left: 2px solid var(--rj-brand);
+  /* 用 inset 阴影代替 border-left：不占布局宽度，当前行与其它行文字严格对齐 */
+  box-shadow: inset 2px 0 0 var(--rj-brand);
 }
+/* 列表不显示序号：整列去掉，歌名直接顶到行首
+   （原来序号位上还挂着一条均衡器动画，一并去掉，当前曲目靠底色 + 左侧竖条标识） */
 .aplayer .aplayer-list ol li .aplayer-list-index {
-  color: var(--rj-brand-3) !important;
-  position: relative;
-}
-.aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index {
-  color: transparent;
-}
-.aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 14px;
-  height: 12px;
-  transform: translate(-50%, -50%);
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 12'><rect x='0' y='4' width='2.5' height='8' rx='1' fill='%23f472b6'/><rect x='5' y='0' width='2.5' height='12' rx='1' fill='%23a78bfa'/><rect x='10' y='2.5' width='2.5' height='9' rx='1' fill='%2322d3ee'/></svg>") center/contain no-repeat;
-  animation: rjEq 0.9s ease-in-out infinite;
-}
-@keyframes rjEq {
-  0%, 100% { transform: translate(-50%, -50%) scaleY(0.7); }
-  50% { transform: translate(-50%, -50%) scaleY(1.15); }
+  display: none !important;
 }
 .aplayer .aplayer-list ol li .aplayer-list-title {
   color: var(--rj-ink-text);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-title {
   color: var(--rj-ink-text);
 }
 .aplayer .aplayer-list ol li .aplayer-list-author {
   color: color-mix(in srgb, var(--rj-ink-text) 60%, transparent) !important;
+  flex: 0 0 auto;
+  float: none !important;      /* AA.css 的 float:right 会盖回来，必须顶掉 */
+  max-width: 46%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
 }
 .aplayer .aplayer-list ol li .aplayer-list-cur {
   color: var(--rj-accent-3);
 }
+/* 亮色主题：白色底板透太多会泛灰发脏，单独收实一档 */
+[data-theme="light"] .aplayer .aplayer-list {
+  background: color-mix(in srgb, var(--rj-ink-surface) 88%, transparent);
+}
+
 /* —— 自动播放被拦截时的提示 —— */
 .rj-tip {
   position: fixed;
@@ -1817,10 +1823,7 @@ a:hover { color: var(--rj-brand-2); }
     radial-gradient(circle 5px at 22px 5px, color-mix(in srgb, var(--rj-brand-2) 90%, transparent) 100%, transparent),
     radial-gradient(circle 5px at 40px 5px, color-mix(in srgb, var(--rj-brand-3) 90%, transparent) 100%, transparent);
 }
-/* —— 播放器：加载进度 / 滑块 / 当前曲目 / 播放指示 —— */
-.aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index::before {
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 12'><rect x='0' y='4' width='2.5' height='8' rx='1' fill='%238b5cf6'/><rect x='5' y='0' width='2.5' height='12' rx='1' fill='%23a78bfa'/><rect x='10' y='2.5' width='2.5' height='9' rx='1' fill='%236366f1'/></svg>") center/contain no-repeat;
-}
+/* —— 播放器：加载进度 / 滑块 —— */
 /* —— 正文列表 marker hover：紫 —— */
 #article-container ul li:hover::marker,
 #article-container ol li:hover::marker { color: var(--rj-brand); }
