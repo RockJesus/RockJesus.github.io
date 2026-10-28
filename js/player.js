@@ -1085,6 +1085,28 @@
     window.addEventListener('resize', function () { resize(); cx = W / 2; cy = H / 2; R = W / 2 - 26; });
   }
 
+  // —— 导航徽标：Alien×Apple 融合标记 ——
+  // 实心六边形徽章（青→紫渐变）+ 苹果负形镂空（切角果身/咬口/叶片）+ 外星斜眼
+  var RJ_LOGO_SVG =
+    '<svg class="rj-logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false">' +
+      '<defs><linearGradient id="rjLogoGrad" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0" class="rj-logo-g1"/>' +
+        '<stop offset=".55" class="rj-logo-g2"/>' +
+        '<stop offset="1" class="rj-logo-g3"/>' +
+      '</linearGradient></defs>' +
+      '<path class="rj-logo-hex" d="M16 1.6 L29.2 9.2 L29.2 22.8 L16 30.4 L2.8 22.8 L2.8 9.2 Z"/>' +
+      '<path class="rj-logo-cut" d="M13 12.6 L14.6 13.1 L16.6 12.5 L18.6 12.9 L20.8 14.4 L21.5 15.2 L19.3 17.3 L21.2 19.5 L21 21.6 L19.4 23.8 L17.3 25.6 L15.7 24.2 L13.8 25.6 L11.4 23.4 L9.9 20.9 L9.6 17.4 L11 13.9 L12.2 12.5 Z M16.4 12.4 L17.2 9.3 L19.4 8.6 L17.9 11.9 Z"/>' +
+      '<path class="rj-logo-eye" d="M12.2 16 L14.6 16.8 L14.2 18.4 L11.9 17.6 Z M16.8 16.8 L19.2 16 L19.5 17.6 L17.2 18.4 Z"/>' +
+    '</svg>';
+  function initLogo() {
+    var host = document.getElementById('site-name');
+    if (!host || host.querySelector('.rj-logo-wrap')) return;
+    var wrap = document.createElement('span');
+    wrap.className = 'rj-logo-wrap';
+    wrap.innerHTML = RJ_LOGO_SVG;
+    host.insertBefore(wrap, host.firstChild);
+  }
+
   // —— 站点统计（Upstash 原子计数，替代失效的不蒜子 busuanzi）——
   var rjPvMarked = false;   // 总访问量：每次完整页面加载 +1
   var rjPvPath = null;      // 文章阅读量：每次进入该文章（含 pjax 跳转）计一次
@@ -1182,6 +1204,7 @@
     fixErrorImgRefs();
     upgradeRewardMenus();
     upgradeAnnouncement();
+    initLogo();
     initGlobe();
     rjStats();
     rjPatchBrokenImgs();
@@ -1200,6 +1223,7 @@
     upgradeRewardMenus();
     upgradeAnnouncement();
     rjGlobeDone = false;
+    initLogo();
     initGlobe();
     rjStats();
     rjPatchBrokenImgs();

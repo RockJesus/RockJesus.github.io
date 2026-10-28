@@ -2490,27 +2490,29 @@ body {
   gap: 10px;
 }
 
-/* 六边形 AlienFX 徽标：clip-path 绘制，带外发光 */
-#site-name::before {
-  content: '';
+/* Alien×Apple 融合徽标：实心六边形徽章 + 苹果负形（咬口/叶片）+ 外星斜眼
+   三色：青→紫渐变徽章 / 底色苹果镂空 / 青色眼睛；结构与配色见 player.js initLogo() */
+#site-name .rj-logo-wrap {
+  display: inline-flex;
   flex: none;
-  width: 15px;
-  height: 17px;
-  background:
-    radial-gradient(circle at 50% 52%,
-      var(--rj-carbon) 0 22%,
-      transparent 23%),
-    linear-gradient(160deg,
-      var(--rj-hud) 0%,
-      color-mix(in srgb, var(--rj-brand) 75%, var(--rj-hud)) 100%);
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--rj-hud-glow) 90%, transparent));
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--rj-hud-glow) 80%, transparent));
   transition: filter var(--rj-dur-base) var(--rj-ease-out);
 }
 
-#site-name:hover::before {
-  filter: drop-shadow(0 0 11px var(--rj-hud));
+#site-name:hover .rj-logo-wrap {
+  filter: drop-shadow(0 0 12px var(--rj-hud));
 }
+
+.rj-logo { width: 100%; height: 100%; display: block; }
+.rj-logo-hex { fill: url(#rjLogoGrad); }
+.rj-logo-g1 { stop-color: var(--rjp-alien-cyan-lt); }
+.rj-logo-g2 { stop-color: var(--rjp-alien-cyan); }
+.rj-logo-g3 { stop-color: var(--rj-brand); }
+.rj-logo-cut { fill: var(--rj-logo-cut, #0a0a12); }
+.rj-logo-eye { fill: var(--rjp-alien-cyan-lt); }
+
 
 /* 导航下沿：紫→青 的接缝光，替代纯白描边 */
 #nav::after {
@@ -2687,9 +2689,9 @@ body {
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
-[data-theme='light'] #site-name::before {
-  filter: none;
-}
+[data-theme='light'] #site-name .rj-logo-wrap { filter: none; }
+[data-theme='light'] .rj-logo-cut { fill: #ffffff; }
+[data-theme='light'] .rj-logo-eye { fill: var(--rj-brand); }
 
 /* 卡片：apple.com 式「白面 + hairline + 极淡投影」 */
 [data-theme='light'] #recent-posts > .recent-post-item,
