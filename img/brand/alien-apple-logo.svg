@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512" role="img" aria-label="Alienware × Apple 融合徽标">
+  <title>Alienware × Apple — 额饰异形</title>
+  <desc>外星人头像，额心嵌一枚品红苹果印记（圆形咬口与叶片）</desc>
+  <defs>
+    <linearGradient id="rjRim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7ff9ff"/>
+      <stop offset=".45" stop-color="#00e5ff"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="rjCore" x1="0" y1="0" x2=".7" y2="1">
+      <stop offset="0" stop-color="#d8b4fe"/>
+      <stop offset=".45" stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#ec4899"/>
+    </linearGradient>
+    <mask id="rjBite">
+      <rect x="0" y="0" width="64" height="64" fill="#fff"/>
+      <circle cx="37.73" cy="14.78" r="2.73" fill="#000"/>
+    </mask>
+    <filter id="rjGlowEye" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="1.3" flood-color="#00e5ff" flood-opacity="0.85"/>
+    </filter>
+    <filter id="rjGlowCore" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="1.4" flood-color="#ec4899" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+  <!-- 颅骨：直线切角，青→紫渐变轮廓 -->
+  <path d="M32 4.4 L36.8 4.8 L42 6.6 L46.6 9.6 L50.4 13.9 L52.6 20.6 L50 28.2 L46.2 35 L40.6 41.2 L32 45.8 L23.4 41.2 L17.8 35 L14 28.2 L11.4 20.6 L13.6 13.9 L17.4 9.6 L22 6.6 L27.2 4.8 Z"
+        fill="#111a2c" stroke="url(#rjRim)" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- 外星杏眼 -->
+  <path d="M30.6 28.4 C27.2 24.8 23.4 22.8 19.6 23.2 C17.1 23.4 15.8 24.5 15.6 25.6 C17.6 27.9 21.2 29.4 24.9 29.5 C27.4 29.6 29.4 29.4 30.6 28.4 Z M33.4 28.4 C36.8 24.8 40.6 22.8 44.4 23.2 C46.9 23.4 48.2 24.5 48.4 25.6 C46.4 27.9 42.8 29.4 39.1 29.5 C36.6 29.6 34.6 29.4 33.4 28.4 Z"
+        fill="#00f0ff" filter="url(#rjGlowEye)"/>
+  <!-- 额头苹果印记：紫→品红渐变，圆形咬口以 mask 减法挖出 -->
+  <g filter="url(#rjGlowCore)">
+    <path mask="url(#rjBite)"
+          d="M32.00 12.15 C29.74 10.37 26.92 11.49 26.64 14.31 C26.36 16.95 27.49 19.77 29.56 21.08 C30.50 21.65 31.25 21.83 32.00 21.83 C32.75 21.83 33.50 21.65 34.44 21.08 C36.51 19.77 37.64 16.95 37.36 14.31 C37.08 11.49 34.26 10.37 32.00 12.15 Z M32.19 10.84 C32.28 8.86 33.22 7.55 35.38 6.98 C35.29 9.05 34.35 10.37 32.19 10.84 Z"
+          fill="url(#rjCore)"/>
+  </g>
+</svg>
