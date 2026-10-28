@@ -43,12 +43,22 @@
     return fetchJson(PLAYLIST_URLS[i]).catch(function () { return fetchPlaylist(i + 1); });
   }
 
+  // APlayer 库自托管优先：从 jsDelivr 拉在境内能等 10s+，首屏全卡在这一步。
+  // 同域 /lib 命中 CDN 缓存通常 <300ms；jsDelivr 留作兜底。
   function ensureAplayer(cb) {
     if (window.APlayer) return cb();
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js';
-    s.onload = cb;
-    document.head.appendChild(s);
+    var srcs = ['/lib/APlayer.min.js?v=1.10.1',
+                'https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js'];
+    var i = 0;
+    function next() {
+      if (i >= srcs.length) { cb(); return; }
+      var s = document.createElement('script');
+      s.src = srcs[i++];
+      s.onload = cb;
+      s.onerror = next;
+      document.head.appendChild(s);
+    }
+    next();
   }
 
   function normalize(list) {
