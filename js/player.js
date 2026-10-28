@@ -507,12 +507,42 @@
     var b = document.getElementById('chat_btn');
     if (b) b.classList.remove('rj-doubao-active');
   }
+  // 面板定位：看板娘可见时，弹窗挂到她头顶上方（底边距头顶 10px），
+  // 右边缘与看板娘右边缘对齐；高度按剩余空间收缩，保证顶部不出屏。
+  // 看板娘不可见（移动端 / 加载失败）时清掉内联样式，回退 CSS 默认位置。
+  function placePanel() {
+    if (!rjPanel) return;
+    var miku = document.getElementById('live2d-widget');
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var r = miku && vw >= 768 ? miku.getBoundingClientRect() : null;
+    if (!r || !r.width || !r.height) {
+      rjPanel.style.bottom = rjPanel.style.right = rjPanel.style.height = rjPanel.style.maxHeight = '';
+      return;
+    }
+    var bottom = Math.round(vh - r.top + 10);
+    var h = Math.min(580, vh - bottom - 64);
+    if (h < 420) {
+      // 屏幕偏矮：头顶放不下一个可用的对话高度，改挂到看板娘左侧（底部让 80px），
+      // 既不压住她，也保证面板本身有足够高度
+      rjPanel.style.bottom = '80px';
+      rjPanel.style.right = Math.round(vw - r.left + 12) + 'px';
+      rjPanel.style.height = rjPanel.style.maxHeight = Math.min(580, vh - 96) + 'px';
+      return;
+    }
+    rjPanel.style.bottom = bottom + 'px';
+    rjPanel.style.right = Math.max(12, Math.round(vw - r.right)) + 'px';
+    rjPanel.style.height = rjPanel.style.maxHeight = h + 'px';
+  }
+  window.addEventListener('resize', function () {
+    if (rjPanel && rjPanel.classList.contains('rj-doubao-open')) placePanel();
+  });
   function rjToggle(btn) {
     var open = rjPanel && rjPanel.classList.contains('rj-doubao-open');
     if (open) {
       closePanel();
     } else {
       buildPanel().classList.add('rj-doubao-open');
+      placePanel();
       mountFrame();
       if (btn) btn.classList.add('rj-doubao-active');
     }
