@@ -478,36 +478,29 @@
       '<div class="rj-doubao-head">' +
         '<img class="rj-doubao-head-avatar" src="' + DOUBAO_AVATAR + '" alt="">' +
         '<span>和豆包聊天</span>' +
+        '<a class="rj-doubao-pop" href="' + DOUBAO_CHAT_URL + '" target="_blank" rel="noopener" title="在新窗口打开">↗</a>' +
         '<button class="rj-doubao-close" title="关闭">×</button>' +
       '</div>' +
       '<div class="rj-doubao-body">' +
-        '<div class="rj-doubao-greet">' +
-          '<img class="rj-doubao-greet-avatar" src="' + DOUBAO_AVATAR + '" alt="">' +
-          '<div class="rj-doubao-bubble">嗨～我是豆包 👋<br>黑苹果、装机、写码、生活问题都可以问我！</div>' +
-        '</div>' +
-        '<div class="rj-doubao-chips">' +
-          '<button class="rj-doubao-chip" data-q="黑苹果 OpenCore 安装教程">🍎 黑苹果安装</button>' +
-          '<button class="rj-doubao-chip" data-q="Alienware 笔记本装黑苹果兼容性">👽 Alienware 兼容性</button>' +
-          '<button class="rj-doubao-chip" data-q="帮我写一段代码">💻 写代码</button>' +
-          '<button class="rj-doubao-chip" data-q="帮我翻译一段英文">🌍 翻译</button>' +
-        '</div>' +
-        '<button class="rj-doubao-go">开始与豆包对话 →</button>' +
-        '<p class="rj-doubao-note">将在新窗口打开豆包网页版 · 由字节跳动提供 AI 能力</p>' +
+        '<div class="rj-doubao-loading"><span class="rj-doubao-spin"></span><em>豆包加载中…</em></div>' +
+        '<iframe class="rj-doubao-frame" data-src="' + DOUBAO_CHAT_URL + '" title="豆包 AI 对话" frameborder="0" allow="clipboard-write; microphone; autoplay; fullscreen"></iframe>' +
       '</div>';
     rjPanel.querySelector('.rj-doubao-close').addEventListener('click', closePanel);
-    rjPanel.querySelector('.rj-doubao-go').addEventListener('click', function () {
-      window.open(DOUBAO_CHAT_URL, '_blank', 'noopener');
-      closePanel();
-    });
-    var chips = rjPanel.querySelectorAll('.rj-doubao-chip');
-    for (var ci = 0; ci < chips.length; ci++) {
-      chips[ci].addEventListener('click', function () {
-        window.open(DOUBAO_CHAT_URL, '_blank', 'noopener');
-        closePanel();
-      });
-    }
     document.body.appendChild(rjPanel);
     return rjPanel;
+  }
+  // 内嵌 iframe 懒加载：首次展开时才请求豆包，避免拖慢首屏；加载完再撤掉骨架
+  function mountFrame() {
+    if (!rjPanel) return;
+    var f = rjPanel.querySelector('.rj-doubao-frame');
+    if (!f) return;
+    if (!f.getAttribute('src')) {
+      f.setAttribute('src', f.getAttribute('data-src'));
+      var mark = function () { rjPanel.classList.add('rj-doubao-ready'); };
+      f.addEventListener('load', mark);
+      // 兜底：网络异常时也撤骨架，避免一直转圈
+      setTimeout(mark, 15000);
+    }
   }
   function closePanel() {
     if (rjPanel) rjPanel.classList.remove('rj-doubao-open');
@@ -520,6 +513,7 @@
       closePanel();
     } else {
       buildPanel().classList.add('rj-doubao-open');
+      mountFrame();
       if (btn) btn.classList.add('rj-doubao-active');
     }
   }

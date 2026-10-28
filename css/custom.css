@@ -993,8 +993,8 @@ img {
   flex-direction: column;
   width: 380px;
   max-width: calc(100vw - 36px);
-  height: auto;
-  max-height: min(560px, 72vh);
+  height: min(580px, 74vh);
+  max-height: calc(100vh - 110px);
   overflow: hidden;
   background: color-mix(in srgb, var(--rj-ink-input) 82%, transparent);
   backdrop-filter: blur(18px) saturate(140%);
@@ -1047,88 +1047,86 @@ img {
   background: color-mix(in srgb, var(--rj-accent-3) 35%, transparent);
   color: var(--rj-text-inverse);
 }
+/* 内容区：直接内嵌豆包网页，撑满剩余高度 */
 .rj-doubao-body {
+  position: relative;
   flex: 1;
+  min-height: 0;
   width: 100%;
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: #fff; /* 豆包页面为浅色，避免加载瞬间透出深色底 */
+}
+.rj-doubao-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+  border-radius: 0 0 22px 22px;
+}
+/* 加载骨架：豆包首屏 1~3 秒，先给个转圈，避免误以为是空白 */
+.rj-doubao-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px 16px 14px;
-  overflow-y: auto;
-}
-/* 问候气泡：豆包头像 + 对话气泡 */
-.rj-doubao-greet {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.rj-doubao-greet-avatar {
-  flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 40%, transparent);
-}
-.rj-doubao-bubble {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.26), rgba(0, 240, 255, 0.10));
-  border: 1px solid rgba(160, 140, 255, 0.34);
-  border-radius: 4px 14px 14px 14px;
-  padding: 10px 13px;
-  font-size: 13.5px;
-  line-height: 1.65;
-  color: #ece9ff; /* 面板为深玻璃，文字固定浅色，不跟随主题 */
-}
-/* 快捷问题 chips */
-.rj-doubao-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.rj-doubao-chip {
-  font: inherit;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(180deg, #f7f8fc, #eef1fa);
+  color: #6b7280;
   font-size: 12.5px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  color: #e8e5ff;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  transition: all 0.2s ease;
+  transition: opacity 0.3s ease, visibility 0.3s;
 }
-.rj-doubao-chip:hover {
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
-  border-color: transparent;
-  color: var(--rj-text-inverse);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 50%, transparent);
-  transform: translateY(-1px);
-}
-/* 主 CTA：开始对话 */
-.rj-doubao-go {
-  margin-top: auto;
-  font: inherit;
-  font-weight: 700;
-  font-size: 14.5px;
+.rj-doubao-loading em {
+  font-style: normal;
   letter-spacing: 0.5px;
-  padding: 12px;
-  border-radius: 14px;
-  cursor: pointer;
-  color: var(--rj-text-inverse);
-  border: none;
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent));
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--rj-brand) 45%, transparent);
-  transition: all 0.25s ease;
 }
-.rj-doubao-go:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--rj-brand) 65%, transparent);
-  filter: brightness(1.1);
+.rj-doubao-spin {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(139, 92, 246, 0.22);
+  border-top-color: var(--rj-brand-2, #8b5cf6);
+  border-right-color: var(--rj-brand, #a855f7);
+  animation: rjDoubaoSpin 0.85s linear infinite;
 }
-.rj-doubao-note {
-  margin: 0;
-  text-align: center;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.55);
+@keyframes rjDoubaoSpin {
+  to { transform: rotate(360deg); }
+}
+#rj-doubao-panel.rj-doubao-ready .rj-doubao-loading {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+/* 头部「新窗口打开」：iframe 内登录态受限时的兜底出口 */
+.rj-doubao-pop {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  text-decoration: none !important;
+  color: var(--rjp-slate-200);
+  background: var(--rj-border);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.rj-doubao-pop:hover {
+  background: color-mix(in srgb, var(--rj-brand) 55%, transparent);
+  color: #fff;
+}
+.rj-doubao-head .rj-doubao-pop + .rj-doubao-close {
+  margin-left: 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rj-doubao-spin { animation-duration: 2s; }
 }
 /* —— 看板娘 hover 气泡：提示可点击召唤豆包 ——
    容器默认 pointer-events:none（点击穿透），开启可点击后需恢复接收事件；
@@ -1165,8 +1163,8 @@ img {
     right: 10px;
     bottom: 74px;
     width: calc(100vw - 20px);
-    height: auto;
-    max-height: 70vh;
+    height: 72vh;
+    max-height: calc(100vh - 96px);
   }
 }
 
@@ -2305,13 +2303,13 @@ a:hover { color: var(--rj-brand-2); }
   color: var(--rj-text-inverse);
 }
 /* 内容区底部圆角衔接 */
-.rj-doubao-body {
+.rj-doubao-frame {
   border-radius: 0 0 24px 24px;
 }
 /* 移动端 */
 @media (max-width: 767px) {
   #rj-doubao-panel { border-radius: 20px; }
-  .rj-doubao-body { border-radius: 0 0 20px 20px; }
+  .rj-doubao-frame { border-radius: 0 0 20px 20px; }
 }
 
 /* ============================================================
