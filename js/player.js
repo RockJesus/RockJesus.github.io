@@ -64,14 +64,14 @@
     var out = [];
     (list || []).forEach(function (t) {
       if (!t || !t.name) return;
-      // v1.6.8：拿不到直链的曲目也保留。
-      // 歌单是「我喜欢」的完整收藏（3000+ 首），其中一部分受版权/会员限制无法解析出
-      // 播放地址。旧版在这里直接丢弃，导致 3064 首只剩 30 首进列表。
-      // 现在保留并标记，列表里置灰展示、不可切入播放。
+      // v1.8.0：列表只保留可播曲目。拿不到直链的（版权/会员限制）直接过滤，
+      // 列表所见即可播，不再展示置灰项。切歌路径里的可播校验（rjSkip 等）全部
+      // 保留兜底 —— 应对 vkey 在列表停留期间过期的极端情况。
+      if (!t.url) return;
       out.push({
         name: t.name,
         artist: t.artist || '',
-        url: t.url || '',
+        url: t.url,
         cover: t.cover || SEED.cover,
         duration: t.duration || 0
       });
@@ -338,7 +338,8 @@
         inp.addEventListener('keydown', function (e) { e.stopPropagation(); });
       }
       var num = box.querySelector('.rj-pl-stat-num');
-      if (num) num.innerHTML = '全部 <b>' + audios.length + '</b> 首 · 可播 <b class="ok">' + ok + '</b> 首';
+      // v1.8.0 列表只含可播曲目：统计只报总数，不再区分可播/不可播
+      if (num) num.innerHTML = '歌单 <b>' + audios.length + '</b> 首 · 每 10 分钟自动更新';
     }
     // 列表高度按「整行」算：CSS 里写死 230px 是按桌面 32+33×6 推的，
     // 移动端行高更大（≈37），230 会露出半行。实测行高再定，永远整行收口。
@@ -881,7 +882,68 @@
     try { return JSON.parse(localStorage.getItem('rjPlayerState')); } catch (e) { return null; }
   }
 
-  function init(list) {
+  // ============================================================
+  //  歌单自动更新 V1.8.0
+  //  每 10 分钟拉一次最新歌单（素材仓 cron 每 2h 刷新 vkey 数据），
+  //  指纹有变就「热替换」：按「歌名+歌手」找回正在播的这首，同曲同进度续播，
+  //  全程不丢播放状态。页面不用刷新就能吃到最新数据。
+  // ============================================================
+  var liveAp = null;      // 当前活跃实例（pjax 重建 / 热替换都会更新它）
+  var liveList = [];      // 当前歌单（pjax 重建要用最新的，不能用 init 时的闭包快照）
+  var liveSig = '';       // 当前歌单指纹
+  function sigOf(list) {
+    // 轻量指纹：数量 + 全体曲名长度滚动哈希 + 首尾曲名，足以识别素材仓刷新后的变化
+    var h = 0;
+    for (var i = 0; i < list.length; i++) {
+      h = (h * 31 + String(list[i].name || '').length) & 0x7fffffff;
+    }
+    return list.length + '|' + h + '|' + ((list[0] || {}).name || '') + '|' + ((list[list.length - 1] || {}).name || '');
+  }
+  function hotSwap(nextList) {
+    var ap = liveAp;
+    if (!ap || !nextList.length) return;
+    var wasPlaying = !!(ap.audio && !ap.audio.paused);
+    var curTime = 0;
+    try { curTime = (ap.audio && ap.audio.currentTime) || 0; } catch (e) {}
+    var cur = (ap.list && ap.list.audios) ? ap.list.audios[ap.list.index] : null;
+    var container = document.getElementById('site-player');
+    var wasCollapsed = container ? container.classList.contains('rj-pl-collapsed') : true;
+    // 在新列表里找回正在播的这首；找不到（版权下架）就从当前进度位置就近换一首
+    var idx = -1;
+    if (cur) {
+      for (var i = 0; i < nextList.length; i++) {
+        if (nextList[i].name === cur.name && nextList[i].artist === cur.artist) { idx = i; break; }
+      }
+    }
+    // 把「同曲同进度」写进续播状态，交给 init 的续播逻辑执行（同一条路径，不重复造轮子）
+    try {
+      localStorage.setItem('rjPlayerState', JSON.stringify({
+        idx: idx,
+        time: (idx >= 0 && (wasPlaying || curTime > 3)) ? curTime : 0
+      }));
+    } catch (e) {}
+    try { ap.destroy(); } catch (e) {}
+    if (container) container.innerHTML = '';
+    window.aplayers = (window.aplayers || []).filter(function (x) { return x !== ap; });
+    liveAp = null;
+    init(nextList, { silent: !wasPlaying, collapsed: wasCollapsed });
+  }
+  function startAutoRefresh() {
+    // 轮询体独立成函数：控制台可 window.__rjPlaylistPoll() 手动触发检查（测试/调试用）
+    function pollOnce() {
+      if (!liveAp) return Promise.resolve(); // 播放器还没起来
+      return fetchPlaylist().then(function (data) {
+        var nl = normalize(data && data.tracks);
+        if (!nl.length) return;                    // 空数据不动现有列表
+        if (sigOf(nl) === liveSig) return;         // 没变化
+        hotSwap(nl);
+      }).catch(function () {});                    // 拉取失败保持现状，下个周期再试
+    }
+    window.__rjPlaylistPoll = pollOnce;
+    setInterval(pollOnce, 10 * 60 * 1000);
+  }
+
+  function init(list, opts) {
     var container = document.getElementById('site-player');
     if (!container || !window.APlayer || !list.length) return;
     var ap = new APlayer({
@@ -901,6 +963,7 @@
     });
     window.aplayers = window.aplayers || [];
     window.aplayers.push(ap); // pjax 只销毁非 fixed 实例
+    liveAp = ap; liveList = list; liveSig = sigOf(list);
 
     // —— 律动前置：音频必须以匿名跨域方式加载 ——
     //    折叠态律动要接 Web Audio 读频谱，而不透明（无 CORS）资源接进 AudioContext
@@ -914,6 +977,11 @@
     }
 
     decorate(ap, container, list);
+    // 热替换时保留用户当前的折叠/展开状态（decorate 默认折叠）
+    if (opts && opts.collapsed === false) {
+      container.classList.remove('rj-pl-collapsed');
+      try { ap.list.show(); } catch (e) {}
+    }
 
     var saved = readState();
     var resumeTime = saved && typeof saved.time === 'number' ? Math.min(Math.max(saved.time, 0), 3600) : 0;
@@ -945,7 +1013,8 @@
           });
         }
       }
-      autoPlay(ap, false);
+      // 热替换且替换前处于暂停态时静默：只换列表/曲位，不替用户按下播放键
+      if (!(opts && opts.silent)) autoPlay(ap, false);
     } catch (e) {
       showTip('♪ 点击页面任意处开启音乐');
     }
@@ -968,6 +1037,8 @@
       var c = document.getElementById('site-player');
       if (!c || c.querySelector('.aplayer-body')) return;
       var st = readState();
+      // 用 liveList（热替换后的最新列表），不能用 init 时的闭包快照
+      var list = liveList;
       var idx = st && typeof st.idx === 'number' && st.idx >= 0 && st.idx < list.length ? st.idx : -1;
       // 记忆里的曲目若已不可播，退到第一首能播的，别让 pjax 后重建出个空 src
       if (idx >= 0 && !list[idx].url) idx = -1;
@@ -1826,11 +1897,9 @@
     ensureAplayer(function () {
       fetchPlaylist()
         .then(function (data) {
-          var list = normalize(data && data.tracks);
-          // 全量歌单里绝大多数曲目能播；万一整份都解析失败（vkey 全局过期）
-          // 就退回种子曲，至少播放器不是死的
-          var hasPlayable = list.some(function (t) { return t.url; });
-          init(hasPlayable ? list : [SEED]);
+          var list = normalize(data && data.tracks); // 已过滤：只留可播曲目
+          // 兜底：整份歌单一条直链都没有（vkey 全局过期）→ 退回种子曲，播放器不至于是死的
+          init(list.length ? list : [SEED]);
         })
         .catch(function () { init([SEED]); });
     });
@@ -1841,4 +1910,5 @@
   } else {
     load();
   }
+  startAutoRefresh();
 })();
