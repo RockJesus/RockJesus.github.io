@@ -26,8 +26,11 @@
   function fetchJson(url, timeout) {
     return new Promise(function (resolve, reject) {
       var ctrl = new AbortController();
-      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 30000);
-      fetch(url, { cache: 'no-cache', signal: ctrl.signal })
+      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 15000);
+      // 不要用 cache:'no-cache'：它会带 Cache-Control: no-cache 强制回源，
+      // 583KB 的 JSON 每次都要等源头，首屏能卡到 30s+。
+      // 版本更新靠 URL 上的 ?v= 控制（换版本 = 换缓存键），默认缓存策略即可。
+      fetch(url, { signal: ctrl.signal })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (d) { clearTimeout(timer); resolve(d); })
         .catch(function (e) { clearTimeout(timer); reject(e); });
