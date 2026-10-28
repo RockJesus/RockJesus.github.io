@@ -161,7 +161,13 @@
       try { ap.list.switch(target); } catch (e) { return false; }
       resetTime();
       // 播放中换台继续播；暂停时换台停在新歌开头（保留用户的暂停意图）
-      if (wasPlaying) { try { ap.play(); } catch (e) {} }
+      if (wasPlaying) {
+        try {
+          var pr = ap.play();
+          // audio.play() 返回 promise，被自动播放策略拒时会抛 uncaught rejection
+          if (pr && pr.catch) pr.catch(function () {});
+        } catch (e) {}
+      }
       return true;
     }
     // —— 换歌必须从头播：switch() 内部会 seek(0)，但「src 刚换」时对 currentTime
@@ -248,7 +254,23 @@
     }
     setInterval(function () { saveState(); }, 3000);
     // listswitch 载荷带的是「即将切到的」index（此时 ap.list.index 还没更新），必须用它
-    ap.on('listswitch', function (d) { saveState(0, d && d.index); });
+    var rjFixing = false;
+    ap.on('listswitch', function (d) {
+      saveState(0, d && d.index);
+      // 兜住所有「自行切台」的入口：播完自动切、随机顺序、loop 回绕。
+      // 只监听 ended 不够 —— APlayer 的切换发生在其事件处理之后，280ms 检查容易抓错时刻。
+      // 这里在每次切换后校验落点，若不可播就顺延到下一首能播的。
+      var idx = (d && typeof d.index === 'number') ? d.index : ap.list.index;
+      if (rjFixing || rjIsPlayable(ap, idx)) return;
+      // 先暂停：APlayer 的 setAudio 会守 this.paused，暂停后它不会去 play 一个空 src
+      // （空 src 上 audio.play() 会抛 unhandledrejection，控制台脏但不影响功能）
+      try { ap.pause(); } catch (e) {}
+      rjFixing = true;
+      setTimeout(function () {
+        rjFixing = false;
+        if (!rjIsPlayable(ap, ap.list.index)) rjSkip(1, true);
+      }, 160);
+    });
     ap.on('pause', function () { saveState(); });
 
     // —— 播放列表：展开播放器即常显（旧版「10 秒无操作自动收起」已移除，
