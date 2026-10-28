@@ -460,7 +460,7 @@
         var m = Math.floor(t / 60), s = t % 60;
         return m + ':' + (s < 10 ? '0' + s : s);
       }
-      // listswitch 在 ap.list.index 被赋值「之前」触发（AVPlayer 内部先 trigger 再改 index），
+      // listswitch 在 ap.list.index 被赋值「之前」触发（APlayer 内部先 trigger 再改 index），
       // 所以必须优先用事件载荷里的 index，否则换歌后曲名/歌手会慢一首
       function syncMeta(idx) {
         var i = typeof idx === 'number' ? idx : ap.list.index;
