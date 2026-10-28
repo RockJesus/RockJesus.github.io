@@ -988,12 +988,13 @@ img {
   position: fixed;
   right: 18px;
   bottom: 80px;
-  z-index: 1001;
+  z-index: 100001; /* 高于 live2d 容器的 99999，避免被看板娘压住 */
   display: flex;
   flex-direction: column;
   width: 380px;
   max-width: calc(100vw - 36px);
-  height: min(560px, 72vh);
+  height: auto;
+  max-height: min(560px, 72vh);
   overflow: hidden;
   background: color-mix(in srgb, var(--rj-ink-input) 82%, transparent);
   backdrop-filter: blur(18px) saturate(140%);
@@ -1046,18 +1047,126 @@ img {
   background: color-mix(in srgb, var(--rj-accent-3) 35%, transparent);
   color: var(--rj-text-inverse);
 }
-.rj-doubao-frame {
+.rj-doubao-body {
   flex: 1;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 16px 14px;
+  overflow-y: auto;
+}
+/* 问候气泡：豆包头像 + 对话气泡 */
+.rj-doubao-greet {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.rj-doubao-greet-avatar {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 40%, transparent);
+}
+.rj-doubao-bubble {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.26), rgba(0, 240, 255, 0.10));
+  border: 1px solid rgba(160, 140, 255, 0.34);
+  border-radius: 4px 14px 14px 14px;
+  padding: 10px 13px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #ece9ff; /* 面板为深玻璃，文字固定浅色，不跟随主题 */
+}
+/* 快捷问题 chips */
+.rj-doubao-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rj-doubao-chip {
+  font: inherit;
+  font-size: 12.5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #e8e5ff;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: all 0.2s ease;
+}
+.rj-doubao-chip:hover {
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  border-color: transparent;
+  color: var(--rj-text-inverse);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 50%, transparent);
+  transform: translateY(-1px);
+}
+/* 主 CTA：开始对话 */
+.rj-doubao-go {
+  margin-top: auto;
+  font: inherit;
+  font-weight: 700;
+  font-size: 14.5px;
+  letter-spacing: 0.5px;
+  padding: 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  color: var(--rj-text-inverse);
   border: none;
-  background: var(--rj-text-inverse);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent));
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--rj-brand) 45%, transparent);
+  transition: all 0.25s ease;
+}
+.rj-doubao-go:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--rj-brand) 65%, transparent);
+  filter: brightness(1.1);
+}
+.rj-doubao-note {
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+/* —— 看板娘 hover 气泡：提示可点击召唤豆包 ——
+   容器默认 pointer-events:none（点击穿透），开启可点击后需恢复接收事件；
+   z-index 99999 高于常规 UI，弹窗面板需在其之上 */
+#live2d-widget[data-rj-miku-chat] {
+  pointer-events: auto !important; /* L2Dwidget 用内联样式置 none，需 !important */
+  cursor: pointer;
+}
+#live2d-widget[data-rj-miku-chat]::after {
+  content: '点我召唤豆包 ✨';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e8fbff;
+  background: linear-gradient(135deg, rgba(43, 22, 100, 0.92), rgba(139, 92, 246, 0.92));
+  border: 1px solid rgba(139, 92, 246, 0.55);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4), 0 0 14px rgba(0, 240, 255, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#live2d-widget[data-rj-miku-chat]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
 }
 @media (max-width: 767px) {
   #rj-doubao-panel {
     right: 10px;
     bottom: 74px;
     width: calc(100vw - 20px);
-    height: 68vh;
+    height: auto;
+    max-height: 70vh;
   }
 }
 
@@ -2195,14 +2304,14 @@ a:hover { color: var(--rj-brand-2); }
   box-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 55%, transparent);
   color: var(--rj-text-inverse);
 }
-/* iframe 底部圆角衔接 */
-.rj-doubao-frame {
+/* 内容区底部圆角衔接 */
+.rj-doubao-body {
   border-radius: 0 0 24px 24px;
 }
 /* 移动端 */
 @media (max-width: 767px) {
   #rj-doubao-panel { border-radius: 20px; }
-  .rj-doubao-frame { border-radius: 0 0 20px 20px; }
+  .rj-doubao-body { border-radius: 0 0 20px 20px; }
 }
 
 /* ============================================================

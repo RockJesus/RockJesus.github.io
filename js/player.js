@@ -480,25 +480,53 @@
         '<span>和豆包聊天</span>' +
         '<button class="rj-doubao-close" title="关闭">×</button>' +
       '</div>' +
-      '<iframe class="rj-doubao-frame" src="' + DOUBAO_CHAT_URL + '" frameborder="0" allow="clipboard-write; autoplay; microphone" allowtransparency="true"></iframe>';
-    rjPanel.querySelector('.rj-doubao-close').addEventListener('click', function () {
-      var b = document.getElementById('chat_btn');
-      rjPanel.classList.remove('rj-doubao-open');
-      if (b) b.classList.remove('rj-doubao-active');
+      '<div class="rj-doubao-body">' +
+        '<div class="rj-doubao-greet">' +
+          '<img class="rj-doubao-greet-avatar" src="' + DOUBAO_AVATAR + '" alt="">' +
+          '<div class="rj-doubao-bubble">嗨～我是豆包 👋<br>黑苹果、装机、写码、生活问题都可以问我！</div>' +
+        '</div>' +
+        '<div class="rj-doubao-chips">' +
+          '<button class="rj-doubao-chip" data-q="黑苹果 OpenCore 安装教程">🍎 黑苹果安装</button>' +
+          '<button class="rj-doubao-chip" data-q="Alienware 笔记本装黑苹果兼容性">👽 Alienware 兼容性</button>' +
+          '<button class="rj-doubao-chip" data-q="帮我写一段代码">💻 写代码</button>' +
+          '<button class="rj-doubao-chip" data-q="帮我翻译一段英文">🌍 翻译</button>' +
+        '</div>' +
+        '<button class="rj-doubao-go">开始与豆包对话 →</button>' +
+        '<p class="rj-doubao-note">将在新窗口打开豆包网页版 · 由字节跳动提供 AI 能力</p>' +
+      '</div>';
+    rjPanel.querySelector('.rj-doubao-close').addEventListener('click', closePanel);
+    rjPanel.querySelector('.rj-doubao-go').addEventListener('click', function () {
+      window.open(DOUBAO_CHAT_URL, '_blank', 'noopener');
+      closePanel();
     });
+    var chips = rjPanel.querySelectorAll('.rj-doubao-chip');
+    for (var ci = 0; ci < chips.length; ci++) {
+      chips[ci].addEventListener('click', function () {
+        window.open(DOUBAO_CHAT_URL, '_blank', 'noopener');
+        closePanel();
+      });
+    }
     document.body.appendChild(rjPanel);
     return rjPanel;
+  }
+  function closePanel() {
+    if (rjPanel) rjPanel.classList.remove('rj-doubao-open');
+    var b = document.getElementById('chat_btn');
+    if (b) b.classList.remove('rj-doubao-active');
   }
   function rjToggle(btn) {
     var open = rjPanel && rjPanel.classList.contains('rj-doubao-open');
     if (open) {
-      rjPanel.classList.remove('rj-doubao-open');
-      btn.classList.remove('rj-doubao-active');
+      closePanel();
     } else {
       buildPanel().classList.add('rj-doubao-open');
-      btn.classList.add('rj-doubao-active');
+      if (btn) btn.classList.add('rj-doubao-active');
     }
   }
+  // ESC 关闭
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closePanel();
+  });
   // 捕获阶段截停：屏蔽 gitter 等对 #chat_btn 的默认触发，改由豆包弹窗接管（委托，实时找当前按钮）
   document.addEventListener('click', function (e) {
     var btn = document.getElementById('chat_btn');
@@ -509,17 +537,37 @@
       rjToggle(btn);
     }
   }, true);
-  // 点击面板外部关闭
+  // 点击面板外部关闭（看板娘的点击除外，否则打开动作冒泡后会被立即关闭）
   document.addEventListener('click', function (e) {
     if (!rjPanel || !rjPanel.classList.contains('rj-doubao-open')) return;
     var btn = document.getElementById('chat_btn');
     if (btn && btn.contains(e.target)) return;
     if (rjPanel.contains(e.target)) return;
+    var miku = document.getElementById('live2d-widget');
+    if (miku && (miku === e.target || miku.contains(e.target))) return;
     rjPanel.classList.remove('rj-doubao-open');
     if (btn) btn.classList.remove('rj-doubao-active');
   });
   setupDoubao();
   document.addEventListener('pjax:complete', function () { setupDoubao(); });
+
+  // —— 看板娘（live2d 模型）点击 → 弹出豆包对话框 ——
+  //    canvas 是 pointer-events:none，点击落在容器 #live2d-widget 上；
+  //    容器由 L2Dwidget 脚本异步创建，轮询绑定一次即可（body 级元素，pjax 不销毁）。
+  (function bindMikuDoubao() {
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries++;
+      var miku = document.getElementById('live2d-widget');
+      if (miku) {
+        clearInterval(timer);
+        miku.setAttribute('data-rj-miku-chat', '1');
+        miku.addEventListener('click', function () { rjToggle(null); });
+        return;
+      }
+      if (tries > 60) clearInterval(timer); // 30s 后放弃（组件被禁用等场景）
+    }, 500);
+  })();
 
 
   // ============ V12 全站增强：破图兜底 / 打赏二维码 / 人生信条 / 3D 旋转地球 ============
