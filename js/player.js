@@ -7,13 +7,12 @@
   var rjCanvasNest = document.getElementById('canvas_nest');
   if (rjCanvasNest) rjCanvasNest.setAttribute('color', '139,92,246');
 
-  // 源顺序有讲究：jsDelivr 对 @main 有 12 小时缓存，素材仓更新后它仍返回旧歌单，
-  // 而且它最快（~250ms）—— 放在前面会「抢答」旧数据（曾导致列表只有 30 首）。
-  // 所以顺序：同域构建产物 → GitHub raw（更新快） → jsDelivr（最后兜底）。
+  // 只保留两个源。jsDelivr 已移除：它对 @main 有 12 小时缓存，素材仓更新后
+  // 仍返回旧歌单，而它恰恰响应最快（~250ms）——只要前一个源慢一点，它就会
+  // 抢先返回旧数据，表现成「列表又变回 30 首」。宁可少一个兜底，也不要错数据。
   var PLAYLIST_URLS = [
-    '/data/playlist.json?v=1.2.1',
-    'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json',
-    'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json'
+    '/data/playlist.json?v=1.2.1',                                            // 本站构建产物（主）
+    'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'  // 素材仓直连（兜底）
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -26,7 +25,7 @@
   function fetchJson(url, timeout) {
     return new Promise(function (resolve, reject) {
       var ctrl = new AbortController();
-      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 15000);
+      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 12000);
       // 不要用 cache:'no-cache'：它会带 Cache-Control: no-cache 强制回源，
       // 583KB 的 JSON 每次都要等源头，首屏能卡到 30s+。
       // 版本更新靠 URL 上的 ?v= 控制（换版本 = 换缓存键），默认缓存策略即可。
