@@ -443,9 +443,10 @@ img {
   border: 0 !important;
 }
 .aplayer.aplayer-fixed {
-  left: 16px;
+  /* AA.css 后加载且钉成 left:0/bottom:0，必须 !important 才能保住边距 */
+  left: 22px !important;
   right: auto !important;
-  bottom: 16px;
+  bottom: 22px !important;
   width: 328px !important;
   max-width: calc(100vw - 32px);
   margin: 0 !important;
@@ -1013,10 +1014,10 @@ img {
 /* 移动端适配 */
 @media (max-width: 767px) {
   .aplayer.aplayer-fixed {
-    left: 10px !important;
+    left: 16px !important;
     right: auto !important;
-    bottom: 10px;
-    width: calc(100vw - 20px) !important;   /* AA.css 把容器钉成 left/right:0，这里改回留边 */
+    bottom: 16px !important;
+    width: calc(100vw - 32px) !important;   /* AA.css 把容器钉成 left/right:0，这里改回留边（左右各 16） */
     max-width: none;
     /* 移动端看板娘固定在左下（z-index 99999），会把播放器整块盖住；AA.css 后加载需要 !important */
     z-index: 100000 !important;
