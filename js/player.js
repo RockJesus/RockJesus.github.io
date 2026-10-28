@@ -142,34 +142,14 @@
     ap.on('listswitch', function () { saveState(); });
     ap.on('pause', function () { saveState(); });
 
-    // —— 歌单展开后 10 秒无操作自动收起（点击播放器/歌单任意处重置计时） ——
+    // —— 播放列表：展开播放器即常显（旧版「10 秒无操作自动收起」已移除，
+    //    与新交互的「展开默认带列表」冲突）；只有折叠播放器时才收起 ——
     var listEl = container.querySelector('.aplayer-list');
-    var foldTimer = null;
-    function foldList() {
-      try {
-        if (ap.list && typeof ap.list.hide === 'function') { ap.list.hide(); }
-        else if (listEl) { listEl.style.display = 'none'; }
-      } catch (e) { if (listEl) { listEl.style.display = 'none'; } }
-      foldTimer = null;
-    }
-    function armFold() {
-      if (foldTimer) { clearTimeout(foldTimer); foldTimer = null; }
-      if (!listEl) return;
-      if (listEl.style.display !== 'none' && listEl.getBoundingClientRect().height > 0) {
-        foldTimer = setTimeout(foldList, 10000);
-      }
-    }
-    if (listEl && typeof MutationObserver !== 'undefined') {
-      var mo = new MutationObserver(armFold);
-      mo.observe(listEl, { attributes: true, attributeFilter: ['style', 'class'] });
-    }
-    container.addEventListener('pointerdown', function () { armFold(); }, true);
-    armFold();
 
-    // —— 单击封面播放/暂停，双击打开/关闭折叠歌单（V16）——
-    //    原理：APlayer 内建在 .aplayer-pic 上绑定的 click(toggle) 已被 CSS pointer-events:none 屏蔽，
-    //    事件落到 .aplayer-row 上由本层统一处理；单击延迟 280ms 以区分双击（双击取消待执行的单击），
-    //    双击立即切换歌单展开状态；歌单按钮(.aplayer-menu)等交互控件保持 APlayer 内建行为
+    // —— 交互模型 V1.6.2 ——
+    //    折叠态圆盘：单击 = 播放/暂停，双击 = 展开
+    //    展开态：双击圆盘 = 折叠；卡片空白处单击 = 播放/暂停、双击 = 开/关播放列表
+    //    展开时播放列表默认打开；点页面其它任何位置自动折叠播放器
     var singleTimer = null;
     function isInteractive(el) {
       return !!(el && el.closest && el.closest(
@@ -187,18 +167,30 @@
     function listHidden() {
       return !listEl || listEl.classList.contains('aplayer-list-hide') || listEl.style.display === 'none';
     }
+    function showList() {
+      if (!listEl) return;
+      try { ap.list.show(); } catch (e) { listEl.style.display = 'block'; }
+    }
+    function hideList() {
+      if (!listEl) return;
+      try { ap.list.hide(); } catch (e) { listEl.style.display = 'none'; }
+    }
     function toggleList() {
       if (!listEl) return;
-      try {
-        if (listHidden()) { ap.list.show(); } else { ap.list.hide(); }
-      } catch (e) {
-        listEl.style.display = listHidden() ? 'block' : 'none';
-      }
-      armFold();
+      if (listHidden()) { showList(); } else { hideList(); }
+    }
+    function isCollapsed() {
+      return container.classList.contains('rj-pl-collapsed');
+    }
+    function setCollapsed(v) {
+      container.classList.toggle('rj-pl-collapsed', v);
+      if (v) { if (!listHidden()) hideList(); }
+      else if (listHidden()) { showList(); }
     }
     // ============================================================
     //  自绘播放器外壳 rj-pl
-    //  折叠态：56px 圆角唱片（点击播放/暂停）；展开态：328×78 玻璃卡片
+    //  折叠态：64px 圆形唱片（透明底，封面常转；单击播放/暂停，双击展开）
+    //  展开态：328px 玻璃卡片（封面 + 曲目 + 进度 + 控制钮 + 列表）
     //  APlayer 只保留 audio 与歌单，可见 UI 全部由本层接管
     // ============================================================
     (function buildShell() {
@@ -215,7 +207,8 @@
       var root = document.createElement('div');
       root.className = 'rj-pl';
       root.innerHTML =
-        '<button type="button" class="rj-pl-disc" title="播放 / 暂停">' +
+        '<button type="button" class="rj-pl-disc" title="单击播放 / 暂停 · 双击展开">' +
+          '<span class="rj-pl-art"></span>' +
           '<span class="rj-pl-shade"></span>' +
           '<span class="rj-pl-discbtn">' + svg(P.play) + '</span>' +
         '</button>' +
@@ -296,7 +289,21 @@
       });
 
       function on(ev, fn) { try { ap.on(ev, fn); } catch (e) {} }
-      disc.addEventListener('click', function (e) { e.stopPropagation(); togglePlay(); });
+      // 圆盘：单击播放/暂停，双击展开或折叠。
+      // 单击延迟 230ms 执行，第二次点击到来时立刻撤销待执行的单击，避免双击误触发暂停
+      disc.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; return; }
+        singleTimer = setTimeout(function () {
+          singleTimer = null;
+          togglePlay();
+        }, 230);
+      });
+      disc.addEventListener('dblclick', function (e) {
+        e.stopPropagation(); e.preventDefault();
+        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
+        setCollapsed(!isCollapsed());
+      });
       mainBtn.addEventListener('click', function (e) { e.stopPropagation(); togglePlay(); });
       root.querySelector('[data-a="prev"]').addEventListener('click', function (e) { e.stopPropagation(); try { ap.list.prev(); } catch (err) {} });
       root.querySelector('[data-a="next"]').addEventListener('click', function (e) { e.stopPropagation(); try { ap.list.next(); } catch (err) {} });
@@ -304,20 +311,25 @@
       listBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleList(); });
       root.querySelector('.rj-pl-fold').addEventListener('click', function (e) {
         e.stopPropagation();
-        var collapsed = container.classList.toggle('rj-pl-collapsed');
-        if (collapsed && !listHidden()) toggleList();
+        setCollapsed(!isCollapsed());
       });
-      // 展开态卡片空白处：单击播放/暂停，双击开歌单
+      // 展开态卡片空白处：单击播放/暂停，双击开/关播放列表
       root.addEventListener('click', function (e) {
-        if (container.classList.contains('rj-pl-collapsed') || isInteractive(e.target)) return;
+        if (isCollapsed() || isInteractive(e.target)) return;
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
-        singleTimer = setTimeout(function () { singleTimer = null; togglePlay(); }, 280);
+        singleTimer = setTimeout(function () { singleTimer = null; togglePlay(); }, 230);
       });
       root.addEventListener('dblclick', function (e) {
-        if (container.classList.contains('rj-pl-collapsed') || isInteractive(e.target)) return;
+        if (isCollapsed() || isInteractive(e.target)) return;
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
         toggleList();
       });
+      // 点页面其它任何地方 → 自动折叠（用 pointerdown 捕获，菜单/皮肤点击也能立刻响应）
+      document.addEventListener('pointerdown', function (e) {
+        if (isCollapsed()) return;
+        if (container.contains(e.target)) return;
+        setCollapsed(true);
+      }, true);
 
       on('listswitch', syncMeta);
       on('listswitch', function () { setTimeout(syncProgress, 60); });
@@ -350,6 +362,7 @@
         new MutationObserver(stripNarrow).observe(container, { attributes: true, attributeFilter: ['class'] });
       }
       syncMeta(); syncPlayIcon(); syncProgress();
+      setCollapsed(true);   // 首屏折叠：圆盘形态 + 收起播放列表
     })();
   }
 

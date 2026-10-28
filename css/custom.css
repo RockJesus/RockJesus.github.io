@@ -432,6 +432,16 @@ img {
    展开态：328px 玻璃卡（封面 + 曲目 + 进度 + 控制钮）
    原生 pic / info / controller / miniswitcher 由 JS 隐藏，此处只做兜底
    ============================================================ */
+/* APlayer 的挂载容器：皮肤表给它加了 blur(10px) 背景，折叠态会在圆盘外露出一个
+   模糊矩形，必须一起抹掉（可见 UI 全部自绘，这个容器不再需要任何视觉层） */
+#site-player {
+  background: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
 .aplayer.aplayer-fixed {
   left: 16px;
   right: auto !important;
@@ -504,33 +514,61 @@ img {
   display: none !important;
 }
 
-/* —— 折叠态 —— */
+/* —— 折叠态：完全透明的圆形唱片（只留封面本身，背景/描边/模糊底全部去掉） —— */
 .aplayer.aplayer-fixed.rj-pl-collapsed {
-  width: 64px !important;
+  width: 66px !important;
 }
 .aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-body {
   width: 100% !important;
-  border-radius: 18px;
-  border-color: rgba(255, 255, 255, 0.12) !important;   /* 后置主题层会把描边改回主题紫，折叠态收敛掉紫圈 */
-  box-shadow: 0 12px 30px rgba(2, 6, 18, 0.58) !important;
+  height: 66px;
+  border-radius: 50% !important;   /* 后置玻璃层会写回 18px 圆角，折叠态必须是正圆 */
+  border: 0 !important;            /* 去掉 1px 描边，否则圆盘内容区比高度窄 2px，圆会略扁 */
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  overflow: visible;              /* 圆盘外投影不被卡片裁掉 */
+}
+.aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-body::before,
+.aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-body::after {
+  display: none;                  /* 折叠态不要毛玻璃封面底 + 深色渐变，保持背景透明 */
 }
 .aplayer.rj-pl-collapsed .rj-pl {
   padding: 0;
   gap: 0;
-  height: 64px;
+  height: 66px;
 }
 .aplayer.rj-pl-collapsed .rj-pl-meta,
-.aplayer.rj-pl-collapsed .rj-pl-btns {
-  display: none;
+.aplayer.rj-pl-collapsed .rj-pl-btns,
+.aplayer.rj-pl-collapsed .rj-pl-fold {
+  display: none;                  /* 折叠靠双击圆盘切换，不再挂角标箭头 */
+}
+/* 兜底：折叠态绝不漏出播放列表（JS 会调 list.hide，但 APlayer 首帧可能还没渲染完） */
+.aplayer.rj-pl-collapsed .aplayer-list {
+  display: none !important;
 }
 .aplayer.rj-pl-collapsed .rj-pl-disc {
   width: 100%;
   height: 100%;
   border: 0;
-  border-radius: 18px;
-  box-shadow: none;
-  /* 折叠态本身就是一个封面块，不要再叠播放呼吸环（会形成一圈紫边） */
+  border-radius: 50%;
+  background: transparent;
+  /* 折叠态本身就是一张转动的唱片，不要再叠播放呼吸环（会形成一圈紫边） */
   animation: none !important;
+  box-shadow:
+    0 10px 26px rgba(2, 6, 18, 0.46),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+}
+/* 折叠态暗角收轻一些，让封面本身透出来，只留中心播放键的对比 */
+.aplayer.rj-pl-collapsed .rj-pl-shade {
+  background: radial-gradient(120% 120% at 50% 50%, rgba(6, 9, 18, 0.02), rgba(6, 9, 18, 0.36));
+}
+.aplayer.rj-pl-collapsed .rj-pl-disc:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    0 14px 30px rgba(2, 6, 18, 0.52),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 0 26px color-mix(in srgb, var(--rj-brand) 46%, transparent);
 }
 
 /* —— 外壳 —— */
@@ -551,23 +589,38 @@ img {
   box-sizing: border-box !important;   /* 原生 .aplayer *{box-sizing:content-box} */
 }
 
-/* 封面（折叠态即整卡） */
+/* 封面圆盘：外层只负责形状与投影；封面图放进独立的 .rj-pl-art 旋转层，
+   这样中心播放键不跟着转 */
 .rj-pl-disc {
   position: relative;
   flex: none;
   width: 52px;
   height: 52px;
   padding: 0;
-  border-radius: 14px;
+  border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background-color: rgba(20, 26, 44, 0.9);
-  background-image: var(--rj-pl-cover, none);
-  background-size: cover;
-  background-position: center;
   box-shadow: 0 6px 16px rgba(2, 6, 18, 0.5);
   cursor: pointer;
   overflow: hidden;
+  touch-action: manipulation;   /* 触屏双击不被浏览器当成页面缩放 */
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+}
+/* 唱片封面：一直缓慢转动（播放/暂停都不停），营造唱片质感。
+   自身也用 clip-path 裁成圆，避免旋转合成层偶尔把方角漏到圆形外面 */
+.rj-pl-art {
+  position: absolute;
+  inset: -1px;                  /* 抵掉 1px 描边，旋转时不露缝 */
+  border-radius: 50%;
+  clip-path: circle(50%);
+  background-image: var(--rj-pl-cover, none);
+  background-size: cover;
+  background-position: center;
+  animation: rjPlSpin 16s linear infinite;
+  will-change: transform;
+}
+@keyframes rjPlSpin {
+  to { transform: rotate(360deg); }
 }
 .rj-pl-disc:hover {
   transform: translateY(-1px) scale(1.03);
@@ -598,13 +651,12 @@ img {
 .rj-pl-discbtn svg {
   width: 14px;
   height: 14px;
-  fill: #fff;
+  fill: #fff !important;   /* 皮肤表的 .aplayer svg{fill:currentColor} 在后方，会把图标刷成黑色 */
 }
 .rj-pl-disc:hover .rj-pl-shade {
   opacity: 0.55;
 }
-.rj-pl-disc:hover .rj-pl-discbtn,
-.aplayer.rj-pl-collapsed .rj-pl-discbtn {
+.rj-pl-disc:hover .rj-pl-discbtn {
   width: 26px;
   height: 26px;
   margin: -13px 0 0 -13px;
@@ -616,9 +668,30 @@ img {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
+/* 折叠态：中心播放键常显，直接吃主题色（紫 / 亮色下加深的紫） */
+.aplayer.rj-pl-collapsed .rj-pl-discbtn {
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  opacity: 1;
+  transform: scale(1);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  border: 1px solid color-mix(in srgb, var(--rj-brand-4) 60%, transparent);
+  box-shadow:
+    0 4px 12px color-mix(in srgb, var(--rj-brand) 60%, transparent),
+    0 0 0 3px rgba(255, 255, 255, 0.1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.aplayer.rj-pl-collapsed .rj-pl-discbtn svg {
+  width: 15px;
+  height: 15px;
+}
 .aplayer.rj-pl-collapsed .rj-pl-disc:hover .rj-pl-discbtn {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(34, 211, 238, 0.8));
-  border-color: transparent;
+  transform: scale(1.06);
+  box-shadow:
+    0 6px 18px color-mix(in srgb, var(--rj-brand) 72%, transparent),
+    0 0 0 4px rgba(255, 255, 255, 0.16);
 }
 /* 播放中：封面外圈缓慢呼吸，暂停即停 */
 .rj-pl.rj-pl-playing .rj-pl-disc {
@@ -695,8 +768,8 @@ img {
   bottom: 0;
   width: 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, #8b5cf6, #22d3ee);
-  box-shadow: 0 0 8px rgba(34, 211, 238, 0.55);
+  background: linear-gradient(90deg, var(--rj-brand), var(--rj-brand-2));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--rj-brand) 55%, transparent);
 }
 .rj-pl-thumb {
   position: absolute;
@@ -747,16 +820,19 @@ img {
   fill: currentColor;
 }
 .rj-pl-btns button:hover {
-  background: rgba(139, 92, 246, 0.3);
+  background: color-mix(in srgb, var(--rj-brand) 30%, transparent);
   color: #fff;
   transform: translateY(-1px);
 }
+/* 主播放键吃主题色：渐变两端都取品牌紫，亮色模式下自动换成加深的紫 */
 .rj-pl-btns .rj-pl-main {
   width: 32px;
   height: 32px;
   color: #fff;
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.5);
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-3));
+  box-shadow:
+    0 4px 14px color-mix(in srgb, var(--rj-brand) 52%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--rj-brand-4) 40%, transparent) inset;
 }
 .rj-pl-btns .rj-pl-main svg {
   width: 16px;
@@ -764,14 +840,14 @@ img {
 }
 .rj-pl-btns .rj-pl-main:hover {
   transform: translateY(-1px) scale(1.05);
-  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.64);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--rj-brand) 68%, transparent);
 }
 .rj-pl.rj-pl-haslist .rj-pl-btns [data-a="list"] {
-  background: rgba(34, 211, 238, 0.2);
-  color: #7ff0ff;
+  background: color-mix(in srgb, var(--rj-brand) 30%, transparent);
+  color: #fff;
 }
 
-/* 折叠/展开按钮：常态隐藏，hover 卡片才浮出；折叠态常显（点它展开） */
+/* 折叠/展开按钮：常态隐藏，hover 卡片才浮出（折叠态不显示，靠双击圆盘切换） */
 .rj-pl-fold {
   position: absolute;
   top: 5px;
@@ -800,27 +876,9 @@ img {
   opacity: 1;
   transform: scale(1) rotate(180deg);
 }
-.aplayer.rj-pl-collapsed .rj-pl-fold {
-  top: 5px;
-  right: 5px;
-  width: 17px;
-  height: 17px;
-  opacity: 0.78;
-  transform: scale(1) rotate(0deg);
-  background: rgba(8, 11, 20, 0.55);
-  border-color: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-.aplayer.rj-pl-collapsed .rj-pl-fold svg {
-  width: 12px;
-  height: 12px;
-}
-.aplayer.rj-pl-collapsed:hover .rj-pl-fold {
-  opacity: 1;
-}
+/* 折叠态不挂箭头（靠双击圆盘切换），以下 hover 只作用于展开态 */
 .rj-pl-fold:hover {
-  background: rgba(139, 92, 246, 0.92);
+  background: color-mix(in srgb, var(--rj-brand) 92%, transparent);
   border-color: transparent;
   color: #fff;
 }
@@ -850,20 +908,22 @@ img {
   border-radius: 4px;
 }
 .aplayer .aplayer-list ol li {
-  color: var(--rjp-slate-300);
+  /* 用双模式语义色：亮色下列表是浅底，写死的 slate-300 会白到看不见 */
+  color: var(--rj-ink-text);
   border-top: 1px solid var(--rj-hairline-1);
   padding: 7px 14px;
   transition: background 0.2s ease;
 }
 .aplayer .aplayer-list ol li:hover {
-  background: color-mix(in srgb, var(--rj-brand-3) 12%, transparent);
+  /* AA.css 后加载，给每行 hover 和当前行都刷了纯黑底，必须顶回主题色 */
+  background: color-mix(in srgb, var(--rj-brand) 12%, transparent) !important;
 }
 .aplayer .aplayer-list ol li.aplayer-list-light {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand-3) 30%, transparent), color-mix(in srgb, var(--rj-accent) 12%, transparent));
-  border-left: 2px solid var(--rj-accent-3);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand) 26%, transparent), color-mix(in srgb, var(--rj-brand-2) 10%, transparent)) !important;
+  border-left: 2px solid var(--rj-brand);
 }
 .aplayer .aplayer-list ol li .aplayer-list-index {
-  color: var(--rj-brand-3);
+  color: var(--rj-brand-3) !important;
   position: relative;
 }
 .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-index {
@@ -885,13 +945,13 @@ img {
   50% { transform: translate(-50%, -50%) scaleY(1.15); }
 }
 .aplayer .aplayer-list ol li .aplayer-list-title {
-  color: var(--rjp-slate-200);
+  color: var(--rj-ink-text);
 }
 .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-title {
-  color: var(--rj-text-inverse);
+  color: var(--rj-ink-text);
 }
 .aplayer .aplayer-list ol li .aplayer-list-author {
-  color: var(--rjp-slate-500);
+  color: color-mix(in srgb, var(--rj-ink-text) 60%, transparent) !important;
 }
 .aplayer .aplayer-list ol li .aplayer-list-cur {
   color: var(--rj-accent-3);
@@ -969,20 +1029,18 @@ img {
   }
   .aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-body {
     width: 100% !important;
+    height: 58px;
+    border-radius: 50% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .aplayer.rj-pl-collapsed .rj-pl {
+    height: 58px;
   }
   .aplayer.rj-pl-collapsed .rj-pl-disc {
     width: 100%;
     height: 100%;
-  }
-  .aplayer.rj-pl-collapsed .rj-pl-fold {
-    width: 15px;
-    height: 15px;
-    top: 4px;
-    right: 4px;
-  }
-  .aplayer.rj-pl-collapsed .rj-pl-fold svg {
-    width: 10px;
-    height: 10px;
+    border-radius: 50%;
   }
   .rj-pl {
     padding: 8px 10px;
@@ -991,7 +1049,7 @@ img {
   .rj-pl-disc {
     width: 46px;
     height: 46px;
-    border-radius: 12px;
+    border-radius: 50%;
   }
   .rj-pl-btns button {
     width: 26px;
