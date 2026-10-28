@@ -8,7 +8,7 @@
   if (rjCanvasNest) rjCanvasNest.setAttribute('color', '139,92,246');
 
   var PLAYLIST_URLS = [
-    '/data/playlist.json?v=1.1.22',
+    '/data/playlist.json?v=1.2.0',
     'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
     'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'
   ];
@@ -23,7 +23,7 @@
   function fetchJson(url, timeout) {
     return new Promise(function (resolve, reject) {
       var ctrl = new AbortController();
-      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 10000);
+      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 20000);
       fetch(url, { cache: 'no-cache', signal: ctrl.signal })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (d) { clearTimeout(timer); resolve(d); })
@@ -48,16 +48,68 @@
   function normalize(list) {
     var out = [];
     (list || []).forEach(function (t) {
-      if (!t || !t.url || !t.name) return;
+      if (!t || !t.name) return;
+      // v1.6.8：拿不到直链的曲目也保留。
+      // 歌单是「我喜欢」的完整收藏（3000+ 首），其中一部分受版权/会员限制无法解析出
+      // 播放地址。旧版在这里直接丢弃，导致 3064 首只剩 30 首进列表。
+      // 现在保留并标记，列表里置灰展示、不可切入播放。
       out.push({
         name: t.name,
         artist: t.artist || '',
-        url: t.url,
+        url: t.url || '',
         cover: t.cover || SEED.cover,
         duration: t.duration || 0
       });
     });
     return out;
+  }
+
+  // —— 可播性判定与查找 ——
+  // 列表里同时存在可播/不可播两种曲目，所有切歌入口都必须绕过不可播的，
+  // 否则会出现「切到一首空 src 的歌 → 播放器停在静默状态」。
+  function rjIsPlayable(ap, i) {
+    var a = ap && ap.list && ap.list.audios && ap.list.audios[i];
+    return !!(a && a.url);
+  }
+  function rjFindPlayable(ap, from, dir) {
+    var n = (ap && ap.list && ap.list.audios && ap.list.audios.length) || 0;
+    for (var s = 1; s <= n; s++) {
+      var i = ((from + dir * s) % n + n) % n;
+      if (i === from) break;
+      if (rjIsPlayable(ap, i)) return i;
+    }
+    return -1;
+  }
+  function rjRandomPlayable(ap) {
+    var n = (ap && ap.list && ap.list.audios && ap.list.audios.length) || 0;
+    var pool = [];
+    for (var i = 0; i < n; i++) if (rjIsPlayable(ap, i)) pool.push(i);
+    if (!pool.length) return -1;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  // 列表高度按「整行」收口：写死 px 在不同字体/断点下会露出半行。
+  // 实测首行与第 2 行高度（第 2 行起多 1px 描边）再定 maxHeight。
+  function rjFitListRows(listEl, rows) {
+    if (!listEl) return;
+    var ol = listEl.querySelector('ol');
+    if (!ol || !ol.children.length) return;
+    var h1 = ol.children[0].getBoundingClientRect().height;
+    var h2 = (ol.children[1] || ol.children[0]).getBoundingClientRect().height;
+    if (!h1 || h1 < 8 || !h2) return;
+    ol.style.maxHeight = Math.round(h1 + h2 * ((rows || 7) - 1)) + 'px';
+  }
+
+  // 断点变化后行高会变，重新收口一次（只绑一次，pjax 不重复挂）
+  if (!window.__rjFitBound) {
+    window.__rjFitBound = true;
+    var __rjFitTimer = null;
+    window.addEventListener('resize', function () {
+      if (__rjFitTimer) clearTimeout(__rjFitTimer);
+      __rjFitTimer = setTimeout(function () {
+        rjFitListRows(document.querySelector('.aplayer .aplayer-list'), 7);
+      }, 180);
+    });
   }
 
   // —— 统一装饰：自绘外壳 + 封面毛玻璃底 + 播放状态 + 断点记忆 ——
@@ -83,17 +135,15 @@
     //  正确入口是 player 级 skipBack()/skipForward()：按当前 order（含 random）
     //  取上一/下一序号，并自带首尾环绕。
     // ============================================================
-    function rjSkip(dir) {
+    function rjSkip(dir, forcePlay) {
       var n = (ap.list && ap.list.audios && ap.list.audios.length) || 0;
       if (n < 2) return false;
-      var wasPlaying = !!(ap.audio && !ap.audio.paused);
-      try {
-        if (dir > 0 && typeof ap.skipForward === 'function') ap.skipForward();
-        else if (dir < 0 && typeof ap.skipBack === 'function') ap.skipBack();
-        else ap.list.switch((ap.list.index + dir + n) % n);
-      } catch (e) {
-        try { ap.list.switch((ap.list.index + dir + n) % n); } catch (e2) { return false; }
-      }
+      // 不能直接用 skipForward/skipBack：它们按列表顺序走，会落在不可播曲目上。
+      // 这里沿同一方向线性找最近的可用曲目（环形，避开当前）。
+      var target = rjFindPlayable(ap, ap.list.index, dir);
+      if (target < 0) return false;
+      var wasPlaying = forcePlay || !!(ap.audio && !ap.audio.paused);
+      try { ap.list.switch(target); } catch (e) { return false; }
       resetTime();
       // 播放中换台继续播；暂停时换台停在新歌开头（保留用户的暂停意图）
       if (wasPlaying) { try { ap.play(); } catch (e) {} }
@@ -159,7 +209,14 @@
       syncCoverDebounced();
     });
     ap.on('pause', function () { if (row) row.classList.remove('rj-playing'); });
-    ap.on('ended', function () { if (row) row.classList.remove('rj-playing'); });
+    ap.on('ended', function () {
+      if (row) row.classList.remove('rj-playing');
+      // APlayer 自己会切到列表下一首，但下一首可能不可播 → 停在空 src 上静默。
+      // 等它切完再用索引判断，落在不可播就沿列表继续找下一首能播的。
+      setTimeout(function () {
+        if (!rjIsPlayable(ap, ap.list.index)) rjSkip(1, true);
+      }, 280);
+    });
     ap.on('loadeddata', syncCoverDebounced);
 
     // 断点续播记忆
@@ -183,6 +240,104 @@
     //    与新交互的「展开默认带列表」冲突）；只有折叠播放器时才收起 ——
     var listEl = container.querySelector('.aplayer-list');
 
+    // ============================================================
+    //  曲目可播状态（V1.6.8）
+    //  歌单已改为全量收录，列表里同时存在可播 / 不可播两类曲目。
+    //  不可播的置灰（CSS）+ 角标，并在捕获阶段拦掉点击 ——
+    //  否则会切到空 src 上，表现为「点了没反应」。
+    // ============================================================
+    // 顶部统计 + 搜索。3000+ 首纯靠滚动找歌不可用，搜索是这一版的必需品：
+    // 过滤只切 li 的显隐，不重建 DOM，所以「行 → 曲目索引」的映射始终成立
+    // （点击拦截用 children 序号取原索引，隐藏行仍在 children 里）。
+    var searchTimer = null;
+    function applyFilter(kw) {
+      if (!listEl) return 0;
+      var lis = listEl.querySelectorAll('ol li');
+      var audios = (ap.list && ap.list.audios) || [];
+      var q = (kw || '').trim().toLowerCase();
+      var hit = 0;
+      for (var i = 0; i < lis.length; i++) {
+        var a = audios[i] || {};
+        var m = !q ||
+          String(a.name || '').toLowerCase().indexOf(q) >= 0 ||
+          String(a.artist || '').toLowerCase().indexOf(q) >= 0;
+        if (m) {
+          hit++;
+          lis[i].classList.remove('rj-hide');
+        } else {
+          lis[i].classList.add('rj-hide');
+        }
+      }
+      var ol = listEl.querySelector('ol');
+      if (ol) ol.scrollTop = 0;
+      return hit;
+    }
+    function syncStat() {
+      if (!listEl) return;
+      var audios = (ap.list && ap.list.audios) || [];
+      var ok = 0;
+      for (var i = 0; i < audios.length; i++) if (audios[i] && audios[i].url) ok++;
+      var box = listEl.querySelector('.rj-pl-stat');
+      if (!box) {
+        box = document.createElement('div');
+        box.className = 'rj-pl-stat';
+        box.innerHTML = '<span class="rj-pl-stat-num"></span>' +
+          '<input class="rj-pl-search" type="search" placeholder="搜索歌名 / 歌手" />';
+        listEl.insertBefore(box, listEl.firstChild);
+        // APlayer 在播放器容器上挂了「点列表行 → 读 aplayer-list-index 换算出序号」的处理，
+        // 点到统计条/搜索框时会走进它，而那里没有 index 元素 →
+        // 抛「Cannot read properties of undefined (reading 'innerHTML')」。
+        // 统计条是自绘交互区，直接截住事件不让它冒到 APlayer 的处理器上。
+        ['click', 'mousedown', 'pointerdown', 'touchstart'].forEach(function (t) {
+          box.addEventListener(t, function (e) { e.stopPropagation(); }, false);
+        });
+        var inp = box.querySelector('.rj-pl-search');
+        inp.addEventListener('input', function () {
+          if (searchTimer) clearTimeout(searchTimer);
+          var v = this.value;
+          searchTimer = setTimeout(function () { applyFilter(v); }, 200);
+        });
+        // 别让搜索框的按键冒到热键/翻页逻辑上
+        inp.addEventListener('keydown', function (e) { e.stopPropagation(); });
+      }
+      var num = box.querySelector('.rj-pl-stat-num');
+      if (num) num.innerHTML = '全部 <b>' + audios.length + '</b> 首 · 可播 <b class="ok">' + ok + '</b> 首';
+    }
+    // 列表高度按「整行」算：CSS 里写死 230px 是按桌面 32+33×6 推的，
+    // 移动端行高更大（≈37），230 会露出半行。实测行高再定，永远整行收口。
+    function fitListRows(rows) { rjFitListRows(listEl, rows); }
+    function markRows() {
+      if (!listEl) return;
+      var lis = listEl.querySelectorAll('ol li');
+      var audios = (ap.list && ap.list.audios) || [];
+      for (var i = 0; i < lis.length; i++) {
+        var playable = !!(audios[i] && audios[i].url);
+        if (playable) {
+          if (lis[i].classList.contains('rj-nop')) lis[i].classList.remove('rj-nop');
+        } else if (!lis[i].classList.contains('rj-nop')) {
+          lis[i].classList.add('rj-nop');
+        }
+      }
+      syncStat();
+      fitListRows(7);
+    }
+    if (listEl) {
+      listEl.addEventListener('click', function (e) {
+        var t = e.target;
+        var li = t && t.closest ? t.closest('li') : null;
+        if (!li || !li.parentNode || li.parentNode.tagName !== 'OL') return;
+        var idx = Array.prototype.indexOf.call(li.parentNode.children, li);
+        if (idx >= 0 && !rjIsPlayable(ap, idx)) {
+          e.stopPropagation();
+          e.preventDefault();
+          var a = ap.list.audios[idx];
+          showTip('「' + ((a && a.name) || '这首') + '」暂无可播地址，换一首吧');
+        }
+      }, true);
+    }
+    // 首屏优先出画面，标记放到下一个宏任务（3000+ 行 class 操作约 100ms）
+    setTimeout(markRows, 40);
+
     // —— 交互模型 V1.6.2 ——
     //    折叠态圆盘：单击 = 播放/暂停，双击 = 展开
     //    展开态：双击圆盘 = 折叠；卡片空白处单击 = 播放/暂停、双击 = 开/关播放列表
@@ -193,7 +348,8 @@
       return !!(el && el.closest && el.closest(
         '.rj-pl-bar, .rj-pl-btns, .rj-pl-disc, ' +
         '.aplayer-bar-wrap, .aplayer-menu, .aplayer-volume-wrap, .aplayer-loop, ' +
-        '.aplayer-icon, .aplayer-time, .aplayer-miniswitcher, button, a'
+        '.aplayer-icon, .aplayer-time, .aplayer-miniswitcher, ' +
+        '.aplayer-list, input, textarea, button, a'
       ));
     }
     function togglePlay() {
@@ -729,9 +885,19 @@
     //    续播 seek 必须「一次性 + 校验仍是同一首」：旧版把 seek 挂在 loadeddata 上，
     //    而 loadeddata 每次换歌都会再触发 → 听新歌会从旧歌的进度开始（"换歌不重头"）
     try {
-      if (saved && typeof saved.idx === 'number' && saved.idx >= 0 && saved.idx < ap.list.audios.length) {
-        var bootTrack = ap.list.audios[saved.idx];
-        ap.list.switch(saved.idx);
+      var bootIdx = -1;
+      var savedIdx = (saved && typeof saved.idx === 'number') ? saved.idx : -1;
+      if (savedIdx >= 0 && savedIdx < ap.list.audios.length && rjIsPlayable(ap, savedIdx)) {
+        bootIdx = savedIdx;
+      } else if (savedIdx >= 0 && savedIdx < ap.list.audios.length) {
+        // 上次听的那首现在解析不出地址（版权/会员变动）→ 就近换一首能播的，不续进度
+        bootIdx = rjFindPlayable(ap, savedIdx, 1);
+        resumeTime = 0;
+      }
+      if (bootIdx < 0) bootIdx = rjRandomPlayable(ap);
+      if (bootIdx >= 0) {
+        var bootTrack = ap.list.audios[bootIdx];
+        ap.list.switch(bootIdx);
         if (resumeTime > 3) {
           var resumeDone = false;
           ap.on('loadeddata', function () {
@@ -741,8 +907,6 @@
             try { ap.seek(resumeTime); } catch (e) {}
           });
         }
-      } else if (ap.list.audios.length > 1) {
-        ap.list.switch(Math.floor(Math.random() * ap.list.audios.length));
       }
       autoPlay(ap, false);
     } catch (e) {
@@ -767,8 +931,13 @@
       var c = document.getElementById('site-player');
       if (!c || c.querySelector('.aplayer-body')) return;
       var st = readState();
-      var idx = st && typeof st.idx === 'number' && st.idx >= 0 && st.idx < list.length ? st.idx : 0;
-      if (!list[idx]) return;
+      var idx = st && typeof st.idx === 'number' && st.idx >= 0 && st.idx < list.length ? st.idx : -1;
+      // 记忆里的曲目若已不可播，退到第一首能播的，别让 pjax 后重建出个空 src
+      if (idx >= 0 && !list[idx].url) idx = -1;
+      if (idx < 0) {
+        for (var q = 0; q < list.length; q++) { if (list[q].url) { idx = q; break; } }
+      }
+      if (idx < 0 || !list[idx]) return;
       var nap = new APlayer({
         container: c,
         fixed: true,
@@ -1621,7 +1790,10 @@
       fetchPlaylist()
         .then(function (data) {
           var list = normalize(data && data.tracks);
-          init(list.length ? list : [SEED]);
+          // 全量歌单里绝大多数曲目能播；万一整份都解析失败（vkey 全局过期）
+          // 就退回种子曲，至少播放器不是死的
+          var hasPlayable = list.some(function (t) { return t.url; });
+          init(hasPlayable ? list : [SEED]);
         })
         .catch(function () { init([SEED]); });
     });

@@ -995,6 +995,119 @@ img {
   background: color-mix(in srgb, var(--rj-ink-surface) 88%, transparent);
 }
 
+/* ============================================================
+   全量歌单（V1.6.8）
+   列表现在是「我喜欢」完整收藏（3000+ 首），其中约一半受版权/会员限制
+   解析不出播放地址。它们仍在列表里可见，但置灰 + 角标 + 不可点击。
+   ============================================================ */
+
+/* APlayer 会把 listMaxHeight(260) 写成 .aplayer-list 的 inline max-height，
+   加上统计条后总高会超出去被裁掉 —— 高度交给下面 ol 自己的 230px 控制 */
+.aplayer .aplayer-list {
+  max-height: none !important;
+}
+
+/* 顶部曲目统计 + 搜索：让「这是我的全部音乐」一眼可见，也让 3000 首能被找到 */
+.aplayer .aplayer-list .rj-pl-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  color: color-mix(in srgb, var(--rj-ink-text) 58%, transparent);
+  border-bottom: 1px solid var(--rj-hairline-1);
+}
+.aplayer .aplayer-list .rj-pl-stat-num {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.aplayer .aplayer-list .rj-pl-stat b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--rj-ink-text) 88%, transparent);
+}
+.aplayer .aplayer-list .rj-pl-stat b.ok {
+  color: var(--rj-brand);
+}
+.aplayer .aplayer-list .rj-pl-search {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 20px;
+  padding: 0 8px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--rj-ink-text);
+  background: color-mix(in srgb, var(--rj-ink-text) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rj-ink-text) 12%, transparent);
+  border-radius: 999px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.aplayer .aplayer-list .rj-pl-search::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+.aplayer .aplayer-list .rj-pl-search::placeholder {
+  color: color-mix(in srgb, var(--rj-ink-text) 40%, transparent);
+}
+.aplayer .aplayer-list .rj-pl-search:focus {
+  border-color: color-mix(in srgb, var(--rj-brand) 62%, transparent);
+  background: color-mix(in srgb, var(--rj-ink-text) 10%, transparent);
+}
+
+/* 搜索过滤：只切显隐，不重建 DOM —— 行与曲目索引的映射保持不变 */
+.aplayer .aplayer-list ol li.rj-hide {
+  display: none !important;
+}
+
+/* 3000+ 行一次性渲染：视口外的行跳过布局与绘制，滚动才不卡 */
+.aplayer .aplayer-list ol li {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 33px;
+}
+
+/* 不可播：整行降透明度，光标明确拒绝，hover 不再高亮 */
+.aplayer .aplayer-list ol li.rj-nop {
+  opacity: 0.38;
+  cursor: not-allowed !important;
+}
+/* 亮色：0.38 叠在浅底上几乎糊成一片，收到 0.58 保住歌名可读性 */
+[data-theme="light"] .aplayer .aplayer-list ol li.rj-nop {
+  opacity: 0.58;
+}
+.aplayer .aplayer-list ol li.rj-nop:hover {
+  background: transparent !important;
+}
+.aplayer .aplayer-list ol li.rj-nop .aplayer-list-author {
+  max-width: 32%;      /* 给右侧角标腾位置 */
+}
+.aplayer .aplayer-list ol li.rj-nop::after {
+  content: "无版权";
+  flex: 0 0 auto;
+  font-size: 10px;
+  line-height: 1.6;
+  padding: 0 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--rj-ink-text) 60%, transparent);
+  background: color-mix(in srgb, var(--rj-ink-text) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rj-ink-text) 12%, transparent);
+}
+
+/* 移动端：横向空间紧张，角标缩小、歌手再让一点宽度 */
+@media (max-width: 767px) {
+  .aplayer .aplayer-list ol li.rj-nop::after {
+    font-size: 9px;
+    padding: 0 4px;
+  }
+  .aplayer .aplayer-list ol li.rj-nop .aplayer-list-author {
+    max-width: 26%;
+  }
+}
+
 /* —— 自动播放被拦截时的提示 —— */
 .rj-tip {
   position: fixed;
