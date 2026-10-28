@@ -151,6 +151,7 @@
     //    展开态：双击圆盘 = 折叠；卡片空白处单击 = 播放/暂停、双击 = 开/关播放列表
     //    展开时播放列表默认打开；点页面其它任何位置自动折叠播放器
     var singleTimer = null;
+    var vizSync = null;      // buildShell 内赋值，折叠/展开状态变化时同步律动启停
     function isInteractive(el) {
       return !!(el && el.closest && el.closest(
         '.rj-pl-bar, .rj-pl-btns, .rj-pl-disc, ' +
@@ -160,6 +161,8 @@
     }
     function togglePlay() {
       if (!ap.audio) return;
+      // 首屏第一次点击已由全局 pointerdown 开始播放，这里让掉这一次，避免瞬间暂停
+      if (Date.now() - (container.__rjBootAt || 0) < 500) { container.__rjBootAt = 0; return; }
       try {
         if (ap.audio.paused) { ap.play(); } else { ap.pause(); }
       } catch (e) {}
@@ -186,6 +189,7 @@
       container.classList.toggle('rj-pl-collapsed', v);
       if (v) { if (!listHidden()) hideList(); }
       else if (listHidden()) { showList(); }
+      if (vizSync) vizSync();   // 只有折叠态才跑律动，展开时停掉省电
     }
     // ============================================================
     //  自绘播放器外壳 rj-pl
@@ -217,6 +221,7 @@
           '<span class="rj-pl-shade"></span>' +
           '<span class="rj-pl-discbtn">' + svg(P.play) + '</span>' +
         '</button>' +
+        '<canvas class="rj-pl-eq" aria-hidden="true"></canvas>' +
         '<div class="rj-pl-meta">' +
           '<div class="rj-pl-title">正在连接…</div>' +
           '<div class="rj-pl-line">' +
@@ -243,6 +248,174 @@
       var elBar = root.querySelector('.rj-pl-bar');
       var mainBtn = root.querySelector('.rj-pl-main');
 
+      // ============================================================
+      //  折叠态律动 V1.6.6
+      //  真实频谱优先：音乐源（QQ CDN / jsDelivr）都返回 Access-Control-Allow-Origin: *，
+      //  audio 声明匿名跨域后即可接进 Web Audio 读 FFT；拿不到（AudioContext 没解锁 /
+      //  个别源缺 CORS）就退回合成节拍，任何情况下都不影响播放与出声。
+      // ============================================================
+      var EQ_N = 36;                 // 环上柱子数
+      var VIZ = 104;                 // 画布逻辑尺寸（CSS 侧同值，圆盘 66 → 环在圆盘外 1~15px）
+      var DPR = Math.min(2, window.devicePixelRatio || 1);
+      var eqEl = root.querySelector('.rj-pl-eq');
+      var eq2d = eqEl && eqEl.getContext ? eqEl.getContext('2d') : null;
+      if (eq2d) { eqEl.width = Math.round(VIZ * DPR); eqEl.height = Math.round(VIZ * DPR); }
+      var viz = { tried: false, actx: null, an: null, data: null, raf: 0, fix: false, smooth: [] };
+      for (var vi = 0; vi < EQ_N; vi++) viz.smooth.push(0);
+
+      function initViz() {
+        if (viz.tried) return;
+        viz.tried = true;
+        var AC = window.AudioContext || window.webkitAudioContext;
+        var au = ap.audio;
+        if (!AC || !au || !eq2d) return;
+        try {
+          // crossOrigin 已在 APlayer 创建后立刻设好（见上），这里只在极端情况下补一次
+          if (!au.crossOrigin) au.crossOrigin = 'anonymous';
+          var actx = new AC();
+          var srcNode = actx.createMediaElementSource(au);
+          var an = actx.createAnalyser();
+          an.fftSize = 256;
+          an.smoothingTimeConstant = 0.74;
+          an.minDecibels = -88;
+          srcNode.connect(an);
+          an.connect(actx.destination);   // 必须接回 destination，否则只剩分析、没有声音
+          viz.actx = actx;
+          viz.an = an;
+          viz.data = new Uint8Array(an.frequencyBinCount);
+        } catch (e) {
+          viz.an = null;
+        }
+      }
+
+      // 极端兜底：万一某首源站没给 CORS 头，匿名跨域会直接加载失败；
+      // 清掉 crossOrigin 重载一次 —— 宁可没有律动，也不能没有声音
+      if (ap.audio) {
+        ap.audio.addEventListener('error', function () {
+          if (viz.fix) return;
+          var au = ap.audio;
+          if (!au || !au.crossOrigin) return;
+          viz.fix = true;
+          viz.an = null;
+          try { au.crossOrigin = null; au.load(); } catch (e) {}
+        });
+      }
+
+      // 频谱 → 36 根柱子（对数采样，前后镜像，视觉上左右对称）
+      function sampleBars(d) {
+        var maxBin = Math.min(d.length - 1, 56);   // 约到 10kHz
+        var half = EQ_N / 2;
+        var tmp = [];
+        for (var i = 0; i < half; i++) {
+          var t0 = Math.pow(i / (half - 1), 1.7);
+          var t1 = Math.pow((i + 1) / (half - 1), 1.7);
+          var lo = Math.min(maxBin, Math.floor(t0 * maxBin));
+          var hi = Math.max(lo + 1, Math.min(maxBin, Math.floor(t1 * maxBin)));
+          var sum = 0, n = 0;
+          for (var j = lo; j <= hi; j++) { sum += d[j]; n++; }
+          tmp.push(n ? (sum / n) / 255 : 0);
+        }
+        var out = [];
+        for (var k = 0; k < EQ_N; k++) {
+          out.push(k < half ? tmp[k] : tmp[EQ_N - 1 - k]);
+        }
+        return out;
+      }
+
+      function drawEq(bars, glow) {
+        var R = VIZ / 2;
+        eq2d.setTransform(DPR, 0, 0, DPR, 0, 0);
+        eq2d.clearRect(0, 0, VIZ, VIZ);
+        var r0 = R * 0.69;                  // 圆盘半径 + 约 3px，不要压边
+        var maxLen = R - r0 - 3;
+        eq2d.lineCap = 'round';
+        eq2d.shadowBlur = 4 + glow * 8;
+        eq2d.shadowColor = 'rgba(139, 92, 246, ' + (0.3 + glow * 0.45) + ')';
+        for (var i = 0; i < EQ_N; i++) {
+          var v = bars[i];
+          var a = (i / EQ_N) * Math.PI * 2 - Math.PI / 2;
+          var len = 1.4 + v * maxLen;
+          var c = Math.cos(a), sn = Math.sin(a);
+          var hue = 264 - 76 * (1 - Math.abs(i - EQ_N / 2) / (EQ_N / 2));   // 12 点紫、6 点青，左右对称
+          eq2d.strokeStyle = 'hsla(' + hue.toFixed(0) + ', 92%, ' + (62 + v * 14).toFixed(0) + '%, ' + (0.3 + v * 0.62).toFixed(2) + ')';
+          eq2d.lineWidth = 2.4;
+          eq2d.beginPath();
+          eq2d.moveTo(R + c * r0, R + sn * r0);
+          eq2d.lineTo(R + c * (r0 + len), R + sn * (r0 + len));
+          eq2d.stroke();
+        }
+        eq2d.shadowBlur = 0;
+      }
+
+      function frame(now) {
+        viz.raf = requestAnimationFrame(frame);
+        var au = ap.audio;
+        if (!au || au.paused) return;
+        var bars, low;
+        if (viz.an && viz.actx && viz.actx.state === 'running') {
+          viz.an.getByteFrequencyData(viz.data);
+          bars = sampleBars(viz.data);
+          low = (bars[0] + bars[1] + bars[2]) / 3;
+        } else {
+          // 合成节拍：约 92 BPM，kick 打点 + 慢速起伏，只在拿不到真实频谱时使用
+          var t = now / 1000;
+          var beat = 60 / 92;
+          var kick = Math.exp(-((t % beat) / beat) * 6.5);
+          var swell = 0.55 + 0.45 * Math.sin(t * 1.7);
+          low = 0.2 + 0.5 * kick * swell;
+          bars = [];
+          for (var i = 0; i < EQ_N; i++) {
+            bars.push(low * (0.4 + 0.6 * Math.abs(Math.sin(t * 2.1 + i * 0.72))));
+          }
+        }
+        // 动态归一化：音乐各频段能量差异大，不归一化柱子几乎一样长，看不出律动
+        var peak = 0;
+        for (var pi = 0; pi < EQ_N; pi++) { if (bars[pi] > peak) peak = bars[pi]; }
+        if (peak > 0.1) {
+          for (var pj = 0; pj < EQ_N; pj++) {
+            // 开方压缩动态范围：高频本来就弱，不抬一手环的两侧会空掉
+            bars[pj] = Math.min(1, Math.pow(bars[pj] / peak, 0.72) * 0.94);
+          }
+        }
+        // 平滑：上升快、回落慢，跳起来有弹性但不抖
+        for (var s2 = 0; s2 < EQ_N; s2++) {
+          var prev = viz.smooth[s2];
+          var target = bars[s2];
+          viz.smooth[s2] = target > prev ? prev + (target - prev) * 0.55 : prev + (target - prev) * 0.16;
+        }
+        drawEq(viz.smooth, Math.min(1, low * 1.25));
+        // 圆盘随低频轻微脉动
+        var beatScale = 1 + Math.min(0.045, low * 0.055);
+        root.style.setProperty('--rj-beat', beatScale.toFixed(4));
+      }
+
+      function startViz() {
+        if (viz.raf) return;
+        initViz();
+        if (viz.actx && viz.actx.state === 'suspended') {
+          try { viz.actx.resume(); } catch (e) {}
+        }
+        viz.raf = requestAnimationFrame(frame);
+      }
+      function stopViz() {
+        if (viz.raf) { cancelAnimationFrame(viz.raf); viz.raf = 0; }
+        root.style.setProperty('--rj-beat', '1');
+        // 等 0.45s 透明度淡出结束再清画布，否则环会"啪"地瞬间消失
+        setTimeout(function () {
+          if (viz.raf) return;   // 期间又播了就不清
+          if (eq2d) {
+            eq2d.setTransform(DPR, 0, 0, DPR, 0, 0);
+            eq2d.clearRect(0, 0, VIZ, VIZ);
+          }
+          for (var i = 0; i < EQ_N; i++) viz.smooth[i] = 0;
+        }, 460);
+      }
+      function syncViz() {
+        var on = isCollapsed() && ap.audio && !ap.audio.paused;
+        if (on) startViz(); else stopViz();
+      }
+      vizSync = syncViz;
+
       container.classList.add('rj-pl-collapsed'); // 默认折叠，和旧版首屏一致
 
       function fmt(t) {
@@ -262,6 +435,7 @@
         discBtn.innerHTML = svg(d);
         mainBtn.innerHTML = svg(d);
         root.classList.toggle('rj-pl-playing', !paused);
+        syncViz();
       }
       function syncProgress() {
         var au = ap.audio;
@@ -486,6 +660,18 @@
     });
     window.aplayers = window.aplayers || [];
     window.aplayers.push(ap); // pjax 只销毁非 fixed 实例
+
+    // —— 律动前置：音频必须以匿名跨域方式加载 ——
+    //    折叠态律动要接 Web Audio 读频谱，而不透明（无 CORS）资源接进 AudioContext
+    //    会被浏览器强制静音。所以必须赶在 decorate（建壳）与首播之前设置；
+    //    此时音频还没播，重新 load 一次不会打断任何播放。
+    if (ap.audio) {
+      try {
+        if (!ap.audio.crossOrigin) ap.audio.crossOrigin = 'anonymous';
+        if (ap.audio.src && ap.audio.paused) ap.audio.load();
+      } catch (e) {}
+    }
+
     decorate(ap, container, list);
 
     var saved = readState();
@@ -511,6 +697,9 @@
     document.addEventListener('pointerdown', function () {
       if (started) return;
       started = true;
+      // 记下这次"开声"点击：它已经让音乐开始播放，紧随其后的圆盘单击不能再 toggle
+      // （否则首屏第一次点圆盘会「播一下立刻停」）
+      container.__rjBootAt = Date.now();
       if (ap.audio && ap.audio.paused && ap.list.audios.length) {
         try { ap.play(); } catch (e) {}
       }

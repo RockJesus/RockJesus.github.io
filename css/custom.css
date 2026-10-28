@@ -547,6 +547,36 @@ img {
 .aplayer.rj-pl-collapsed .aplayer-list {
   display: none !important;
 }
+/* —— 折叠态律动 V1.6.6 ——
+   36 根频谱柱由 JS 画在 canvas 上，围成环贴着圆盘外沿；只在「折叠 + 播放中」出现，
+   展开态或暂停时整块隐藏。圆盘同时按 --rj-beat 做极轻微脉动（封面转动不受影响）。 */
+.rj-pl-eq {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 104px;
+  height: 104px;
+  margin: -52px 0 0 -52px;
+  z-index: 4;
+  display: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.aplayer.rj-pl-collapsed .rj-pl-eq {
+  display: block;
+}
+.aplayer.rj-pl-collapsed .rj-pl.rj-pl-playing .rj-pl-eq {
+  opacity: 1;                    /* .rj-pl-playing 挂在 .rj-pl 上，不是 .aplayer */
+}
+.aplayer.rj-pl-collapsed .rj-pl-disc {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);   /* 暂停时平滑回弹 */
+}
+.aplayer.rj-pl-collapsed .rj-pl.rj-pl-playing .rj-pl-disc {
+  transform: scale(var(--rj-beat, 1));
+  transition: none;              /* 播放中每帧由 JS 写入，有过渡会被拖成慢动作 */
+  will-change: transform;
+}
 .aplayer.rj-pl-collapsed .rj-pl-disc {
   width: 100%;
   height: 100%;
@@ -1050,6 +1080,11 @@ img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
+  }
+  .rj-pl-eq {
+    width: 92px;
+    height: 92px;
+    margin: -46px 0 0 -46px;
   }
   .rj-pl {
     padding: 8px 10px;
