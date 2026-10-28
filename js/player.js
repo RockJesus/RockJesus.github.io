@@ -60,20 +60,18 @@
     return out;
   }
 
-  // —— 统一装饰：全幅封面背景 + 悬浮播放键 + 播放状态 + 断点记忆 ——
+  // —— 统一装饰：自绘外壳 + 封面毛玻璃底 + 播放状态 + 断点记忆 ——
   function decorate(ap, container, list) {
     var body = container.querySelector('.aplayer-body');
     var pic = container.querySelector('.aplayer-pic');
     var info = container.querySelector('.aplayer-info');
-    var row = null;
-    if (body && pic && info) {
-      row = document.createElement('div');
-      row.className = 'aplayer-row';
-      body.insertBefore(row, body.firstChild);
-      row.appendChild(pic);
-      row.appendChild(info);
-      pic.style.backgroundImage = 'none'; // 封面改由整卡背景展示
-    }
+    // APlayer 自带的封面块 / 信息块 / 控制器 / 折叠箭头全部隐藏：
+    // 只保留它的 audio、歌单数据和 .aplayer-list 面板，可见界面由 rj-pl 自绘
+    if (pic) pic.style.display = 'none';
+    if (info) info.style.display = 'none';
+    var miniSw = container.querySelector('.aplayer-miniswitcher');
+    if (miniSw) miniSw.style.display = 'none';
+    var row = null; // 自绘外壳，沿用旧变量名承接后面对它的引用
     function curAudio() {
       var list = ap.list && ap.list.audios;
       return (list && list[ap.list.index]) || null;
@@ -97,18 +95,20 @@
       if (!body) return;
       var a = curAudio();
       var cover = (a && a.cover) || SEED.cover;
+      function apply(u) {
+        // 卡片底色 = 同一张封面的模糊版（CSS 侧读 --rj-pl-cover 做毛玻璃层），
+        // 缩略封面也用这张图；不再把锐利大图铺到整卡，避免文字被照片压灰
+        if (body) body.style.setProperty('--rj-pl-cover', 'url("' + u + '")');
+        if (row) row.style.setProperty('--rj-pl-cover', 'url("' + u + '")');
+      }
       var img = new Image();
       img.onload = function () {
         if (curAudio() !== a) return; // 已切走，忽略过期加载结果
-        body.style.backgroundImage = 'url("' + cover + '")';
-        body.style.backgroundSize = 'cover';
-        body.style.backgroundPosition = 'center';
+        apply(cover);
       };
       img.onerror = function () {
         if (curAudio() !== a) return;
-        body.style.backgroundImage = 'url("' + SEED.cover + '")';
-        body.style.backgroundSize = 'cover';
-        body.style.backgroundPosition = 'center';
+        apply(SEED.cover);
       };
       img.src = cover;
     }
@@ -173,6 +173,7 @@
     var singleTimer = null;
     function isInteractive(el) {
       return !!(el && el.closest && el.closest(
+        '.rj-pl-bar, .rj-pl-btns, .rj-pl-fold, .rj-pl-disc, ' +
         '.aplayer-bar-wrap, .aplayer-menu, .aplayer-volume-wrap, .aplayer-loop, ' +
         '.aplayer-icon, .aplayer-time, .aplayer-miniswitcher, button, a'
       ));
@@ -195,103 +196,161 @@
       }
       armFold();
     }
-    // —— 封面中央播放/暂停按钮（最小折叠态常显；点击直接播放/暂停）——
-    if (row) {
-      var picBtn = document.createElement('div');
-      picBtn.className = 'rj-pic-btn';
-      picBtn.setAttribute('aria-label', '播放/暂停');
-      picBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-      row.appendChild(picBtn);
-      function syncPicBtn() {
-        if (!ap.audio) return;
-        var paused = ap.audio.paused;
-        picBtn.innerHTML = paused
-          ? '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
-          : '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
-        picBtn.classList.toggle('rj-pic-btn-playing', !paused);
-      }
-      picBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePlay();
-      });
-      ap.on('play', syncPicBtn);
-      ap.on('pause', syncPicBtn);
-      ap.on('ended', syncPicBtn);
-      syncPicBtn();
-    }
-    // —— 自定义控制条（展开态）：上一首/播放暂停/下一首/循环/随机/列表/静音，主题紫圆钮 ——
-    if (row) {
-      var svgI = function (d) { return '<svg viewBox="0 0 24 24"><path d="' + d + '"/></svg>'; };
-      var I = {
+    // ============================================================
+    //  自绘播放器外壳 rj-pl
+    //  折叠态：56px 圆角唱片（点击播放/暂停）；展开态：328×78 玻璃卡片
+    //  APlayer 只保留 audio 与歌单，可见 UI 全部由本层接管
+    // ============================================================
+    (function buildShell() {
+      if (!body) return;
+      var P = {
+        play: 'M8 5v14l11-7z',
+        pause: 'M6 5h4v14H6zM14 5h4v14h-4z',
         prev: 'M7 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zm10.6.7a1 1 0 0 1 1.5.8v10.8a1 1 0 0 1-1.5.8l-7.6-5.4a1 1 0 0 1 0-1.6l7.6-5.4z',
         next: 'M17 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zM5.9 6.7a1 1 0 0 1 1.5-.8l7.6 5.4a1 1 0 0 1 0 1.6l-7.6 5.4a1 1 0 0 1-1.5-.8V6.7z',
-        loop: 'M17 7H7v3L3 6l4-4v3h12v5h-2V7zm-10 10h10v-3l4 4-4 4v-3H5v-5h2v4z',
-        random: 'M5 8h8l-2-2 1.5-1.5L17 8l-4.5 3.5L11 10l2-2H5V8zm14 8h-8l2 2-1.5 1.5L7 16l4.5-3.5L13 14l-2 2h8v-2z',
         list: 'M4 6h2v2H4V6zm4 0h12v2H8V6zm-4 5h2v2H4v-2zm4 0h12v2H8v-2zm-4 5h2v2H4v-2zm4 0h12v2H8v-2z',
-        vol: 'M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.1v8.2a4.5 4.5 0 0 0 2.5-4.1zm0-7.9V6a7 7 0 0 1 0 12v1.9a9 9 0 0 0 0-16.8z'
+        chev: 'M7.4 14.6 12 10l4.6 4.6L18 13.2 12 7.2l-6 6z'
       };
-      var ctrl = document.createElement('div');
-      ctrl.className = 'rj-controls';
-      function mkCtl(cls, d, title, fn) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'rj-ctl ' + cls;
-        b.title = title;
-        b.innerHTML = svgI(d);
-        b.addEventListener('click', function (e) { e.stopPropagation(); e.preventDefault(); fn(); });
-        return b;
+      var svg = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>'; };
+      var root = document.createElement('div');
+      root.className = 'rj-pl';
+      root.innerHTML =
+        '<button type="button" class="rj-pl-disc" title="播放 / 暂停">' +
+          '<span class="rj-pl-shade"></span>' +
+          '<span class="rj-pl-discbtn">' + svg(P.play) + '</span>' +
+        '</button>' +
+        '<div class="rj-pl-meta">' +
+          '<div class="rj-pl-title">正在连接…</div>' +
+          '<div class="rj-pl-line">' +
+            '<span class="rj-pl-artist">RockJesus Station</span>' +
+            '<span class="rj-pl-time">0:00 / 0:00</span>' +
+          '</div>' +
+          '<div class="rj-pl-bar"><span class="rj-pl-fill"><i class="rj-pl-thumb"></i></span></div>' +
+        '</div>' +
+        '<div class="rj-pl-btns">' +
+          '<button type="button" data-a="prev" title="上一首">' + svg(P.prev) + '</button>' +
+          '<button type="button" data-a="toggle" class="rj-pl-main" title="播放 / 暂停">' + svg(P.play) + '</button>' +
+          '<button type="button" data-a="next" title="下一首">' + svg(P.next) + '</button>' +
+          '<button type="button" data-a="list" title="播放列表">' + svg(P.list) + '</button>' +
+        '</div>' +
+        '<button type="button" class="rj-pl-fold" title="收起 / 展开">' + svg(P.chev) + '</button>';
+      body.insertBefore(root, body.firstChild);
+      row = root;
+
+      var disc = root.querySelector('.rj-pl-disc');
+      var discBtn = root.querySelector('.rj-pl-discbtn');
+      var elTitle = root.querySelector('.rj-pl-title');
+      var elArtist = root.querySelector('.rj-pl-artist');
+      var elTime = root.querySelector('.rj-pl-time');
+      var elFill = root.querySelector('.rj-pl-fill');
+      var elBar = root.querySelector('.rj-pl-bar');
+      var mainBtn = root.querySelector('.rj-pl-main');
+
+      container.classList.add('rj-pl-collapsed'); // 默认折叠，和旧版首屏一致
+
+      function fmt(t) {
+        t = Math.max(0, Math.floor(t || 0));
+        var m = Math.floor(t / 60), s = t % 60;
+        return m + ':' + (s < 10 ? '0' + s : s);
       }
-      var ctrlPlay = mkCtl('rj-ctl-play', 'M8 5v14l11-7z', '播放/暂停', togglePlay);
-      ctrl.appendChild(mkCtl('rj-ctl-prev', I.prev, '上一首', function () { try { ap.list.prev(); } catch (e) {} }));
-      ctrl.appendChild(ctrlPlay);
-      ctrl.appendChild(mkCtl('rj-ctl-next', I.next, '下一首', function () { try { ap.list.next(); } catch (e) {} }));
-      ctrl.appendChild(mkCtl('rj-ctl-loop', I.loop, '循环模式', function () {
-        try { ap.loop = ap.loop === 'all' ? 'one' : ap.loop === 'one' ? 'none' : 'all'; } catch (e) {}
-      }));
-      ctrl.appendChild(mkCtl('rj-ctl-random', I.random, '随机/顺序', function () {
-        try { ap.order = ap.order === 'random' ? 'list' : 'random'; } catch (e) {}
-      }));
-      ctrl.appendChild(mkCtl('rj-ctl-list', I.list, '播放列表', toggleList));
-      ctrl.appendChild(mkCtl('rj-ctl-mute', I.vol, '静音', function () {
-        try { if (ap.audio) ap.audio.muted = !ap.audio.muted; } catch (e) {}
-      }));
-      if (info) info.appendChild(ctrl);
-      var syncCtlPlay = function () {
-        if (!ap.audio) return;
-        ctrlPlay.innerHTML = ap.audio.paused ? svgI('M8 5v14l11-7z') : svgI('M6 5h4v14H6zM14 5h4v14h-4z');
-        ctrlPlay.classList.toggle('rj-ctl-playing', !ap.audio.paused);
-      };
-      ap.on('play', syncCtlPlay);
-      ap.on('pause', syncCtlPlay);
-      ap.on('ended', syncCtlPlay);
-      syncCtlPlay();
-    }
-    // —— 折叠/展开 ↔ 播放列表联动：播放器折叠时列表收起，展开时列表展开 ——
-    if (window.MutationObserver) {
-      var moFold = new MutationObserver(function () {
-        try {
-          if (container.classList.contains('aplayer-mini')) {
-            if (listEl && !listHidden()) ap.list.hide();
-          } else {
-            if (listEl && listHidden()) ap.list.show();
-          }
-        } catch (e) {}
+      function syncMeta() {
+        var a = curAudio();
+        elTitle.textContent = (a && a.name) || '未选择曲目';
+        elArtist.textContent = (a && a.artist) || 'RockJesus Station';
+        elTitle.title = elTitle.textContent;
+      }
+      function syncPlayIcon() {
+        var paused = !ap.audio || ap.audio.paused;
+        var d = paused ? P.play : P.pause;
+        discBtn.innerHTML = svg(d);
+        mainBtn.innerHTML = svg(d);
+        root.classList.toggle('rj-pl-playing', !paused);
+      }
+      function syncProgress() {
+        var au = ap.audio;
+        if (!au) return;
+        var d = au.duration || 0;
+        if (!d) { var a = curAudio(); d = (a && a.duration) || 0; }
+        var p = d ? Math.min(1, au.currentTime / d) : 0;
+        elFill.style.width = (p * 100).toFixed(2) + '%';
+        elTime.textContent = fmt(au.currentTime) + ' / ' + fmt(d);
+      }
+      // 进度条：点击或拖拽都能定位
+      var dragging = false;
+      function seekTo(e) {
+        var au = ap.audio; if (!au) return;
+        var r = elBar.getBoundingClientRect();
+        if (!r.width) return;
+        var p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+        var d = au.duration || 0;
+        if (d) { try { au.currentTime = p * d; } catch (err) {} }
+        elFill.style.width = (p * 100).toFixed(2) + '%';
+      }
+      elBar.addEventListener('pointerdown', function (e) {
+        dragging = true; elBar.classList.add('rj-pl-drag'); seekTo(e);
+        e.stopPropagation(); e.preventDefault();
       });
-      moFold.observe(container, { attributes: true, attributeFilter: ['class'] });
-    }
-    if (row) {
-      row.addEventListener('click', function (e) {
+      window.addEventListener('pointermove', function (e) { if (dragging) seekTo(e); });
+      window.addEventListener('pointerup', function () {
+        if (dragging) { dragging = false; elBar.classList.remove('rj-pl-drag'); }
+      });
+
+      function on(ev, fn) { try { ap.on(ev, fn); } catch (e) {} }
+      disc.addEventListener('click', function (e) { e.stopPropagation(); togglePlay(); });
+      mainBtn.addEventListener('click', function (e) { e.stopPropagation(); togglePlay(); });
+      root.querySelector('[data-a="prev"]').addEventListener('click', function (e) { e.stopPropagation(); try { ap.list.prev(); } catch (err) {} });
+      root.querySelector('[data-a="next"]').addEventListener('click', function (e) { e.stopPropagation(); try { ap.list.next(); } catch (err) {} });
+      var listBtn = root.querySelector('[data-a="list"]');
+      listBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleList(); });
+      root.querySelector('.rj-pl-fold').addEventListener('click', function (e) {
+        e.stopPropagation();
+        var collapsed = container.classList.toggle('rj-pl-collapsed');
+        if (collapsed && !listHidden()) toggleList();
+      });
+      // 展开态卡片空白处：单击播放/暂停，双击开歌单
+      root.addEventListener('click', function (e) {
+        if (container.classList.contains('rj-pl-collapsed') || isInteractive(e.target)) return;
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
-        if (isInteractive(e.target)) return;
         singleTimer = setTimeout(function () { singleTimer = null; togglePlay(); }, 280);
       });
-      row.addEventListener('dblclick', function (e) {
+      root.addEventListener('dblclick', function (e) {
+        if (container.classList.contains('rj-pl-collapsed') || isInteractive(e.target)) return;
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
-        if (isInteractive(e.target)) return;
         toggleList();
       });
-    }
+
+      on('listswitch', syncMeta);
+      on('listswitch', function () { setTimeout(syncProgress, 60); });
+      on('play', syncPlayIcon);
+      on('pause', syncPlayIcon);
+      on('ended', syncPlayIcon);
+      on('loadedmetadata', syncProgress);
+      if (ap.audio) ap.audio.addEventListener('timeupdate', syncProgress);
+      // 歌单显隐 → 列表按钮保持高亮
+      if (listEl && window.MutationObserver) {
+        new MutationObserver(function () {
+          root.classList.toggle('rj-pl-haslist', !listHidden());
+        }).observe(listEl, { attributes: true, attributeFilter: ['style', 'class'] });
+      }
+      if (!root.style.getPropertyValue('--rj-pl-cover')) {
+        root.style.setProperty('--rj-pl-cover', 'url("' + SEED.cover + '")');
+      }
+      // APlayer 会按容器宽度自动挂 .aplayer-narrow，原生窄态会隐藏歌单与信息；
+      // 折叠改由 rj-pl-collapsed 控制，这里持续摘掉原生窄态类
+      function stripNarrow() {
+        if (container.classList.contains('aplayer-narrow')) {
+          container.classList.remove('aplayer-narrow');
+        }
+        if (container.classList.contains('aplayer-mini')) {
+          container.classList.remove('aplayer-mini');
+        }
+      }
+      stripNarrow();
+      if (window.MutationObserver) {
+        new MutationObserver(stripNarrow).observe(container, { attributes: true, attributeFilter: ['class'] });
+      }
+      syncMeta(); syncPlayIcon(); syncProgress();
+    })();
   }
 
   function showTip(msg) {
@@ -317,10 +376,32 @@
     t.className = 'rj-muted-tip';
     t.textContent = '🔇 音乐已自动播放 · 点击页面任意处开启声音';
     document.body.appendChild(t);
+    // 提示条贴在播放器顶部上方，播放器展开歌单变高时跟着上移，避免压在歌单上
+    var place = function () {
+      var p = document.querySelector('.aplayer.aplayer-fixed');
+      if (!p || !t.parentNode) return;
+      var r = p.getBoundingClientRect();
+      t.style.bottom = Math.round(window.innerHeight - r.top + 8) + 'px';
+    };
+    place();
+    t.__rjPlace = place;
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(place);
+      var host = document.querySelector('.aplayer.aplayer-fixed');
+      if (host) ro.observe(host);
+      t.__rjRO = ro;
+    }
+    window.addEventListener('resize', place);
+    setTimeout(place, 400);
+    setTimeout(place, 1500);
   }
   function hideMutedTip() {
     var t = document.getElementById('rj-muted-tip');
-    if (t && t.parentNode) t.parentNode.removeChild(t);
+    if (t) {
+      if (t.__rjRO) { try { t.__rjRO.disconnect(); } catch (e) {} }
+      if (t.__rjPlace) window.removeEventListener('resize', t.__rjPlace);
+      if (t.parentNode) t.parentNode.removeChild(t);
+    }
   }
 
   // —— 自动播放：先正常带声播放；被浏览器拦截时转"静音自动播放"（muted 自动播放始终被允许），
