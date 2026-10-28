@@ -721,7 +721,7 @@
     box.appendChild(label);
     var stats = document.createElement('div');
     stats.className = 'rj-globe-stats';
-    stats.innerHTML = '<div class="rj-globe-stats-title">🌍 全世界访客分布</div><div class="rj-globe-stats-flags"></div>';
+    stats.innerHTML = '<div class="rj-globe-stats-title">🌍 访客分布</div><div class="rj-globe-stats-flags"></div>';
     box.appendChild(stats);
     var ctx = canvas.getContext('2d');
     var W = 340, H = 236, dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1158,7 +1158,6 @@
   }
 
   // —— 站点统计（Upstash 原子计数，替代失效的不蒜子 busuanzi）——
-  var rjPvMarked = false;   // 总访问量：每次完整页面加载 +1
   var rjPvPath = null;      // 文章阅读量：每次进入该文章（含 pjax 跳转）计一次
   function rjUpstash(key, isIncr) {
     return fetch(UPSTASH_URL + (isIncr ? '/incr/' : '/get/') + key, {
@@ -1178,26 +1177,6 @@
     var el = document.getElementById(id);
     if (el) el.innerHTML = val;
   }
-  function ensureWebinfoItems() {
-    var host = document.querySelector('.card-webinfo .webinfo');
-    if (!host || host.querySelector('#rj-site-pv')) return;
-    function mk(id, name) {
-      var it = document.createElement('div');
-      it.className = 'webinfo-item';
-      var nm = document.createElement('div');
-      nm.className = 'item-name';
-      nm.textContent = name + ' :';
-      var cnt = document.createElement('div');
-      cnt.className = 'item-count';
-      cnt.id = id;
-      cnt.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-      it.appendChild(nm);
-      it.appendChild(cnt);
-      return it;
-    }
-    host.appendChild(mk('rj-site-uv', '本站访客数'));
-    host.appendChild(mk('rj-site-pv', '本站总访问量'));
-  }
   function ensurePagePv() {
     if (document.getElementById('rj-page-pv')) return;
     var line = document.querySelector('#post-info .meta-secondline');
@@ -1212,27 +1191,9 @@
     line.appendChild(box);
   }
   function rjStats() {
-    ensureWebinfoItems();
     ensurePagePv();
     var failed = function (id) { rjFill(id, '—'); };
-    // 本站总访问量：每次完整页面加载 +1（pjax 站内跳转不重复计）
-    if (!rjPvMarked) {
-      rjPvMarked = true;
-      rjUpstash('pv_total', true)
-        .then(function (n) { rjFill('rj-site-pv', rjFmt(n)); })
-        .catch(function () { failed('rj-site-pv'); });
-    }
-    // 本站访客数：每个浏览器只计一次（localStorage 标记去重）
-    var uvDone = false;
-    try { uvDone = !!localStorage.getItem('rjUvDone'); } catch (e) {}
-    var uvReq = uvDone
-      ? rjUpstash('uv_total', false)
-      : rjUpstash('uv_total', true).then(function (n) {
-          try { localStorage.setItem('rjUvDone', '1'); } catch (e) {}
-          return n;
-        });
-    uvReq.then(function (n) { rjFill('rj-site-uv', rjFmt(n)); }).catch(function () { failed('rj-site-uv'); });
-    // 文章阅读量：按路径 +1
+    // 文章阅读量：按路径 +1（卡片内旧的本站访客数/总访问量已下线，仅保留地球分布）
     if (document.getElementById('rj-page-pv')) {
       var path = location.pathname;
       var pkey = 'pv_' + encodeURIComponent(path);
