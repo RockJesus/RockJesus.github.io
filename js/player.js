@@ -76,6 +76,40 @@
       var list = ap.list && ap.list.audios;
       return (list && list[ap.list.index]) || null;
     }
+    // ============================================================
+    //  切歌 V1.6.7
+    //  APlayer 1.10.1 的 list 对象只有 switch()，没有 prev()/next()：
+    //  旧代码调 ap.list.prev()/next() 会抛异常并被 try 吞掉 → 按钮「按了没反应」。
+    //  正确入口是 player 级 skipBack()/skipForward()：按当前 order（含 random）
+    //  取上一/下一序号，并自带首尾环绕。
+    // ============================================================
+    function rjSkip(dir) {
+      var n = (ap.list && ap.list.audios && ap.list.audios.length) || 0;
+      if (n < 2) return false;
+      var wasPlaying = !!(ap.audio && !ap.audio.paused);
+      try {
+        if (dir > 0 && typeof ap.skipForward === 'function') ap.skipForward();
+        else if (dir < 0 && typeof ap.skipBack === 'function') ap.skipBack();
+        else ap.list.switch((ap.list.index + dir + n) % n);
+      } catch (e) {
+        try { ap.list.switch((ap.list.index + dir + n) % n); } catch (e2) { return false; }
+      }
+      resetTime();
+      // 播放中换台继续播；暂停时换台停在新歌开头（保留用户的暂停意图）
+      if (wasPlaying) { try { ap.play(); } catch (e) {} }
+      return true;
+    }
+    // —— 换歌必须从头播：switch() 内部会 seek(0)，但「src 刚换」时对 currentTime
+    //    的赋值可能被忽略，元数据就绪后再钉一次 0 作为保险 ——
+    function resetTime() {
+      if (!ap.audio) return;
+      try { ap.audio.currentTime = 0; } catch (e) {}
+      if (ap.audio.readyState < 1) {
+        ap.audio.addEventListener('loadedmetadata', function () {
+          try { ap.audio.currentTime = 0; } catch (e) {}
+        }, { once: true });
+      }
+    }
     // —— 试听片段检测：vkey 过期时 QQ 只返回 30 秒试听，播放器误以为播完自动切歌 →
     //    表现为"每首歌都是片段"。若实际时长明显短于歌单标注 → 判定为试听，自动跳过该歌 ——
     function rjSkipPreview() {
@@ -84,7 +118,7 @@
         if (!ap.audio || !a || !a.duration || a.duration < 60) return;
         var real = ap.audio.duration;
         if (real && real < a.duration * 0.6) {
-          ap.list.next();
+          rjSkip(1);
         }
       } catch (e) {}
     }
@@ -130,16 +164,19 @@
 
     // 断点续播记忆
     var STATE_KEY = 'rjPlayerState';
-    function saveState() {
+    function saveState(fixedTime, fixedIdx) {
       try {
         localStorage.setItem(STATE_KEY, JSON.stringify({
-          idx: ap.list.index,
-          time: (ap.audio && ap.audio.currentTime) || 0
+          idx: typeof fixedIdx === 'number' ? fixedIdx : ap.list.index,
+          // 换歌瞬间 listswitch 先于 setAudio 触发，此刻 currentTime 还是上一首的，
+          // 必须显式写 0，否则下次打开会把「新歌」续播到「旧进度」
+          time: typeof fixedTime === 'number' ? fixedTime : ((ap.audio && ap.audio.currentTime) || 0)
         }));
       } catch (e) {}
     }
-    setInterval(saveState, 3000);
-    ap.on('listswitch', function () { saveState(); });
+    setInterval(function () { saveState(); }, 3000);
+    // listswitch 载荷带的是「即将切到的」index（此时 ap.list.index 还没更新），必须用它
+    ap.on('listswitch', function (d) { saveState(0, d && d.index); });
     ap.on('pause', function () { saveState(); });
 
     // —— 播放列表：展开播放器即常显（旧版「10 秒无操作自动收起」已移除，
@@ -423,8 +460,11 @@
         var m = Math.floor(t / 60), s = t % 60;
         return m + ':' + (s < 10 ? '0' + s : s);
       }
-      function syncMeta() {
-        var a = curAudio();
+      // listswitch 在 ap.list.index 被赋值「之前」触发（AVPlayer 内部先 trigger 再改 index），
+      // 所以必须优先用事件载荷里的 index，否则换歌后曲名/歌手会慢一首
+      function syncMeta(idx) {
+        var i = typeof idx === 'number' ? idx : ap.list.index;
+        var a = (ap.list.audios && ap.list.audios[i]) || curAudio();
         elTitle.textContent = (a && a.name) || '未选择曲目';
         elArtist.textContent = (a && a.artist) || 'RockJesus Station';
         elTitle.title = elTitle.textContent;
@@ -483,8 +523,16 @@
         setCollapsed(!isCollapsed());
       });
       mainBtn.addEventListener('click', function (e) { e.stopPropagation(); togglePlay(); });
-      root.querySelector('[data-a="prev"]').addEventListener('click', function (e) { e.stopPropagation(); try { ap.list.prev(); } catch (err) {} });
-      root.querySelector('[data-a="next"]').addEventListener('click', function (e) { e.stopPropagation(); try { ap.list.next(); } catch (err) {} });
+      root.querySelector('[data-a="prev"]').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
+        rjSkip(-1);
+      });
+      root.querySelector('[data-a="next"]').addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
+        rjSkip(1);
+      });
       var listBtn = root.querySelector('[data-a="list"]');
       listBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleList(); });
       // 展开态卡片空白处：单击播放/暂停，双击开/关播放列表
@@ -505,7 +553,7 @@
         setCollapsed(true);
       }, true);
 
-      on('listswitch', syncMeta);
+      on('listswitch', function (d) { syncMeta(d && d.index); });
       on('listswitch', function () { setTimeout(syncProgress, 60); });
       on('play', syncPlayIcon);
       on('pause', syncPlayIcon);
@@ -678,11 +726,20 @@
     var resumeTime = saved && typeof saved.time === 'number' ? Math.min(Math.max(saved.time, 0), 3600) : 0;
 
     // —— 打开：优先续播上次歌曲（同曲同进度、不切歌），否则随机挑一首；随后自动播放 ——
+    //    续播 seek 必须「一次性 + 校验仍是同一首」：旧版把 seek 挂在 loadeddata 上，
+    //    而 loadeddata 每次换歌都会再触发 → 听新歌会从旧歌的进度开始（"换歌不重头"）
     try {
       if (saved && typeof saved.idx === 'number' && saved.idx >= 0 && saved.idx < ap.list.audios.length) {
+        var bootTrack = ap.list.audios[saved.idx];
         ap.list.switch(saved.idx);
         if (resumeTime > 3) {
-          ap.on('loadeddata', function () { try { ap.seek(resumeTime); } catch (e) {} });
+          var resumeDone = false;
+          ap.on('loadeddata', function () {
+            if (resumeDone) return;
+            if (!bootTrack || ap.list.audios[ap.list.index] !== bootTrack) return;
+            resumeDone = true;
+            try { ap.seek(resumeTime); } catch (e) {}
+          });
         }
       } else if (ap.list.audios.length > 1) {
         ap.list.switch(Math.floor(Math.random() * ap.list.audios.length));
@@ -729,9 +786,17 @@
       });
       window.aplayers.push(nap);
       decorate(nap, c, list);
+      var pjTrack = list[idx];
       nap.list.switch(idx);
       if (st && st.time > 3) {
-        nap.on('loadeddata', function () { try { nap.seek(st.time); } catch (e) {} });
+        // 同首播：续播只生效一次，换歌后一律从头播
+        var pjDone = false;
+        nap.on('loadeddata', function () {
+          if (pjDone) return;
+          if (!pjTrack || nap.list.audios[nap.list.index] !== pjTrack) return;
+          pjDone = true;
+          try { nap.seek(st.time); } catch (e) {}
+        });
       }
       autoPlay(nap, true);
     });
