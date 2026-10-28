@@ -7,10 +7,13 @@
   var rjCanvasNest = document.getElementById('canvas_nest');
   if (rjCanvasNest) rjCanvasNest.setAttribute('color', '139,92,246');
 
+  // 源顺序有讲究：jsDelivr 对 @main 有 12 小时缓存，素材仓更新后它仍返回旧歌单，
+  // 而且它最快（~250ms）—— 放在前面会「抢答」旧数据（曾导致列表只有 30 首）。
+  // 所以顺序：同域构建产物 → GitHub raw（更新快） → jsDelivr（最后兜底）。
   var PLAYLIST_URLS = [
-    '/data/playlist.json?v=1.2.0',
-    'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json',
-    'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'
+    '/data/playlist.json?v=1.2.1',
+    'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json',
+    'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus/music/playlist.json'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -23,7 +26,7 @@
   function fetchJson(url, timeout) {
     return new Promise(function (resolve, reject) {
       var ctrl = new AbortController();
-      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 20000);
+      var timer = setTimeout(function () { ctrl.abort(); reject(new Error('timeout')); }, timeout || 30000);
       fetch(url, { cache: 'no-cache', signal: ctrl.signal })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (d) { clearTimeout(timer); resolve(d); })
