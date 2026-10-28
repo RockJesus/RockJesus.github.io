@@ -2492,12 +2492,7 @@ a:hover { color: var(--rj-brand-2); }
     animation: none !important;
   }
 
-  /* 徽标霓虹呼吸：静止在常亮态 */
-  .rj-logo-eye,
-  .rj-logo-core {
-    animation: none !important;
-    opacity: 1;
-  }
+  /* 徽标：位图无内置动画，hover 只做投影，无需额外静止处理 */
 
   /* 悬停位移与缩放：只保留颜色反馈，不做几何变化 */
   #recent-posts > .recent-post-item:hover,
@@ -2609,47 +2604,27 @@ body {
 #site-name .rj-logo-wrap {
   display: inline-flex;
   flex: none;
-  width: 30px;
-  height: 30px;
-  --rj-logo-face: #111a2c;
-  --rj-logo-eye: var(--rjp-alien-cyan);
-  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--rj-hud-glow) 75%, transparent));
-  transition: filter var(--rj-dur-base) var(--rj-ease-out);
+  align-items: center;
+  height: 36px;
+  width: auto;
+  /* 位图自带白色发光边，常态只补一层中性冷光，避免青色与银边打架 */
+  filter: drop-shadow(0 0 4px rgba(190, 225, 255, 0.45));
+  transition: filter var(--rj-dur-base) var(--rj-ease-out), transform var(--rj-dur-base) var(--rj-ease-out);
 }
 
 #site-name:hover .rj-logo-wrap {
-  filter: drop-shadow(0 0 11px var(--rj-hud));
+  filter: drop-shadow(0 0 8px rgba(190, 225, 255, 0.6)) drop-shadow(0 0 14px var(--rj-hud));
+  transform: translateY(-1px);
 }
 
-.rj-logo { display: block; width: 100%; height: 100%; }
-/* 颅骨：碳黑实心 + 青→紫渐变轮廓（直线切角，无圆弧） */
-.rj-logo-head {
-  fill: var(--rj-logo-face);
-  stroke: url(#rjLogoRim);
-  stroke-width: 2.5;
-  stroke-linejoin: round;
-}
-.rj-logo-r1 { stop-color: var(--rjp-alien-cyan-lt); }
-.rj-logo-r2 { stop-color: var(--rjp-alien-cyan); }
-.rj-logo-r3 { stop-color: var(--rj-brand); }
-/* 额头苹果核：紫→品红霓虹渐变，与青色斜眼形成双色对比 */
-.rj-logo-k1 { stop-color: #d8b4fe; }
-.rj-logo-k2 { stop-color: #a855f7; }
-.rj-logo-k3 { stop-color: #ec4899; }
-.rj-logo-eye {
-  fill: var(--rj-logo-eye);
-  filter: drop-shadow(0 0 1.5px var(--rj-hud));
-  animation: rjLogoPulse 5.5s ease-in-out infinite;
-}
-.rj-logo-coreg {
-  filter: drop-shadow(0 0 1.8px rgba(236, 72, 153, 0.8));
-  animation: rjLogoPulse 7s 1.4s ease-in-out infinite;
-}
-.rj-logo-core { fill: url(#rjLogoCore); }
-/* 霓虹呼吸：极缓慢的明暗起伏，营造灯效通电感 */
-@keyframes rjLogoPulse {
-  0%, 100% { opacity: 0.78; }
-  50%      { opacity: 1; }
+/* 位图徽标：自身带白色发光边，容器只负责尺寸与投影 */
+.rj-logo-img {
+  display: block;
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 
@@ -2828,11 +2803,12 @@ body {
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
-/* 亮色：保留深色颅骨保证对比，霓虹减弱为干净的实色描边 */
+/* 亮色：白底上白色发光边会糊，用贴地阴影把轮廓压出来，光晕收敛 */
 [data-theme='light'] #site-name .rj-logo-wrap {
-  --rj-logo-face: #10131f;
-  --rj-logo-eye: #00c8dc;
-  filter: drop-shadow(0 1px 2px rgba(10, 14, 26, 0.18));
+  filter: drop-shadow(0 1px 3px rgba(10, 14, 26, 0.32));
+}
+[data-theme='light'] #site-name:hover .rj-logo-wrap {
+  filter: drop-shadow(0 2px 6px rgba(10, 14, 26, 0.42));
 }
 
 /* 卡片：apple.com 式「白面 + hairline + 极淡投影」 */

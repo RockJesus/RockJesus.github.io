@@ -1127,33 +1127,30 @@
     window.addEventListener('resize', function () { resize(); cx = W / 2; cy = H / 2; R = W / 2 - 26; });
   }
 
-  // —— 导航徽标：Alien×Apple 融合标记「额饰异形」——
-  // 外星人头像（切角颅骨 / 发光斜眼）+ 额头苹果能量印记（咬口 + 叶片），霓虹双色
-  var RJ_LOGO_SVG =
-    '<svg class="rj-logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">' +
-      '<defs>' +
-        '<linearGradient id="rjLogoRim" x1="0" y1="0" x2="1" y2="1">' +
-          '<stop offset="0" class="rj-logo-r1"/>' +
-          '<stop offset=".45" class="rj-logo-r2"/>' +
-          '<stop offset="1" class="rj-logo-r3"/>' +
-        '</linearGradient>' +
-        '<linearGradient id="rjLogoCore" x1="0" y1="0" x2=".6" y2="1">' +
-          '<stop offset="0" class="rj-logo-k1"/>' +
-          '<stop offset=".55" class="rj-logo-k2"/>' +
-          '<stop offset="1" class="rj-logo-k3"/>' +
-        '</linearGradient>' +
-        '<mask id="rjLogoBite"><rect x="0" y="0" width="64" height="64" fill="#fff"/><circle cx="37.73" cy="14.78" r="2.73" fill="#000"/></mask>' +
-      '</defs>' +
-      '<path class="rj-logo-head" d="M32 4.4 L36.8 4.8 L42 6.6 L46.6 9.6 L50.4 13.9 L52.6 20.6 L50 28.2 L46.2 35 L40.6 41.2 L32 45.8 L23.4 41.2 L17.8 35 L14 28.2 L11.4 20.6 L13.6 13.9 L17.4 9.6 L22 6.6 L27.2 4.8 Z"/>' +
-      '<path class="rj-logo-eye" d="M30.6 28.4 C27.2 24.8 23.4 22.8 19.6 23.2 C17.1 23.4 15.8 24.5 15.6 25.6 C17.6 27.9 21.2 29.4 24.9 29.5 C27.4 29.6 29.4 29.4 30.6 28.4 Z M33.4 28.4 C36.8 24.8 40.6 22.8 44.4 23.2 C46.9 23.4 48.2 24.5 48.4 25.6 C46.4 27.9 42.8 29.4 39.1 29.5 C36.6 29.6 34.6 29.4 33.4 28.4 Z"/>' +
-      '<g class="rj-logo-coreg" mask="url(#rjLogoBite)"><path class="rj-logo-core" d="M32.00 12.15 C29.74 10.37 26.92 11.49 26.64 14.31 C26.36 16.95 27.49 19.77 29.56 21.08 C30.50 21.65 31.25 21.83 32.00 21.83 C32.75 21.83 33.50 21.65 34.44 21.08 C36.51 19.77 37.64 16.95 37.36 14.31 C37.08 11.49 34.26 10.37 32.00 12.15 Z M32.19 10.84 C32.28 8.86 33.22 7.55 35.38 6.98 C35.29 9.05 34.35 10.37 32.19 10.84 Z"/></g>' +
-    '</svg>';
+  // —— 导航徽标：外星人头像 × 额头苹果（实拍位图，透明背景）——
+  //   源图黑底发光，抠图只留中间主体（黑银头骨 + 眼部高光 + 白苹果）；
+  //   WebP 主用 23KB，PNG 仅在 WebP 解码失败时兜底，避免首屏开销
+  var RJ_LOGO_WEBP = '/img/brand/alien-head.webp';
+  var RJ_LOGO_PNG = '/img/brand/alien-head.png';
   function initLogo() {
     var host = document.getElementById('site-name');
     if (!host || host.querySelector('.rj-logo-wrap')) return;
     var wrap = document.createElement('span');
     wrap.className = 'rj-logo-wrap';
-    wrap.innerHTML = RJ_LOGO_SVG;
+    var img = document.createElement('img');
+    img.className = 'rj-logo-img';
+    img.src = RJ_LOGO_WEBP;
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    img.decoding = 'async';
+    img.width = 376;
+    img.height = 512;
+    img.addEventListener('error', function () {
+      if (img.getAttribute('data-fb')) return;
+      img.setAttribute('data-fb', '1');
+      img.src = RJ_LOGO_PNG;
+    });
+    wrap.appendChild(img);
     host.insertBefore(wrap, host.firstChild);
   }
 
