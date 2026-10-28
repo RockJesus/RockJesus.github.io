@@ -20,9 +20,9 @@
   --blockquote-bg: color-mix(in srgb, var(--rj-brand) 8%, transparent);
 }
 
-/* ---------- 背景：恢复原始背景图（主题配置 background: oc.png） ---------- */
+/* ---------- 背景：恢复原始背景图（主题配置 background: oc.webp，1920x1080 q80，87KB） ---------- */
 #web_bg {
-  background: url(/img/oc.png) center/cover no-repeat;
+  background: url(/img/oc.webp) center/cover no-repeat;
   background-attachment: local;
 }
 
