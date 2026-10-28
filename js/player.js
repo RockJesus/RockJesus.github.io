@@ -153,7 +153,7 @@
     var singleTimer = null;
     function isInteractive(el) {
       return !!(el && el.closest && el.closest(
-        '.rj-pl-bar, .rj-pl-btns, .rj-pl-fold, .rj-pl-disc, ' +
+        '.rj-pl-bar, .rj-pl-btns, .rj-pl-disc, ' +
         '.aplayer-bar-wrap, .aplayer-menu, .aplayer-volume-wrap, .aplayer-loop, ' +
         '.aplayer-icon, .aplayer-time, .aplayer-miniswitcher, button, a'
       ));
@@ -196,14 +196,19 @@
     (function buildShell() {
       if (!body) return;
       var P = {
-        play: 'M8 5v14l11-7z',
-        pause: 'M6 5h4v14H6zM14 5h4v14h-4z',
+        play: 'M9.2 6.4v11.2L17.6 12z',
+        /* 暂停用两个圆角胶囊，纯矩形在封面上会像两块贴纸 */
+        pause: '<rect x="7.2" y="5.2" width="3.4" height="13.6" rx="1.7"/>' +
+               '<rect x="13.4" y="5.2" width="3.4" height="13.6" rx="1.7"/>',
         prev: 'M7 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zm10.6.7a1 1 0 0 1 1.5.8v10.8a1 1 0 0 1-1.5.8l-7.6-5.4a1 1 0 0 1 0-1.6l7.6-5.4z',
         next: 'M17 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zM5.9 6.7a1 1 0 0 1 1.5-.8l7.6 5.4a1 1 0 0 1 0 1.6l-7.6 5.4a1 1 0 0 1-1.5-.8V6.7z',
-        list: 'M4 6h2v2H4V6zm4 0h12v2H8V6zm-4 5h2v2H4v-2zm4 0h12v2H8v-2zm-4 5h2v2H4v-2zm4 0h12v2H8v-2z',
-        chev: 'M7.4 14.6 12 10l4.6 4.6L18 13.2 12 7.2l-6 6z'
+        list: 'M4 6h2v2H4V6zm4 0h12v2H8V6zm-4 5h2v2H4v-2zm4 0h12v2H8v-2zm-4 5h2v2H4v-2zm4 0h12v2H8v-2z'
       };
-      var svg = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>'; };
+      // d 以 '<' 开头时按原始图形插入（圆角矩形等），否则当作单条 path
+      var svg = function (d) {
+        var inner = d.charAt(0) === '<' ? d : '<path d="' + d + '"/>';
+        return '<svg viewBox="0 0 24 24" aria-hidden="true">' + inner + '</svg>';
+      };
       var root = document.createElement('div');
       root.className = 'rj-pl';
       root.innerHTML =
@@ -225,8 +230,7 @@
           '<button type="button" data-a="toggle" class="rj-pl-main" title="播放 / 暂停">' + svg(P.play) + '</button>' +
           '<button type="button" data-a="next" title="下一首">' + svg(P.next) + '</button>' +
           '<button type="button" data-a="list" title="播放列表">' + svg(P.list) + '</button>' +
-        '</div>' +
-        '<button type="button" class="rj-pl-fold" title="收起 / 展开">' + svg(P.chev) + '</button>';
+        '</div>';
       body.insertBefore(root, body.firstChild);
       row = root;
 
@@ -309,10 +313,6 @@
       root.querySelector('[data-a="next"]').addEventListener('click', function (e) { e.stopPropagation(); try { ap.list.next(); } catch (err) {} });
       var listBtn = root.querySelector('[data-a="list"]');
       listBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleList(); });
-      root.querySelector('.rj-pl-fold').addEventListener('click', function (e) {
-        e.stopPropagation();
-        setCollapsed(!isCollapsed());
-      });
       // 展开态卡片空白处：单击播放/暂停，双击开/关播放列表
       root.addEventListener('click', function (e) {
         if (isCollapsed() || isInteractive(e.target)) return;

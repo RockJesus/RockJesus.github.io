@@ -539,9 +539,8 @@ img {
   height: 66px;
 }
 .aplayer.rj-pl-collapsed .rj-pl-meta,
-.aplayer.rj-pl-collapsed .rj-pl-btns,
-.aplayer.rj-pl-collapsed .rj-pl-fold {
-  display: none;                  /* 折叠靠双击圆盘切换，不再挂角标箭头 */
+.aplayer.rj-pl-collapsed .rj-pl-btns {
+  display: none;                  /* 折叠态只留一张转动的圆盘 */
 }
 /* 兜底：折叠态绝不漏出播放列表（JS 会调 list.hide，但 APlayer 首帧可能还没渲染完） */
 .aplayer.rj-pl-collapsed .aplayer-list {
@@ -559,9 +558,9 @@ img {
     0 10px 26px rgba(2, 6, 18, 0.46),
     0 0 0 1px rgba(255, 255, 255, 0.12) inset;
 }
-/* 折叠态暗角收轻一些，让封面本身透出来，只留中心播放键的对比 */
+/* 折叠态不要任何压暗层：播放键已改成纯图标，封面要原样透出来 */
 .aplayer.rj-pl-collapsed .rj-pl-shade {
-  background: radial-gradient(120% 120% at 50% 50%, rgba(6, 9, 18, 0.02), rgba(6, 9, 18, 0.36));
+  display: none;
 }
 .aplayer.rj-pl-collapsed .rj-pl-disc:hover {
   transform: translateY(-2px) scale(1.04);
@@ -632,6 +631,8 @@ img {
   background: radial-gradient(120% 120% at 50% 50%, rgba(6, 9, 18, 0.16), rgba(6, 9, 18, 0.6));
   transition: opacity 0.24s ease;
 }
+/* 中心播放/暂停键：纯图标，不铺任何底色（底衬会压住封面）。
+   可读性靠图标自身的投影 + 主题色光晕，深浅封面上都看得清。 */
 .rj-pl-discbtn {
   position: absolute;
   left: 50%;
@@ -642,56 +643,86 @@ img {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.96), rgba(34, 211, 238, 0.86));
-  box-shadow: 0 0 14px rgba(139, 92, 246, 0.72);
+  background: none;
+  border: 0;
+  box-shadow: none;
   opacity: 0;
   transform: scale(0.82);
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .rj-pl-discbtn svg {
-  width: 14px;
-  height: 14px;
-  fill: #fff !important;   /* 皮肤表的 .aplayer svg{fill:currentColor} 在后方，会把图标刷成黑色 */
+  width: 16px;
+  height: 16px;
+  /* 封面可能是纯白也可能是纯黑：品牌紫在中灰附近两种底上都有足够对比，
+     再加一圈白色微光（深底上勾亮）+ 一层落影（浅底上分离） */
+  fill: #8b5cf6 !important;
+  filter:
+    drop-shadow(0 1px 2px rgba(2, 6, 18, 0.55))
+    drop-shadow(0 0 6px rgba(255, 255, 255, 0.42));
+}
+/* 皮肤表里的 .aplayer svg path{fill:rgba(0,0,0,.8)} 比 svg 选择器更具体，
+   会把图标刷成半透明黑，必须在 path 这一层覆盖回来 */
+.rj-pl-discbtn svg path {
+  fill: #8b5cf6 !important;
+}
+/* 三角用同色描边 + 圆角连接，把三个尖角磨圆，避免硬边三角在封面上发楞 */
+.rj-pl-discbtn svg path {
+  stroke: #8b5cf6;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.rj-pl-discbtn svg rect {
+  fill: #8b5cf6 !important;
+}
+.aplayer.rj-pl-collapsed .rj-pl-discbtn svg {
+  fill: #8b5cf6 !important;
+}
+.aplayer.rj-pl-collapsed .rj-pl-discbtn svg path {
+  fill: #8b5cf6 !important;
+  stroke: #8b5cf6;
+}
+.aplayer.rj-pl-collapsed .rj-pl-discbtn svg rect {
+  fill: #8b5cf6 !important;
 }
 .rj-pl-disc:hover .rj-pl-shade {
-  opacity: 0.55;
+  opacity: 0.22;          /* 只做 hover 反馈，不能把封面压黑 */
 }
 .rj-pl-disc:hover .rj-pl-discbtn {
   width: 26px;
   height: 26px;
   margin: -13px 0 0 -13px;
   opacity: 1;
-  transform: scale(1);
-  background: rgba(8, 11, 20, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.34);
-  box-shadow: 0 2px 10px rgba(2, 6, 18, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  transform: scale(1.08);
+  background: none;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
-/* 折叠态：中心播放键常显，直接吃主题色（紫 / 亮色下加深的紫） */
+/* 折叠态：中心播放键常显，同样是纯图标（主题色光晕），完全不遮封面 */
 .aplayer.rj-pl-collapsed .rj-pl-discbtn {
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
   opacity: 1;
   transform: scale(1);
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
-  border: 1px solid color-mix(in srgb, var(--rj-brand-4) 60%, transparent);
-  box-shadow:
-    0 4px 12px color-mix(in srgb, var(--rj-brand) 60%, transparent),
-    0 0 0 3px rgba(255, 255, 255, 0.1);
+  background: none;
+  border: 0;
+  box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 .aplayer.rj-pl-collapsed .rj-pl-discbtn svg {
-  width: 15px;
-  height: 15px;
+  width: 21px;
+  height: 21px;
+  filter:
+    drop-shadow(0 1px 3px rgba(2, 6, 18, 0.45))
+    drop-shadow(0 0 7px rgba(255, 255, 255, 0.5));
 }
 .aplayer.rj-pl-collapsed .rj-pl-disc:hover .rj-pl-discbtn {
-  transform: scale(1.06);
-  box-shadow:
-    0 6px 18px color-mix(in srgb, var(--rj-brand) 72%, transparent),
-    0 0 0 4px rgba(255, 255, 255, 0.16);
+  transform: scale(1.14);
+  box-shadow: none;
 }
 /* 播放中：封面外圈缓慢呼吸，暂停即停 */
 .rj-pl.rj-pl-playing .rj-pl-disc {
@@ -814,74 +845,45 @@ img {
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
-.rj-pl-btns button svg {
+.rj-pl-btns button svg,
+.rj-pl-btns button svg path {
   width: 15px;
   height: 15px;
-  fill: currentColor;
+  fill: currentColor !important;
+}
+.rj-pl-btns button svg path {
+  width: auto;
+  height: auto;
 }
 .rj-pl-btns button:hover {
   background: color-mix(in srgb, var(--rj-brand) 30%, transparent);
   color: #fff;
   transform: translateY(-1px);
 }
-/* 主播放键吃主题色：渐变两端都取品牌紫，亮色模式下自动换成加深的紫 */
+/* 主播放键同样只留图标：底色透明，靠主题色图标 + 光晕表达强调 */
 .rj-pl-btns .rj-pl-main {
   width: 32px;
   height: 32px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-3));
-  box-shadow:
-    0 4px 14px color-mix(in srgb, var(--rj-brand) 52%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--rj-brand-4) 40%, transparent) inset;
+  background: none;
+  box-shadow: none;
+  color: #c4b5fd;          /* 卡片底色在两种主题下都是深色，图标固定用亮紫 */
 }
 .rj-pl-btns .rj-pl-main svg {
-  width: 16px;
-  height: 16px;
+  width: 19px;
+  height: 19px;
+  filter: drop-shadow(0 0 7px rgba(139, 92, 246, 0.7));
 }
 .rj-pl-btns .rj-pl-main:hover {
-  transform: translateY(-1px) scale(1.05);
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--rj-brand) 68%, transparent);
+  background: rgba(139, 92, 246, 0.18);   /* hover 只给一层很淡的底，不遮任何内容 */
+  color: #fff;
+  transform: translateY(-1px) scale(1.06);
+  box-shadow: none;
 }
 .rj-pl.rj-pl-haslist .rj-pl-btns [data-a="list"] {
   background: color-mix(in srgb, var(--rj-brand) 30%, transparent);
   color: #fff;
 }
 
-/* 折叠/展开按钮：常态隐藏，hover 卡片才浮出（折叠态不显示，靠双击圆盘切换） */
-.rj-pl-fold {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  z-index: 4;
-  width: 19px;
-  height: 19px;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  border: 1px solid rgba(148, 163, 184, 0.42);
-  background: rgba(12, 17, 30, 0.94);
-  color: rgba(214, 222, 240, 0.92);
-  cursor: pointer;
-  opacity: 0;
-  transform: scale(0.85) rotate(180deg);
-  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
-}
-.rj-pl-fold svg {
-  width: 15px;
-  height: 15px;
-  fill: currentColor;
-}
-.aplayer:hover .rj-pl-fold {
-  opacity: 1;
-  transform: scale(1) rotate(180deg);
-}
-/* 折叠态不挂箭头（靠双击圆盘切换），以下 hover 只作用于展开态 */
-.rj-pl-fold:hover {
-  background: color-mix(in srgb, var(--rj-brand) 92%, transparent);
-  border-color: transparent;
-  color: #fff;
-}
 /* —— 播放列表面板 —— */
 .aplayer .aplayer-list {
   position: relative;
