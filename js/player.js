@@ -129,6 +129,57 @@
 
   // —— 统一装饰：自绘外壳 + 封面毛玻璃底 + 播放状态 + 断点记忆 ——
   function decorate(ap, container, list) {
+    // —— 播放/暂停淡入淡出：起播音量 0→75% 平滑爬升，暂停先 75%→0 渐弱再真正 pause ——
+    // 接管实例的 pause()：APlayer 内部统一走 this.pause()（实例属性可拦截），
+    // 本文件所有暂停路径也都调用 ap.pause()，一处接管全覆盖
+    var RJ_VOL = 0.75, RJ_FADE_IN = 450, RJ_FADE_OUT = 320;
+    var rjFadeTimer = null, rjPendingPause = false;
+    function rjFadeTo(target, ms, done) {
+      if (rjFadeTimer) { clearTimeout(rjFadeTimer); rjFadeTimer = null; }
+      var a = ap.audio;
+      if (!a) { if (done) done(); return; }
+      var start = a.volume, t0 = Date.now();
+      if (ms <= 0 || Math.abs(target - start) < 0.02) { a.volume = target; if (done) done(); return; }
+      (function step() {
+        var cur = ap.audio;
+        if (!cur || cur !== a) { rjFadeTimer = null; return; } // 播放器已重建/换源，弃掉余晖
+        var k = Math.min(1, (Date.now() - t0) / ms);
+        var e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; // easeInOutQuad
+        cur.volume = Math.max(0, Math.min(1, start + (target - start) * e));
+        if (k < 1) { rjFadeTimer = setTimeout(step, 25); }
+        else { rjFadeTimer = null; if (done) done(); }
+      })();
+    }
+    var rjOrigPause = ap.pause.bind(ap);
+    ap.pause = function () {
+      var a = ap.audio;
+      if (!a || a.paused) { rjOrigPause(); return; }
+      rjPendingPause = true;
+      rjFadeTo(0, RJ_FADE_OUT, function () {
+        if (!rjPendingPause) return;      // 淡出途中又点了播放：放弃这次暂停
+        rjPendingPause = false;
+        rjOrigPause();
+        if (ap.audio) ap.audio.volume = RJ_VOL; // 复位，下次淡入从 0 起坡
+      });
+    };
+    // 淡出途中再点播放：音频未 paused，浏览器不会再发 play 事件，
+    // 必须在这里显式取消挂起的暂停并把音量爬回正常值
+    var rjOrigPlay = ap.play.bind(ap);
+    ap.play = function () {
+      if (rjPendingPause) {
+        rjPendingPause = false;
+        var a0 = ap.audio;
+        if (a0 && !a0.paused) rjFadeTo(RJ_VOL, RJ_FADE_IN);
+      }
+      return rjOrigPlay();
+    };
+    ap.on('play', function () {
+      rjPendingPause = false;             // 新的播放意图作废挂起的淡出暂停
+      var a = ap.audio; if (!a) return;
+      a.volume = 0;
+      rjFadeTo(RJ_VOL, RJ_FADE_IN);
+    });
+
     var body = container.querySelector('.aplayer-body');
     var pic = container.querySelector('.aplayer-pic');
     var info = container.querySelector('.aplayer-info');
