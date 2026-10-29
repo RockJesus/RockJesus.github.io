@@ -2063,10 +2063,29 @@
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', load);
-  } else {
+  // —— 首屏不再拉 187KB 歌单 ——
+  // 播放器默认折叠成左下角一个小圆盘，首屏根本用不到歌单数据；但原来
+  // DOMContentLoaded 就 ensureAplayer + fetchPlaylist，187KB 直接压在首屏
+  // （首屏总传输 815KB，它是最大单项）。
+  // 改为「页面空闲 / 用户首次交互」先到先触发，并给 requestIdleCallback 加
+  // timeout 兜底：页面再忙也最多 2.5s 后开始拉，不会出现播放器永远不出来。
+  var rjPlStarted = false;
+  function loadOnce() {
+    if (rjPlStarted) return;
+    rjPlStarted = true;
     load();
   }
+  function rjWhenIdle(fn) {
+    if (window.requestIdleCallback) window.requestIdleCallback(fn, { timeout: 2500 });
+    else window.setTimeout(fn, 1200);
+  }
+  if (document.readyState === 'complete') {
+    rjWhenIdle(loadOnce);
+  } else {
+    window.addEventListener('load', function () { rjWhenIdle(loadOnce); }, { once: true });
+  }
+  ['pointerdown', 'touchstart', 'keydown'].forEach(function (evt) {
+    window.addEventListener(evt, loadOnce, { once: true, capture: true, passive: true });
+  });
   startAutoRefresh();
 })();
