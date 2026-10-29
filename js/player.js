@@ -1472,7 +1472,8 @@
     }
     // 赛博朋克数据光点（固定种子伪随机，青/洋红交替）
     // 五大洲轮廓：world-atlas TopoJSON 合并大陆岸线，霓虹描边投影到球面
-    var landGeo = null;
+    var landGeo = null;     // 合并后的陆地多边形（填充 + 海岸线）
+    var borderGeo = null;   // topojson.mesh 全部弧段 = 国界 + 海岸线（国界细描边）
     function loadLand() {
       var s = document.createElement('script');
       s.src = '/js/topojson-client.min.js?v=110';
@@ -1484,42 +1485,69 @@
             try {
               var merged = topojson.merge(topo, [topo.objects.countries]);
               landGeo = merged && merged.coordinates;
-              if (landGeo && landGeo.length) { drawLand(); }
-            } catch (e) { landGeo = null; }
+              // 无 filter 的 mesh = 所有弧段：既是海岸线也是每一段国界，用来画全部国家轮廓
+              var mesh = topojson.mesh(topo, topo.objects.countries);
+              borderGeo = mesh && mesh.coordinates;
+              if ((landGeo && landGeo.length) || (borderGeo && borderGeo.length)) { drawLand(); }
+            } catch (e) { landGeo = null; borderGeo = null; }
           })
-          .catch(function () { landGeo = null; });
+          .catch(function () { landGeo = null; borderGeo = null; });
       };
-      s.onerror = function () { landGeo = null; };
+      s.onerror = function () { landGeo = null; borderGeo = null; };
       document.head.appendChild(s);
     }
     function drawLand() {
-      if (!landGeo) return;
-      var gi, pi, ri, lp, ring, poly, needMove;
-      ctx.save();
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = 'rgba(125,240,255,.92)';
-      ctx.shadowColor = 'rgba(34,211,238,.95)';
-      ctx.shadowBlur = 9;
-      ctx.beginPath();
-      for (gi = 0; gi < landGeo.length; gi++) {
-        poly = landGeo[gi];
-        for (pi = 0; pi < poly.length; pi++) {
-          ring = poly[pi];
-          if (ring.length < 3) continue;
+      if (!landGeo && !borderGeo) return;
+      var gi, pi, ri, lp, ring, poly, needMove, li, line;
+      // ① 陆地面（合并多边形）：极淡填充，先铺底
+      if (landGeo) {
+        ctx.save();
+        ctx.beginPath();
+        for (gi = 0; gi < landGeo.length; gi++) {
+          poly = landGeo[gi];
+          for (pi = 0; pi < poly.length; pi++) {
+            ring = poly[pi];
+            if (ring.length < 3) continue;
+            needMove = true;
+            for (ri = 0; ri < ring.length; ri++) {
+              lp = proj(ring[ri][1], ring[ri][0]);
+              if (lp.z < 0) { needMove = true; continue; }
+              if (needMove) { ctx.moveTo(lp.x, lp.y); needMove = false; }
+              else { ctx.lineTo(lp.x, lp.y); }
+            }
+          }
+        }
+        ctx.fillStyle = 'rgba(34,211,238,.07)';
+        ctx.fill();
+        // ② 海岸线：霓虹发光描边（与国界区分层次）
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = 'rgba(125,240,255,.92)';
+        ctx.shadowColor = 'rgba(34,211,238,.95)';
+        ctx.shadowBlur = 9;
+        ctx.stroke();
+        ctx.restore();
+      }
+      // ③ 全部国家轮廓：topojson.mesh 的每段弧（含国界与海岸线），细线、低亮度、不加发光，
+      //    让国界像经纬分层一样铺满球面又不抢海岸线的主视觉
+      if (borderGeo) {
+        ctx.save();
+        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = 'rgba(147,235,255,.46)';
+        ctx.beginPath();
+        for (li = 0; li < borderGeo.length; li++) {
+          line = borderGeo[li];
+          if (!line || line.length < 2) continue;
           needMove = true;
-          for (ri = 0; ri < ring.length; ri++) {
-            lp = proj(ring[ri][1], ring[ri][0]);
-            if (lp.z < 0) { needMove = true; continue; }
+          for (ri = 0; ri < line.length; ri++) {
+            lp = proj(line[ri][1], line[ri][0]);
+            if (lp.z < 0) { needMove = true; continue; }   // 背面裁掉
             if (needMove) { ctx.moveTo(lp.x, lp.y); needMove = false; }
             else { ctx.lineTo(lp.x, lp.y); }
           }
         }
+        ctx.stroke();
+        ctx.restore();
       }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(34,211,238,.07)';
-      ctx.fill();
-      ctx.restore();
     }
     function flagEmoji(cc) {
       if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return '🌍';
