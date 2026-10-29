@@ -24,7 +24,7 @@
    主题据 _config.butterfly.yml 的 background 生成
    #web_bg { position:fixed; z-index:-999; width/height:100%; background:url(/img/oc.webp) center/cover no-repeat local }
    此处不再重复声明，避免同一规则被写三遍（同一 URL 只下载一次，重复只是写法冗余）。
-   背景之上只有 #web_bg::after 的径向光斑装饰（纯 CSS 渐变，无网络请求）。 */
+   背景之上无任何装饰层（v1.8.9 删除径向光斑）。 */
 
 /* ---------- 卡片：暗色玻璃拟态（文章/列表卡对齐右侧卡片风格，更实玻璃+紫边+光晕） ---------- */
 #recent-posts > .recent-post-item,
@@ -2060,28 +2060,6 @@ a:hover { color: var(--rj-brand-2); }
    特征：彩色光斑背景 + 高透毛玻璃面板 + 内高光描边 + 弹性动效 + 光泽扫过
    原则：只叠加视觉层，不动结构与交互
    ============================================================ */
-/* —— 背景彩色光斑（iOS27 招牌：多彩柔和光晕缓慢漂移） —— */
-/* #web_bg 的 position/z-index 由主题统一给出，此处只负责其上方的光斑层 */
-#web_bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(620px 420px at 12% 8%, color-mix(in srgb, var(--rj-brand) 40%, transparent), transparent 62%),
-    radial-gradient(720px 520px at 88% 16%, color-mix(in srgb, var(--rj-brand-2) 34%, transparent), transparent 62%),
-    radial-gradient(640px 480px at 62% 92%, color-mix(in srgb, var(--rj-accent) 20%, transparent), transparent 62%),
-    radial-gradient(520px 420px at 26% 68%, color-mix(in srgb, var(--rj-accent-3) 16%, transparent), transparent 62%);
-  opacity: 0.85;
-  mix-blend-mode: screen;
-  animation: rjGlowShift 26s ease-in-out infinite alternate;
-}
-@keyframes rjGlowShift {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  50%  { transform: translate3d(-2%, 1.5%, 0) scale(1.05); }
-  100% { transform: translate3d(2%, -2%, 0) scale(1.08); }
-}
-
 /* —— 导航栏液态玻璃（含滚动后的紧凑态） —— */
 #nav {
   background: color-mix(in srgb, var(--rj-ink-input) 32%, transparent) !important;
@@ -2668,12 +2646,6 @@ a:hover { color: var(--rj-brand-2); }
     var(--rj-bg);
 }
 
-/* 光斑层：screen 在白底上无效，改 multiply 做柔和染色 */
-[data-theme='light'] #web_bg::after {
-  mix-blend-mode: multiply;
-  opacity: 0.30;
-}
-
 /* 导航栏：深色玻璃 → 白色玻璃 */
 [data-theme='light'] #nav,
 [data-theme='light'] #nav.nav-fixed {
@@ -2805,11 +2777,6 @@ a:hover { color: var(--rj-brand-2); }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-
-  /* 背景光斑：直接静止，避免停在一帧偏移位置 */
-  #web_bg::after {
-    animation: none !important;
   }
 
   /* 页脚渐变：停掉无限流动 */
