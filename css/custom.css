@@ -2890,16 +2890,38 @@ a:hover { color: var(--rj-brand-2); }
    原则：只叠加视觉层，不动结构与交互
    ============================================================ */
 /* —— 导航栏液态玻璃（含滚动后的紧凑态） —— */
+/* 全透明导航：不要底、不要模糊、不要描边投影。
+   .nav-fixed 同时覆盖「祖先带 class」和「#nav 自身带 class」两种写法，
+   主题在 .not-top-img / .nav-fixed 下都会塞 rgba(255,255,255,.8)，必须一并压掉。 */
 #nav {
-  background: color-mix(in srgb, var(--rj-ink-input) 32%, transparent) !important;
-  backdrop-filter: blur(32px) saturate(190%);
-  -webkit-backdrop-filter: blur(32px) saturate(190%);
-  border-bottom: 1px solid var(--rj-hairline-6);
-  box-shadow: 0 10px 40px var(--rj-shadow-1), inset 0 1px 0 var(--rj-hairline-5);
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
+  box-shadow: none;
 }
-#nav.nav-fixed {
-  background: color-mix(in srgb, var(--rj-ink-input) 62%, transparent) !important;
-  box-shadow: 0 12px 44px var(--rj-shadow-5), inset 0 1px 0 var(--rj-hairline-6);
+#nav.nav-fixed,
+.nav-fixed #nav,
+#page-header.nav-fixed #nav,
+.not-top-img #nav,
+#page-header.not-top-img #nav {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none !important;
+}
+/* 没了底板，文字只能靠投影从背景里拔出来：
+   1px 内圈定轮廓 + 8px 外圈压住底下的杂乱明暗 */
+#nav a,
+#nav #search-button,
+#nav #toggle-menu,
+#nav #site-name {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+/* 胶囊与下拉面板自带底板，不需要投影 */
+#nav #menus a,
+#nav .menus_item_child a {
+  text-shadow: none;
 }
 
 /* —— 卡片深液态玻璃：更强透光、内高光、弹性悬停 —— */
@@ -3040,8 +3062,8 @@ a:hover { color: var(--rj-brand-2); }
     -webkit-backdrop-filter: blur(24px) saturate(180%);
   }
   #nav {
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
@@ -3477,15 +3499,21 @@ a:hover { color: var(--rj-brand-2); }
 
 /* 导航栏：深色玻璃 → 白色玻璃 */
 [data-theme='light'] #nav,
-[data-theme='light'] #nav.nav-fixed {
-  background: color-mix(in srgb, var(--rjp-white) 90%, transparent) !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--rj-ink-border) 8%, transparent);
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--rj-ink-shadow) 8%, transparent), inset 0 1px 0 var(--rjp-white);
+[data-theme='light'] #nav.nav-fixed,
+[data-theme='light'] .nav-fixed #nav,
+[data-theme='light'] .not-top-img #nav {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
+  box-shadow: none;
 }
 [data-theme='light'] #nav .site-name,
 [data-theme='light'] #nav a,
 [data-theme='light'] #nav #search-button {
   color: var(--rj-text-strong);
+  /* 亮色下深色文字本身够清，投影只会把渐变 logo 描出一圈黑边 */
+  text-shadow: none;
 }
 [data-theme='light'] #nav #menus {
   /* 浅色下导航条本身已是白玻璃，纯白胶囊会糊在一起 —— 掺一点品牌紫才立得起来 */
@@ -4005,12 +4033,12 @@ body {
 /* ---------- 8. 亮色：Apple 形态 ---------- */
 [data-theme='light'] #nav,
 [data-theme='light'] #nav.nav-fixed {
-  /* Safari 式工具条：更薄、更白、只留一根 hairline */
-  background: color-mix(in srgb, var(--rjp-white) 82%, transparent) !important;
-  border-bottom: 1px solid var(--rjp-apple-line);
+  /* Safari 式工具条的那层白玻璃去掉：整条导航保持全透明 */
+  background: transparent !important;
+  border-bottom: none;
   box-shadow: none;
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* 亮色：白底上白色发光边会糊，用贴地阴影把轮廓压出来，光晕收敛 */
