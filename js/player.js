@@ -1471,14 +1471,6 @@
       im.src = 'https://flagcdn.com/w20/' + cc.toLowerCase() + '.png';
     }
     // 赛博朋克数据光点（固定种子伪随机，青/洋红交替）
-    var DOTS = [];
-    (function () {
-      var s = 42;
-      function rnd() { s = (s * 16807) % 2147483647; return s / 2147483647; }
-      for (var i = 0; i < 42; i++) {
-        DOTS.push({ lat: -72 + rnd() * 144, lng: rnd() * 360, c: i % 2 ? 'rgba(34,211,238,' : 'rgba(232,121,249,' });
-      }
-    })();
     // 五大洲轮廓：world-atlas TopoJSON 合并大陆岸线，霓虹描边投影到球面
     var landGeo = null;
     function loadLand() {
@@ -1694,46 +1686,14 @@
       lon += 0.26;
       if (lon >= 360) lon -= 360;
       var tt = Date.now() / 1000;
-      var i, p, q;
       // 球体暗底（深空色）
       var g0 = ctx.createRadialGradient(cx - R * 0.2, cy - R * 0.25, R * 0.15, cx, cy, R);
       g0.addColorStop(0, 'rgba(16,32,66,.92)');
       g0.addColorStop(1, 'rgba(4,8,18,.97)');
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
       ctx.fillStyle = g0; ctx.fill();
-      // 霓虹经纬线框（经线青/紫交替，纬线青色）
-      ctx.lineWidth = 1;
-      for (var lng = -180; lng < 180; lng += 15) {
-        ctx.strokeStyle = (Math.abs(lng) % 30 < 15) ? 'rgba(34,211,238,.5)' : 'rgba(168,85,247,.42)';
-        ctx.beginPath();
-        for (i = 0; i <= 24; i++) {
-          p = proj(-90 + i * 7.5, lng);
-          if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
-        }
-        ctx.stroke();
-      }
-      for (var lat = -75; lat <= 75; lat += 15) {
-        ctx.strokeStyle = 'rgba(94,234,212,.34)';
-        ctx.beginPath();
-        for (i = 0; i <= 60; i++) {
-          q = proj(lat, -180 + i * 6);
-          if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
-        }
-        ctx.stroke();
-      }
       // 五大洲霓虹轮廓（合并大陆岸线，青蓝描边 + 极淡填充）
       if (landGeo) { drawLand(); }
-      // 数据光点（青/洋红闪烁）
-      for (i = 0; i < DOTS.length; i++) {
-        var d = DOTS[i];
-        var dp = proj(d.lat, d.lng);
-        var dz = Math.max(0, dp.z);
-        var tw = 0.5 + 0.5 * Math.sin(tt * 2.2 + i * 1.7);
-        ctx.fillStyle = d.c + (0.25 + 0.55 * dz * (0.55 + 0.45 * tw)).toFixed(2) + ')';
-        ctx.beginPath();
-        ctx.arc(dp.x, dp.y, 1.2 + 1.6 * dz, 0, Math.PI * 2);
-        ctx.fill();
-      }
       // 全息扫描带 + 高光（球内）
       ctx.save();
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
