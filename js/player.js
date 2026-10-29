@@ -624,8 +624,13 @@
       // 这正是"律动不够同步"的根因。
       // 现在按频段混：低频以绝对能量为主（鼓点冲击真实可感），
       // 高频以 AGC 为主（弱信号也看得出摆动）。另加低频冲击检测 punch。
-      var vizEnv = [];
-      for (var vei = 0; vei < EQ_N; vei++) vizEnv.push(0);
+      // 每频段「相对自身近期均值」而非「相对自身历史峰值」：
+      // 峰值包络（原来 2.3s 半衰期）只升不降，一个高峰就把该频段永久压住，
+      // 实测慢歌 4.5s 内 36 根里有 21 根几乎不动。改成均值型 EMA（≈0.58s），
+      // 每根柱子永远能跟着自己这一段的节奏起伏，与整体音量无关。
+      var vizMean = [];
+      for (var vmi = 0; vmi < EQ_N; vmi++) vizMean.push(0);
+      var MEAN_A = 0.035;              // EMA 系数：约 0.58s 时间常数
       var vizPeak = 0;                 // 全局慢包络：留住频段之间的相对差异
       var lowFast = 0, lowSlow = 0;    // 低频快/慢双包络 → 冲击检测
       var halfN = EQ_N / 2;
@@ -653,12 +658,13 @@
           var raw = bars[k];
           // 绝对分量：全局归一化，保留低频鼓点的真实起伏
           var abs = Math.min(0.95, raw / gEnv);
-          // AGC 分量：每频段按自身包络归一化，高频再弱也随节奏起落
-          // 包络慢衰减（0.995/帧 ≈ 2.3s 半衰期）：镲片/擦片是稀疏脉冲，衰减太快
-          // 包络会塌回地板，输出就恒定了 —— 这是"下半圈不动"的第二根因
-          vizEnv[k] = Math.max(raw, vizEnv[k] * 0.995, 0.02);
-          var g = raw / vizEnv[k];                 // 0~1
-          var ag = g / (1 + 0.35 * g);             // 饱和曲线，软限幅防溢出画布
+          // 相对分量：raw ÷ 自身近期均值。1.0 = 刚好在平均水平，
+          // 1.9 以上算强拍（映射到满格），0.45 以下算静音谷。
+          var m0 = vizMean[k] || (raw > 0 ? raw : 0.02);
+          var rel = raw / Math.max(0.015, m0);
+          vizMean[k] = m0 + (raw - m0) * MEAN_A;
+          var ag = (rel - 0.45) / 1.45;
+          if (ag < 0) ag = 0; else if (ag > 1) ag = 1;
           var d = Math.abs(k - halfN + 0.5) / halfN;   // 0=低频 1=高频
           var w = 0.2 + 0.62 * d;                  // 低频偏绝对，高频偏 AGC
           out.push((abs * (1 - w) + ag * w) * (1 + 0.12 * punch));  // 打点时整环亮一下
@@ -768,7 +774,7 @@
             eq2d.clearRect(0, 0, VIZ, VIZ);
           }
           for (var i = 0; i < EQ_N; i++) viz.smooth[i] = 0;
-          for (var j = 0; j < EQ_N; j++) vizEnv[j] = 0;
+          for (var j = 0; j < EQ_N; j++) vizMean[j] = 0;
         }, 460);
       }
       function syncViz() {
