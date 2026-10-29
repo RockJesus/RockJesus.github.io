@@ -1236,123 +1236,325 @@ img {
 }
 
 /* ============================================================
-   文章正文排版美化 V1 — Cyberpunk Vaporwave Typography
-   覆盖：标题层级 / 段落 / 行内代码 / 代码块 / 表格 / 引用 / 分割线 / 键盘 / 图片 / 链接 / 列表 / 标签 / 版权
+   文章页排版系统 V2 — 阅读优先的统一版式
+   覆盖：正文骨架 / 标题阶梯 / 导语与段落 / 引用 / 图片 / 表格
+        代码 / 列表 / 链接 / 分隔 / 文章尾巴（版权·标签·打赏·上下篇·评论）
+   思路：字号阶梯从「2.0×」收到「1.32×」，标题不再刷屏；
+        全部材质走 tokens（radius / space / hairline / surface），与导航胶囊同源。
    ============================================================ */
+
+/* ---------- 1. 正文骨架：字号 / 行高 / 字距 ---------- */
 #article-container {
-  font-size: 1.02em;
-  line-height: 1.9;
-  color: color-mix(in srgb, var(--rj-ink-text) 84%, transparent);
+  font-size: 15.5px;
+  line-height: 1.92;
+  letter-spacing: 0.012em;
+  color: color-mix(in srgb, var(--rj-ink-text) 86%, transparent);
+  overflow-wrap: anywhere;
+  text-underline-position: under;
 }
 
-/* —— 标题层级：主题渐变前缀 + 悬停微移（保留原动画） —— */
+/* ---------- 2. 标题阶梯 ---------- */
 #article-container h1,
 #article-container h2,
 #article-container h3,
 #article-container h4,
 #article-container h5,
 #article-container h6 {
-  color: color-mix(in srgb, var(--rj-ink-text-ghost) 96%, transparent);
+  position: relative;
+  color: var(--rj-text-strong);
   font-weight: 700;
-  letter-spacing: 0.3px;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  scroll-margin-top: 96px;
+  transition: color var(--rj-dur-fast) ease;
+}
+/* 首个元素不吃顶部外边距，避免正文卡上方出现一大块空白 */
+#article-container > :first-child {
+  margin-top: 0;
+}
+
+/* h2 = 章节标尺：左渐变竖条 + 下缘渐隐细线，44px 上方留白把章节拉开 */
+#article-container h2 {
+  margin: 44px 0 18px;
+  padding: 0 0 13px 16px;
+  font-size: 20.5px;
+  background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--rj-brand-8) 40%, transparent),
+    color-mix(in srgb, var(--rj-brand-8) 8%, transparent) 58%,
+    transparent 88%);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+}
+#article-container h2:hover {
+  padding-left: 16px;
+  color: var(--rj-text-inverse);
 }
 #article-container h2::before,
-#article-container h3::before,
+#article-container h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.21em;
+  width: 3px;
+  height: 1.02em;
+  margin: 0;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--rj-brand-8), var(--rj-accent));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand-8) 50%, transparent);
+  transition: background var(--rj-dur-base) var(--rj-ease-out),
+              box-shadow var(--rj-dur-base) var(--rj-ease-out);
+}
+#article-container h2:hover::before,
+#article-container h3:hover::before {
+  background: linear-gradient(180deg, var(--rj-accent), var(--rj-accent-3));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--rj-accent) 55%, transparent);
+}
+
+/* h3 = 小节：细一档的青色竖条 */
+#article-container h3 {
+  margin: 32px 0 12px;
+  padding: 0 0 0 13px;
+  font-size: 16.8px;
+  font-weight: 600;
+}
+#article-container h3:hover {
+  padding-left: 13px;
+  color: var(--rj-text-inverse);
+}
+#article-container h3::before {
+  top: 0.24em;
+  width: 2.5px;
+  height: 0.94em;
+  background: linear-gradient(180deg, var(--rj-accent), color-mix(in srgb, var(--rj-accent) 35%, transparent));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--rj-accent) 40%, transparent);
+}
+
+/* h4 = 强调行：去掉图标前缀，靠色与重区分 */
+#article-container h4 {
+  margin: 24px 0 10px;
+  padding-left: 0;
+  font-size: 15.8px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--rj-brand-8) 72%, var(--rj-text-strong));
+}
+#article-container h4:hover {
+  padding-left: 0;
+  color: var(--rj-brand-8);
+}
+#article-container h5,
+#article-container h6 {
+  margin: 20px 0 8px;
+  padding-left: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--rj-text-dim);
+}
 #article-container h4::before,
 #article-container h5::before,
 #article-container h6::before {
-  color: var(--rj-brand-3);
-  text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 70%, transparent);
-}
-#article-container h3 {
-  border-bottom: 1px solid color-mix(in srgb, var(--rj-brand-3) 28%, transparent);
-  padding-bottom: 8px;
-}
-#article-container h2:hover,
-#article-container h3:hover,
-#article-container h4:hover {
-  color: var(--rj-text-inverse);
+  content: none;
 }
 #article-container a.headerlink::after {
-  color: var(--rj-brand-3);
+  color: var(--rj-brand-8);
 }
 
-/* —— 段落 —— */
+/* 首段导语：略大一号、更亮，承担「文章开场」 */
+#article-container > p:first-of-type {
+  font-size: 16.4px;
+  line-height: 1.86;
+  letter-spacing: 0.014em;
+  color: color-mix(in srgb, var(--rj-ink-text-ghost) 90%, transparent);
+}
+
+/* ---------- 3. 段落与强调 ---------- */
 #article-container p {
-  line-height: 1.9;
-  margin-bottom: 18px;
+  margin: 0 0 var(--rj-space-4);
+  line-height: 1.92;
+}
+#article-container strong {
+  color: var(--rj-text-strong);
+  font-weight: 700;
+}
+#article-container em {
+  color: color-mix(in srgb, var(--rj-accent-2) 80%, var(--rj-text-strong));
+  font-style: italic;
+}
+#article-container mark {
+  padding: 0.1em 0.36em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--rj-brand-8) 26%, transparent);
+  color: var(--rj-text-strong);
+}
+#article-container del {
+  color: var(--rj-text-mute);
+  text-decoration-color: color-mix(in srgb, var(--rj-accent-3) 60%, transparent);
 }
 
-/* —— 行内代码：玻璃芯片 —— */
+/* ---------- 4. 行内代码：玻璃芯片 ---------- */
 #article-container p code,
 #article-container li code,
-#article-container td code {
+#article-container td code,
+#article-container blockquote code,
+#article-container h2 code,
+#article-container h3 code {
   margin: 0 2px;
-  padding: 2px 7px;
-  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 35%, transparent);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--rj-brand) 12%, transparent);
-  color: var(--rj-brand-5);
-  font-size: 0.88em;
+  padding: 1.5px 6px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 32%, transparent);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--rj-brand) 14%, transparent);
+  color: var(--rj-brand-6);
+  font-size: 0.87em;
+  letter-spacing: 0;
   white-space: nowrap;
   word-break: break-all;
 }
 
-/* —— 代码块：毛玻璃终端 + 霓虹窗口头 —— */
-#article-container pre {
+/* ---------- 5. 代码块：毛玻璃终端（外壳加在 figure 上，pre 保持透明文字层） ---------- */
+#article-container figure.highlight {
   position: relative;
-  padding: 16px 18px;
-  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 25%, transparent);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--rj-ink-media-2) 72%, transparent) !important;
+  width: fit-content;
+  min-width: min(100%, 340px);
+  max-width: 100%;
+  margin: 24px 0;
+  padding: 0 16px 12px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 24%, transparent);
+  border-radius: var(--rj-radius-md);
+  background: color-mix(in srgb, var(--rj-ink-media-2) 76%, transparent) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 6px 24px var(--rj-shadow-5), 0 0 18px color-mix(in srgb, var(--rj-brand) 18%, transparent);
+  box-shadow: 0 8px 28px var(--rj-shadow-5), 0 0 20px color-mix(in srgb, var(--rj-brand) 16%, transparent);
   overflow-x: auto;
-  line-height: 1.6;
+  overflow-y: hidden;
+  line-height: 1.64;
 }
-#article-container pre::before {
+#article-container figure.highlight .highlight-tools {
+  margin: 0 -16px;
+  padding: 0 14px;
+  height: 34px;
+  border-bottom: 1px solid var(--rj-hairline-2);
+  background: color-mix(in srgb, var(--rj-ink-surface) 55%, transparent);
+  color: var(--rj-text-dim);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+#article-container figure.highlight .highlight-tools .code-lang {
+  color: var(--rj-brand-6);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#article-container figure.highlight table {
+  margin: 0;
+  width: auto;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 13px;
+}
+#article-container figure.highlight td {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+#article-container figure.highlight td.gutter {
+  padding-right: 12px;
+}
+#article-container figure.highlight pre {
+  width: auto;
+  margin: 0;
+  padding: 10px 0;
+  border: none;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: visible;
+  line-height: 1.64;
+}
+#article-container figure.highlight pre::before {
+  content: none;
+}
+#article-container figure.highlight pre code {
+  background: transparent !important;
+  color: var(--rjp-violet-ice);
+  font-family: var(--rj-font-mono);
+  font-size: 13px;
+  letter-spacing: 0;
+  text-shadow: none;
+}
+#article-container figure.highlight .gutter pre,
+#article-container figure.highlight .gutter span {
+  color: color-mix(in srgb, var(--rj-text-mute) 70%, transparent);
+  font-size: 12px;
+}
+/* 没有 figure 包裹的裸代码块保持同样的外壳 */
+#article-container > pre {
+  width: fit-content;
+  min-width: min(100%, 340px);
+  max-width: 100%;
+  margin: 24px 0;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 24%, transparent);
+  border-radius: var(--rj-radius-md);
+  background: color-mix(in srgb, var(--rj-ink-media-2) 76%, transparent) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 28px var(--rj-shadow-5), 0 0 20px color-mix(in srgb, var(--rj-brand) 16%, transparent);
+  overflow-x: auto;
+  line-height: 1.64;
+}
+#article-container > pre::before {
   content: '';
   display: block;
   height: 10px;
   margin-bottom: 12px;
   background-image:
     radial-gradient(circle 5px at 4px 5px, color-mix(in srgb, var(--rj-accent-3) 90%, transparent) 100%, transparent),
-    radial-gradient(circle 5px at 22px 5px, color-mix(in srgb, var(--rj-brand-3) 90%, transparent) 100%, transparent),
+    radial-gradient(circle 5px at 22px 5px, color-mix(in srgb, var(--rj-brand-8) 90%, transparent) 100%, transparent),
     radial-gradient(circle 5px at 40px 5px, color-mix(in srgb, var(--rj-accent) 90%, transparent) 100%, transparent);
 }
-#article-container pre code {
+#article-container > pre code {
   background: transparent !important;
   color: var(--rjp-violet-ice);
-  font-family: Consolas, 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 0.9em;
+  font-family: var(--rj-font-mono);
+  font-size: 13px;
+  letter-spacing: 0;
   text-shadow: none;
 }
 .hljs {
   background: transparent !important;
 }
 
-/* —— 表格：霓虹描边 —— */
+/* ---------- 6. 表格 ---------- */
 #article-container table {
   width: 100%;
-  margin: 20px 0;
+  margin: 24px 0;
   border-collapse: separate;
   border-spacing: 0;
-  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 30%, transparent);
-  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 26%, transparent);
+  border-radius: var(--rj-radius-md);
   overflow: hidden;
-  background: color-mix(in srgb, var(--rj-ink-surface) 45%, transparent);
+  background: color-mix(in srgb, var(--rj-ink-surface) 46%, transparent);
+  font-size: 14px;
 }
 #article-container table thead th {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--rj-brand) 28%, transparent), color-mix(in srgb, var(--rj-accent) 16%, transparent));
+  padding: 11px 14px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--rj-brand) 26%, transparent),
+    color-mix(in srgb, var(--rj-accent) 14%, transparent));
   color: var(--rj-text-inverse);
   font-weight: 600;
-  padding: 10px 14px;
+  letter-spacing: 0.02em;
 }
 #article-container table tbody td {
+  padding: 10px 14px;
   border-top: 1px solid var(--rj-border);
-  padding: 9px 14px;
   color: var(--rj-text);
+  line-height: 1.7;
 }
 #article-container table tbody tr:nth-child(even) td {
   background: color-mix(in srgb, var(--rj-ink-border) 4%, transparent);
@@ -1361,109 +1563,574 @@ img {
   background: color-mix(in srgb, var(--rj-brand) 10%, transparent);
 }
 
-/* —— 引用块：霓虹侧边 + 玻璃底 —— */
+/* ---------- 7. 引用块：玻璃提示卡（老文章大量用它当段落） ---------- */
 #article-container blockquote {
+  position: relative;
   margin: 20px 0;
-  padding: 14px 18px;
-  border-radius: 0 12px 12px 0;
-  border-left: 4px solid transparent;
-  border-image: linear-gradient(180deg, var(--rj-brand), var(--rj-accent)) 1;
-  background: color-mix(in srgb, var(--rj-brand) 8%, transparent);
+  padding: 15px 20px 15px 22px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 14%, transparent);
+  border-left: none;
+  border-radius: var(--rj-radius-md);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--rj-brand) 11%, transparent),
+    color-mix(in srgb, var(--rj-accent) 5%, transparent));
   color: var(--rj-text-quote);
+  font-size: 15px;
+  line-height: 1.86;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 var(--rj-hairline-2);
+}
+#article-container blockquote::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--rj-brand-8), var(--rj-accent));
 }
 #article-container blockquote p {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  line-height: 1.86;
 }
 #article-container blockquote p:last-child {
   margin-bottom: 0;
 }
-
-/* —— 分割线：主题渐变 —— */
-#article-container hr {
-  margin: 28px auto;
-  width: 60%;
-  height: 2px;
-  border: none;
-  border-radius: 2px;
-  background: linear-gradient(90deg, transparent, var(--rj-brand-3), var(--rj-accent), var(--rj-accent-3), transparent);
-  opacity: 0.75;
+#article-container blockquote a:not(.headerlink) {
+  color: var(--rj-accent-2);
+}
+#article-container blockquote strong {
+  color: var(--rj-brand-6);
 }
 
-/* —— 键盘键帽 —— */
-#article-container kbd {
-  margin: 0 3px;
-  padding: 3px 8px;
-  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 45%, transparent);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--rj-brand) 15%, transparent);
-  box-shadow: 0 2px 0 color-mix(in srgb, var(--rj-brand) 35%, transparent), 0 1px 4px var(--rj-shadow-cast-1) inset;
-  color: var(--rj-brand-5);
-  font-weight: 600;
-  font-size: 0.9em;
-}
-
-/* —— 文章图片：圆角玻璃框 —— */
+/* ---------- 8. 图片：统一居中 + 玻璃框 ---------- */
 #article-container img {
-  border-radius: 12px;
+  display: block;
+  margin: 24px auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--rj-radius-md);
   border: 1px solid var(--rj-border-strong);
-  box-shadow: 0 6px 20px var(--rj-shadow-4);
+  box-shadow: 0 10px 30px var(--rj-shadow-4);
+  transition: transform var(--rj-dur-base) var(--rj-ease-out),
+              box-shadow var(--rj-dur-base) var(--rj-ease-out),
+              filter var(--rj-dur-base) ease;
 }
 #article-container img:hover {
-  filter: brightness(1.08);
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 16px 40px var(--rj-shadow-5),
+              0 0 24px color-mix(in srgb, var(--rj-brand-8) 20%, transparent);
+}
+/* 徽章 / 数据卡：不套大图框，横排成行 */
+#article-container img[data-lazy-src*="shields.io"],
+#article-container img[data-lazy-src*="github-readme-stats"],
+#article-container img[data-lazy-src*="badgen"],
+#article-container img[src*="shields.io"] {
+  display: inline-block;
+  margin: 4px 6px 4px 0;
+  vertical-align: middle;
+  border: none;
+  border-radius: 4px;
+  box-shadow: none;
+  transform: none;
+  filter: none;
+}
+#article-container p:has(> a > img[data-lazy-src*="github-readme-stats"]) {
+  text-align: center;
+}
+/* 二维码等小图不受大图尺寸约束 */
+#article-container .post-qr-code-img {
+  width: auto;
 }
 
-/* —— 正文链接：虚线描边 + 悬停变色 —— */
-#article-container a:not(.headerlink) {
-  color: var(--rj-brand-3);
-  text-decoration: none;
-  border-bottom: 1px dashed color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
-  transition: color 0.2s ease, border-color 0.2s ease;
+/* 引用块内嵌图片：外层已经是卡片，图不再套第二层框 */
+#article-container blockquote img {
+  margin: 12px auto 6px;
+  border: none;
+  border-radius: var(--rj-radius-sm);
+  box-shadow: 0 8px 22px var(--rj-shadow-4);
 }
-#article-container a:not(.headerlink):hover {
-  color: var(--rj-accent);
-  border-bottom-color: var(--rj-accent);
+#article-container blockquote img:hover {
+  transform: none;
+  box-shadow: 0 10px 26px var(--rj-shadow-5);
 }
 
-/* —— 列表 —— */
-#article-container ul li::marker,
-#article-container ol li::marker {
-  color: var(--rj-brand-3);
+/* ---------- 9. 列表 ---------- */
+#article-container ul,
+#article-container ol {
+  margin: 0 0 var(--rj-space-5);
+  padding-left: 1.5em;
+}
+#article-container li {
+  margin: 8px 0;
+  line-height: 1.88;
+}
+#article-container li::marker {
+  color: var(--rj-brand-8);
+  font-weight: 600;
 }
 #article-container ul li:hover::marker,
 #article-container ol li:hover::marker {
   color: var(--rj-accent);
 }
-#article-container li {
-  margin: 5px 0;
+#article-container li > p {
+  margin-bottom: 6px;
 }
 
-/* —— 文章标签 chips —— */
-#post .tag_share .post-meta__tags {
-  border-color: color-mix(in srgb, var(--rj-brand-3) 60%, transparent);
-  color: var(--rj-brand-4);
-  background: color-mix(in srgb, var(--rj-brand) 10%, transparent);
+/* ---------- 10. 链接：渐变底边替代虚线下划线 ---------- */
+#article-container a:not(.headerlink):not([data-fancybox]) {
+  position: relative;
+  color: color-mix(in srgb, var(--rj-brand-8) 82%, var(--rj-ink-text));
+  text-decoration: none;
+  padding-bottom: 1px;
+  overflow-wrap: anywhere;
+  background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--rj-brand-8) 60%, transparent),
+    color-mix(in srgb, var(--rj-accent) 45%, transparent));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  transition: color var(--rj-dur-fast) ease, background-size var(--rj-dur-fast) ease;
 }
-#post .tag_share .post-meta__tags:hover {
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent));
-  border-color: transparent;
-  color: var(--rj-text-inverse);
+#article-container a:not(.headerlink):not([data-fancybox]):hover {
+  color: var(--rj-accent-2);
+  background-image: linear-gradient(90deg, var(--rj-brand-8), var(--rj-accent));
+  background-size: 100% 2px;
 }
 
-/* —— 版权卡：毛玻璃渐变 —— */
+/* ---------- 11. 分隔线 / 键帽 ---------- */
+#post hr,
+#article-container hr {
+  width: 100%;
+  height: 1px;
+  margin: 36px auto;
+  border: none;
+  border-radius: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--rj-brand-8) 45%, transparent) 22%,
+    color-mix(in srgb, var(--rj-accent) 40%, transparent) 50%,
+    color-mix(in srgb, var(--rj-brand-8) 45%, transparent) 78%,
+    transparent);
+  opacity: 0.8;
+}
+#article-container kbd {
+  display: inline-block;
+  margin: 0 3px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 42%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--rj-brand) 16%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--rj-brand) 32%, transparent),
+              inset 0 1px 0 var(--rj-hairline-3);
+  color: var(--rj-brand-6);
+  font-family: var(--rj-font-mono);
+  font-size: 0.86em;
+  font-weight: 600;
+}
+
+/* ============================================================
+   12. 文章尾巴：版权 / 标签 / 打赏 / 上下篇 / 评论
+       全部统一成同一种玻璃卡（18px 圆角 + 发丝边 + 52% 底 + blur26）
+   ============================================================ */
 #post .post-copyright {
-  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 30%, transparent);
-  border-radius: 12px;
-  background: var(--rj-overlay);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  margin: 40px 0 0;
+  padding: 16px 20px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 26%, transparent);
+  border-radius: var(--rj-radius-lg);
+  background: color-mix(in srgb, var(--rj-overlay) 100%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: inset 0 1px 0 var(--rj-hairline-3), 0 8px 24px var(--rj-shadow-4);
+  font-size: 13.8px;
+  line-height: 1.85;
+  transition: border-color var(--rj-dur-base) ease, box-shadow var(--rj-dur-base) ease;
 }
 #post .post-copyright:hover {
-  box-shadow: 0 0 20px color-mix(in srgb, var(--rj-brand) 35%, transparent), 0 4px 16px var(--rj-shadow-4);
+  border-color: color-mix(in srgb, var(--rj-brand-8) 44%, transparent);
+  box-shadow: inset 0 1px 0 var(--rj-hairline-4),
+              0 0 22px color-mix(in srgb, var(--rj-brand) 26%, transparent),
+              0 10px 30px var(--rj-shadow-5);
+}
+#post .post-copyright .post-copyright__author,
+#post .post-copyright .post-copyright__type,
+#post .post-copyright .post-copyright__notice {
+  padding: 3px 0;
 }
 #post .post-copyright .post-copyright-meta {
   color: var(--rj-accent);
+  font-weight: 600;
+}
+#post .post-copyright .post-copyright-info,
+#post .post-copyright .post-copyright-info a {
+  color: var(--rj-text-soft);
 }
 
+/* 标签 / 分享条：与版权卡同材质，只是高度更扁 */
+#post .tag_share {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 12px 18px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 22%, transparent);
+  border-radius: var(--rj-radius-lg);
+  background: color-mix(in srgb, var(--rj-overlay) 100%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: inset 0 1px 0 var(--rj-hairline-2);
+}
+#post .tag_share .post_share {
+  margin-left: auto;
+}
+/* 本站文章标签关闭，只剩分享图标时不再显示一张空卡片 */
+#post .tag_share:not(:has(.post-meta__tags)) {
+  padding: 16px 0 0;
+  border: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+#post .tag_share .social-share .social-share-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0 4px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 26%, transparent);
+  border-radius: var(--rj-radius-pill);
+  background: color-mix(in srgb, var(--rj-brand) 10%, transparent);
+  color: var(--rj-brand-6);
+  font-size: 14px;
+  transition: all var(--rj-dur-fast) ease;
+}
+#post .tag_share .social-share .social-share-icon:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent));
+  color: var(--rj-text-inverse);
+  transform: translateY(-1px);
+}
+#post .post-meta__tags {
+  margin: 0;
+  padding: 3px 11px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 45%, transparent);
+  border-radius: var(--rj-radius-pill);
+  background: color-mix(in srgb, var(--rj-brand) 12%, transparent);
+  color: var(--rj-brand-6);
+  font-size: 12.5px;
+  transition: all var(--rj-dur-fast) ease;
+}
+#post .post-meta__tags:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent));
+  color: var(--rj-text-inverse);
+}
+
+/* 打赏：不再是 80px 空洞 */
+#post .post-reward {
+  margin: 36px 0 0;
+  padding: 0;
+}
+#post .post-reward .reward-main {
+  margin-top: 14px;
+  padding: 14px 18px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 26%, transparent);
+  border-radius: var(--rj-radius-lg);
+  background: color-mix(in srgb, var(--rj-surface-solid) 92%, transparent);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: 0 14px 36px var(--rj-shadow-6);
+}
+#post .post-reward .reward-item {
+  margin: 0 10px;
+}
+#post .post-reward img.post-qr-code-img {
+  width: 112px;
+  height: 112px;
+  margin: 0 0 6px;
+  border: none;
+  border-radius: var(--rj-radius-sm);
+  box-shadow: 0 6px 18px var(--rj-shadow-4);
+}
+#post .post-reward .post-qr-code-desc {
+  color: var(--rj-text-dim);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+#post .post-reward .reward-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 50%, transparent);
+  border-radius: var(--rj-radius-pill);
+  background: color-mix(in srgb, var(--rj-brand) 16%, transparent);
+  color: var(--rj-brand-6);
+  font-size: 13.5px;
+  transition: all var(--rj-dur-base) var(--rj-ease-out);
+}
+#post .post-reward .reward-button:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent));
+  color: var(--rj-text-inverse);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--rj-brand) 45%, transparent);
+}
+
+/* 上下篇：两张同款玻璃卡（封面做底，文案压在渐变遮罩上） */
+#post .pagination-post {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 36px 0 0;
+  width: 100%;
+  background: transparent;
+  overflow: visible;
+}
+#post .pagination-post .prev-post,
+#post .pagination-post .next-post {
+  position: relative;
+  float: none;
+  width: auto;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 24%, transparent);
+  border-radius: var(--rj-radius-lg);
+  background: color-mix(in srgb, var(--rj-overlay) 100%, transparent);
+  overflow: hidden;
+  transition: transform var(--rj-dur-base) var(--rj-ease-out),
+              border-color var(--rj-dur-base) ease,
+              box-shadow var(--rj-dur-base) ease;
+}
+#post .pagination-post .prev-post:hover,
+#post .pagination-post .next-post:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--rj-brand-8) 50%, transparent);
+  box-shadow: 0 14px 34px var(--rj-shadow-5),
+              0 0 22px color-mix(in srgb, var(--rj-brand) 25%, transparent);
+}
+#post .pagination-post .prev-post > a,
+#post .pagination-post .next-post > a {
+  position: relative;
+  display: block;
+  height: 152px;
+  overflow: hidden;
+}
+#post .pagination-post img.prev-cover,
+#post .pagination-post img.next-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  object-fit: cover;
+  opacity: 0.5;
+  transform: scale(1.02);
+  transition: transform var(--rj-dur-slow) var(--rj-ease-out),
+              opacity var(--rj-dur-base) ease;
+}
+#post .pagination-post .prev-post:hover img.prev-cover,
+#post .pagination-post .next-post:hover img.next-cover {
+  transform: scale(1.06);
+  opacity: 0.66;
+}
+#post .pagination-post .prev-post > a::after,
+#post .pagination-post .next-post > a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(7, 9, 20, 0.25) 0%,
+    rgba(7, 9, 20, 0.55) 46%,
+    rgba(7, 9, 20, 0.9) 100%);
+  pointer-events: none;
+}
+#post .pagination-post .pagination-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  transform: none;
+  padding: 14px 18px 16px;
+  z-index: 2;
+  text-align: left;
+}
+#post .pagination-post .next-post .pagination-info {
+  text-align: right;
+}
+#post .pagination-post .label {
+  color: var(--rj-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+#post .pagination-post .prev_info,
+#post .pagination-post .next_info {
+  margin-top: 4px;
+  color: var(--rj-text-inverse);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+}
+
+
+/* 评论：标题分隔 + 输入框玻璃化 */
+#post-comment {
+  margin-top: 8px;
+}
+#post-comment .comment-head {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rj-border);
+}
+#post-comment .comment-headline {
+  color: var(--rj-text-strong);
+  font-size: 15.5px;
+  font-weight: 700;
+}
+#post-comment .comment-headline i {
+  color: var(--rj-brand-8);
+}
+#post-comment .vcomment textarea,
+#post-comment .vcomment input,
+#post-comment .comment-wrap textarea,
+#post-comment .vwrap input,
+#post-comment .vwrap textarea,
+#post-comment .veditor {
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 28%, transparent) !important;
+  border-radius: var(--rj-radius-sm) !important;
+  background: color-mix(in srgb, var(--rj-surface-input) 90%, transparent) !important;
+  color: var(--rj-text) !important;
+  box-shadow: inset 0 1px 0 var(--rj-hairline-1);
+  transition: border-color var(--rj-dur-fast) ease, box-shadow var(--rj-dur-fast) ease;
+}
+#post-comment .vcomment textarea:focus,
+#post-comment .vcomment input:focus,
+#post-comment .vwrap input:focus,
+#post-comment .vwrap textarea:focus,
+#post-comment .veditor:focus {
+  border-color: color-mix(in srgb, var(--rj-brand-8) 58%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rj-brand) 20%, transparent);
+}
+#post-comment .vwrap,
+#post-comment .vbtn {
+  border-radius: var(--rj-radius-sm) !important;
+}
+#post-comment .vbtn {
+  padding: 0 18px;
+  border: none;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent)) !important;
+  color: var(--rj-text-inverse) !important;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  transition: transform var(--rj-dur-fast) ease, box-shadow var(--rj-dur-fast) ease;
+}
+#post-comment .vbtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--rj-brand) 50%, transparent);
+}
+#post-comment .vcard .vhead .vnick {
+  color: var(--rj-brand-6);
+  font-weight: 600;
+}
+#post-comment .vcard .vh .vtime,
+#post-comment .vempty {
+  color: var(--rj-text-mute);
+}
+
+/* 文章卡作为绝对定位子元素的参考基准（章节锚点偏移用） */
+#post {
+  position: relative;
+}
+
+/* ---------- 12.5 亮色模式校准：白底上提高描边与分隔线的可辨度 ---------- */
+[data-theme='light'] #article-container blockquote {
+  border-color: color-mix(in srgb, var(--rj-brand-8) 20%, transparent);
+  background: color-mix(in srgb, var(--rj-brand-8) 6%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 20px rgba(15, 18, 32, 0.06);
+}
+[data-theme='light'] #article-container h2 {
+  background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--rj-brand-8) 45%, transparent),
+    color-mix(in srgb, var(--rj-brand-8) 10%, transparent) 58%,
+    transparent 88%);
+}
+[data-theme='light'] #article-container h3 {
+  border-bottom-color: color-mix(in srgb, var(--rj-brand-8) 16%, transparent);
+}
+[data-theme='light'] #post .post-copyright,
+[data-theme='light'] #post .pagination-post .prev-post,
+[data-theme='light'] #post .pagination-post .next-post,
+[data-theme='light'] #post .tag_share {
+  border-color: color-mix(in srgb, var(--rj-brand-8) 20%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 8px 24px rgba(15, 18, 32, 0.07);
+}
+[data-theme='light'] #post .pagination-post .prev_info,
+[data-theme='light'] #post .pagination-post .next_info {
+  color: #ffffff;
+}
+[data-theme='light'] #article-container figure.highlight {
+  border-color: color-mix(in srgb, var(--rj-brand-8) 22%, transparent);
+  background: #0b0e1a !important;
+}
+[data-theme='light'] #article-container table {
+  border-color: color-mix(in srgb, var(--rj-brand-8) 20%, transparent);
+}
+
+/* ---------- 13. 移动端：正文左右留白收紧，标题阶梯等比降一档 ---------- */
+@media screen and (max-width: 768px) {
+  #article-container {
+    font-size: 14.9px;
+    line-height: 1.88;
+    letter-spacing: 0.008em;
+  }
+  #article-container > p:first-of-type {
+    font-size: 15.6px;
+  }
+  #article-container h2 {
+    margin: 34px 0 14px;
+    font-size: 19px;
+    padding-left: 14px;
+  }
+  #article-container h2:hover {
+    padding-left: 14px;
+  }
+  #article-container h3 {
+    margin: 26px 0 10px;
+    font-size: 16px;
+  }
+  #article-container p {
+    margin-bottom: 14px;
+  }
+  #article-container img {
+    margin: 20px auto;
+    border-radius: var(--rj-radius-sm);
+  }
+  /* 手机上长链接会占多行，逐行画下划线会显得很碎：改为仅靠颜色区分 */
+  #article-container a:not(.headerlink):not([data-fancybox]) {
+    background-image: none;
+    color: color-mix(in srgb, var(--rj-brand-8) 70%, var(--rj-ink-text));
+    font-weight: 500;
+  }
+  #post .pagination-post {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  #post .pagination-post img.prev-cover,
+  #post .pagination-post img.next-cover {
+    height: 76px;
+  }
+}
 /* ============================================================
    主页首屏 V9 — 移除大标题 / 打字副标题下移纯紫 / 右上角导航紫色
    ============================================================ */
@@ -3019,17 +3686,10 @@ a:hover { color: var(--rj-brand-2); }
   }
 }
 
-/* ---------- 正文标题字号阶梯补齐 ----------
-   渲染时 h1–h5 统一降一级（脚本 scripts/heading-level.js），语义正确了，
-   但字号会跟着掉一档。这里把整梯上移一级，视觉与改造前完全一致：
-   作者写 #  → 渲染 h2 → 2em    （原 h1 尺寸）
-   作者写 ## → 渲染 h3 → 1.5em  （原 h2 尺寸）
-   依此类推。 */
-#article-container h2 { font-size: 2em; }
-#article-container h3 { font-size: 1.5em; }
-#article-container h4 { font-size: 1.17em; }
-#article-container h5 { font-size: 1em; }
-#article-container h6 { font-size: 0.83em; }
+/* ---------- 正文标题字号阶梯 ----------
+   scripts/heading-level.js 会把 h1–h5 降一级（作者写 # → 渲染 h2）。
+   字号阶梯已由「文章页排版系统 V2」按 px 统一接管，
+   这里不再把整梯上移到 2em/1.5em，否则 h2 会回到 31px 的刷屏尺寸。 */
 
 /* ============================================================
    V16 — Alienware Legend × Apple 品牌层
