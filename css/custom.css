@@ -20,11 +20,11 @@
   --blockquote-bg: color-mix(in srgb, var(--rj-brand) 8%, transparent);
 }
 
-/* ---------- 背景：恢复原始背景图（主题配置 background: oc.webp，1920x1080 q80，87KB） ---------- */
-#web_bg {
-  background: url(/img/oc.webp) center/cover no-repeat;
-  background-attachment: local;
-}
+/* ---------- 背景：唯一来源＝主题配置 background: url(/img/oc.webp) ----------
+   主题据 _config.butterfly.yml 的 background 生成
+   #web_bg { position:fixed; z-index:-999; width/height:100%; background:url(/img/oc.webp) center/cover no-repeat local }
+   此处不再重复声明，避免同一规则被写三遍（同一 URL 只下载一次，重复只是写法冗余）。
+   背景之上只有 #web_bg::after 的径向光斑装饰（纯 CSS 渐变，无网络请求）。 */
 
 /* ---------- 卡片：暗色玻璃拟态（文章/列表卡对齐右侧卡片风格，更实玻璃+紫边+光晕） ---------- */
 #recent-posts > .recent-post-item,
@@ -2061,9 +2061,7 @@ a:hover { color: var(--rj-brand-2); }
    原则：只叠加视觉层，不动结构与交互
    ============================================================ */
 /* —— 背景彩色光斑（iOS27 招牌：多彩柔和光晕缓慢漂移） —— */
-#web_bg {
-  position: fixed;
-}
+/* #web_bg 的 position/z-index 由主题统一给出，此处只负责其上方的光斑层 */
 #web_bg::after {
   content: '';
   position: absolute;
