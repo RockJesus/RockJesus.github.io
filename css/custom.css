@@ -576,6 +576,12 @@ img {
   transform: scale(var(--rj-beat, 1));
   transition: none;              /* 播放中每帧由 JS 写入，有过渡会被拖成慢动作 */
   will-change: transform;
+  /* 随低频/鼓点呼吸的品牌紫外发光，JS 写 --rj-beat-glow（0~0.62） */
+  box-shadow:
+    0 10px 26px rgba(2, 6, 18, 0.46),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    0 0 26px rgba(139, 92, 246, calc(var(--rj-beat-glow, 0) * 0.92)),
+    0 0 52px rgba(124, 58, 237, calc(var(--rj-beat-glow, 0) * 0.55));
 }
 .aplayer.rj-pl-collapsed .rj-pl-disc {
   width: 100%;
@@ -599,6 +605,14 @@ img {
     0 14px 30px rgba(2, 6, 18, 0.52),
     0 0 0 1px rgba(255, 255, 255, 0.2) inset,
     0 0 26px color-mix(in srgb, var(--rj-brand) 46%, transparent);
+}
+/* 播放中 disc 的规则权重更高，会把上面的 hover 压掉，这里补一条同权重 */
+.aplayer.rj-pl-collapsed .rj-pl.rj-pl-playing .rj-pl-disc:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    0 14px 30px rgba(2, 6, 18, 0.52),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 0 30px color-mix(in srgb, var(--rj-brand) 62%, transparent);
 }
 
 /* —— 外壳 —— */

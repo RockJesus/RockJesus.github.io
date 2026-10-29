@@ -558,8 +558,11 @@
           var srcNode = actx.createMediaElementSource(au);
           var an = actx.createAnalyser();
           an.fftSize = 2048;              // 采样率可能是 44.1k~192k，用大窗保证 9kHz 内有足够 bin
-          an.smoothingTimeConstant = 0.74;
-          an.minDecibels = -88;
+          // 0.74 太黏：分析器自己就把瞬态抹平了，鼓点会慢半拍。降到 0.55，
+          // 抖动交给 JS 侧的上升快/回落慢平滑去收拾（见 frame）
+          an.smoothingTimeConstant = 0.55;
+          an.minDecibels = -84;           // -88 → -84：略收动态范围，弱信号也能顶起柱子
+                                  // （-80 太狠，鼓点后柱子会长时间贴顶，反而不像在跳）
           srcNode.connect(an);
           an.connect(actx.destination);   // 必须接回 destination，否则只剩分析、没有声音
           viz.actx = actx;
@@ -604,7 +607,8 @@
           var b1 = Math.max(b0 + 1, Math.min(hi, Math.ceil(lo * Math.pow(hi / lo, t1))));
           var sum = 0, n = 0;
           for (var j = b0; j <= b1; j++) { sum += d[j]; n++; }
-          var w = 0.7 + 2.3 * Math.pow(i / (half - 1), 1.2);
+          var w = 0.7 + 3.5 * Math.pow(i / (half - 1), 1.15);   // 上限 3.0 → 4.2：
+          // 高频（镲片/擦片）本来就稀疏短促，不抬足会显得下半圈一直很弱
           tmp.push(n ? ((sum / n) / 255) * w : 0);
         }
         var out = [];
@@ -614,37 +618,77 @@
         return out;
       }
 
-      // 每频段自动增益（AGC）：各频段按自己的近期包络归一化，高频再弱也能随节奏起落。
-      // 包络要慢衰减（0.995/帧 ≈ 2.3s 半衰期）：镲片/擦片是稀疏脉冲，衰减太快
-      // 包络会塌回地板，输出就恒定了 —— 这正是"下半圈不动"的第二根因。
+      // 动态整形 V2：全局包络 + 每频段 AGC 混合
+      // 教训：只用 per-band AGC（v1.8.10）会把每根柱子都归一化到"自己的"包络，
+      // 结果 36 根永远一样高 —— 一直在动，但看不出起伏、跟不上鼓点，
+      // 这正是"律动不够同步"的根因。
+      // 现在按频段混：低频以绝对能量为主（鼓点冲击真实可感），
+      // 高频以 AGC 为主（弱信号也看得出摆动）。另加低频冲击检测 punch。
       var vizEnv = [];
       for (var vei = 0; vei < EQ_N; vei++) vizEnv.push(0);
-      function agc(bars) {
+      var vizPeak = 0;                 // 全局慢包络：留住频段之间的相对差异
+      var lowFast = 0, lowSlow = 0;    // 低频快/慢双包络 → 冲击检测
+      var halfN = EQ_N / 2;
+
+      function shape(bars) {
+        var peak = 0, lowSum = 0, lowN = 0;
         for (var i = 0; i < EQ_N; i++) {
-          var v = bars[i];
-          vizEnv[i] = Math.max(v, vizEnv[i] * 0.995, 0.02);
-          var g = v / vizEnv[i];
-          bars[i] = g / (1 + 0.35 * g);   // 饱和曲线：g=1.6→0.98，软限幅防溢出画布
+          if (bars[i] > peak) peak = bars[i];
+          // 环是镜像的：0~2 与末 3 根都对应最低频
+          if (i < 3 || i >= EQ_N - 3) { lowSum += bars[i]; lowN++; }
         }
+        lowSum = lowN ? lowSum / lowN : 0;
+        vizPeak = Math.max(peak, vizPeak * 0.978, 0.05);   // 约 1.4s 半衰期：包络留在高位，
+                                                       // 鼓点一过 abs 立刻掉下来，不贴顶
+        var gEnv = vizPeak;
+
+        // 冲击：瞬时低频 ÷ 慢速均值，>0 表示正在打点（kick / 底鼓）
+        lowFast += (lowSum - lowFast) * 0.42;
+        lowSlow += (lowSum - lowSlow) * 0.052;
+        var punch = lowSlow > 0.012 ? Math.max(0, (lowFast - lowSlow) / lowSlow) : 0;
+        if (punch > 1.6) punch = 1.6;
+
+        var out = [];
+        for (var k = 0; k < EQ_N; k++) {
+          var raw = bars[k];
+          // 绝对分量：全局归一化，保留低频鼓点的真实起伏
+          var abs = Math.min(0.95, raw / gEnv);
+          // AGC 分量：每频段按自身包络归一化，高频再弱也随节奏起落
+          // 包络慢衰减（0.995/帧 ≈ 2.3s 半衰期）：镲片/擦片是稀疏脉冲，衰减太快
+          // 包络会塌回地板，输出就恒定了 —— 这是"下半圈不动"的第二根因
+          vizEnv[k] = Math.max(raw, vizEnv[k] * 0.995, 0.02);
+          var g = raw / vizEnv[k];                 // 0~1
+          var ag = g / (1 + 0.35 * g);             // 饱和曲线，软限幅防溢出画布
+          var d = Math.abs(k - halfN + 0.5) / halfN;   // 0=低频 1=高频
+          var w = 0.2 + 0.62 * d;                  // 低频偏绝对，高频偏 AGC
+          out.push((abs * (1 - w) + ag * w) * (1 + 0.12 * punch));  // 打点时整环亮一下
+                                                                  // 增益别太大，否则整环一起顶满
+        }
+        return { bars: out, punch: punch };
       }
 
-      function drawEq(bars, glow) {
+      function drawEq(bars, glow, punch) {
         var R = VIZ / 2;
         eq2d.setTransform(DPR, 0, 0, DPR, 0, 0);
         eq2d.clearRect(0, 0, VIZ, VIZ);
-        var r0 = R * 0.69;                  // 圆盘半径 + 约 3px，不要压边
-        var maxLen = R - r0 - 3;
+        var r0 = 34.5;                      // 圆盘半径 33，环贴着外沿 1.5px 起步
+        var maxLen = R - r0 - 3;            // 14.5px（原来 13.1）：留 3px 给辉光，否则柱子末端被画布硬切
         eq2d.lineCap = 'round';
-        eq2d.shadowBlur = 4 + glow * 8;
-        eq2d.shadowColor = 'rgba(139, 92, 246, ' + (0.3 + glow * 0.45) + ')';
+
+        // 辉光克制一点：原来 blur 到 18px 会向内糊住唱片封面、向外让 36 根柱子连成一片
+        eq2d.shadowBlur = 5 + glow * 7;
+        eq2d.shadowColor = 'rgba(139, 92, 246, ' + (0.22 + glow * 0.34).toFixed(2) + ')';
+
         for (var i = 0; i < EQ_N; i++) {
           var v = bars[i];
+          if (v > 1) v = 1;
           var a = (i / EQ_N) * Math.PI * 2 - Math.PI / 2;
-          var len = 1.4 + v * maxLen;
+          var len = 2.2 + Math.pow(v, 1.05) * maxLen; // gamma 略>1：压住中间值，只有真峰值才顶满，
+                                                      // 峰谷对比拉大 → 看起来才像在跳
           var c = Math.cos(a), sn = Math.sin(a);
           var hue = 264 - 76 * (1 - Math.abs(i - EQ_N / 2) / (EQ_N / 2));   // 12 点紫、6 点青，左右对称
-          eq2d.strokeStyle = 'hsla(' + hue.toFixed(0) + ', 92%, ' + (62 + v * 14).toFixed(0) + '%, ' + (0.3 + v * 0.62).toFixed(2) + ')';
-          eq2d.lineWidth = 2.4;
+          eq2d.strokeStyle = 'hsla(' + hue.toFixed(0) + ', 94%, ' + (58 + v * 24).toFixed(0) + '%, ' + (0.5 + v * 0.48).toFixed(2) + ')';
+          eq2d.lineWidth = 3.0;
           eq2d.beginPath();
           eq2d.moveTo(R + c * r0, R + sn * r0);
           eq2d.lineTo(R + c * (r0 + len), R + sn * (r0 + len));
@@ -657,12 +701,14 @@
         viz.raf = requestAnimationFrame(frame);
         var au = ap.audio;
         if (!au || au.paused) return;
-        var bars, low, real = false;
+        var bars, low = 0, punch = 0, real = false;
         if (viz.an && viz.actx && viz.actx.state === 'running') {
           viz.an.getByteFrequencyData(viz.data);
           bars = sampleBars(viz.data);
-          low = (bars[0] + bars[1] + bars[2]) / 3;
-          agc(bars);            // 每频段自动增益：低频拿去算 low/律动，柱子各自归一化
+          var sh = shape(bars);
+          bars = sh.bars;
+          punch = sh.punch;
+          low = (bars[0] + bars[1] + bars[EQ_N - 1]) / 3;
           real = true;
         } else {
           // 合成节拍：约 92 BPM，kick 打点 + 慢速起伏，只在拿不到真实频谱时使用
@@ -671,6 +717,7 @@
           var kick = Math.exp(-((t % beat) / beat) * 6.5);
           var swell = 0.55 + 0.45 * Math.sin(t * 1.7);
           low = 0.2 + 0.5 * kick * swell;
+          punch = Math.min(1.4, kick * 1.5);   // 合成路径也给出拍点冲击
           bars = [];
           for (var i = 0; i < EQ_N; i++) {
             bars.push(low * (0.4 + 0.6 * Math.abs(Math.sin(t * 2.1 + i * 0.72))));
@@ -687,16 +734,17 @@
             }
           }
         }
-        // 平滑：上升快、回落慢，跳起来有弹性但不抖
+        // 平滑：上升更快、回落也加快（原来 0.55/0.16 太黏，鼓点被拖成慢动作）
         for (var s2 = 0; s2 < EQ_N; s2++) {
           var prev = viz.smooth[s2];
           var target = bars[s2];
-          viz.smooth[s2] = target > prev ? prev + (target - prev) * 0.55 : prev + (target - prev) * 0.16;
+          viz.smooth[s2] = target > prev ? prev + (target - prev) * 0.72 : prev + (target - prev) * 0.24;
         }
-        drawEq(viz.smooth, Math.min(1, low * 1.25));
-        // 圆盘随低频轻微脉动
-        var beatScale = 1 + Math.min(0.045, low * 0.055);
+        drawEq(viz.smooth, Math.min(1, low * 1.05 + punch * 0.4), punch);
+        // 圆盘脉动：4.5% → 8.5%，且把冲击算进去，底鼓落下时明显弹一下
+        var beatScale = 1 + Math.min(0.085, low * 0.05 + punch * 0.05);
         root.style.setProperty('--rj-beat', beatScale.toFixed(4));
+        root.style.setProperty('--rj-beat-glow', (0.16 + Math.min(0.46, low * 0.5 + punch * 0.26)).toFixed(3));
       }
 
       function startViz() {
@@ -710,6 +758,8 @@
       function stopViz() {
         if (viz.raf) { cancelAnimationFrame(viz.raf); viz.raf = 0; }
         root.style.setProperty('--rj-beat', '1');
+        root.style.setProperty('--rj-beat-glow', '0');
+        lowFast = lowSlow = vizPeak = 0;
         // 等 0.45s 透明度淡出结束再清画布，否则环会"啪"地瞬间消失
         setTimeout(function () {
           if (viz.raf) return;   // 期间又播了就不清
