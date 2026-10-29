@@ -3083,7 +3083,7 @@ body {
 
 /* 打字副标题下方的 HUD 状态条 */
 #page-header.full_page #site-info::after {
-  content: 'ALIENWARE · HACKINTOSH · macOS';
+  content: 'ALIENWARE · HACKINTOSH · macOS · APPLE';
   display: block;
   margin: 20px auto 0;
   width: fit-content;
