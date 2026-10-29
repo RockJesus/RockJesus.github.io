@@ -2918,6 +2918,35 @@ a:hover { color: var(--rj-brand-2); }
 #nav #site-name {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0, 0, 0, 0.55);
 }
+
+/* 滚动浮起时（nav-fixed）补一层「没有模糊的垂直渐隐」：
+   首屏仍然完全透明，只在导航压在正文上时给文字一层从深到无的底，
+   避免 logo 和正文首行叠字。比导航条高 22px，让正文是「淡出」而不是「被切断」。
+   注意不是毛玻璃：没有 backdrop-filter、没有描边、没有投影。 */
+#nav.nav-fixed::before,
+#page-header.nav-fixed #nav::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 76px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(6, 8, 18, 0.88) 0%,
+    rgba(6, 8, 18, 0.8) 62%,
+    rgba(6, 8, 18, 0.42) 82%,
+    rgba(6, 8, 18, 0) 100%);
+}
+/* 有渐隐兜底后投影可以收一档，否则文字周围会糊出一团 */
+#nav.nav-fixed a,
+#nav.nav-fixed #search-button,
+#nav.nav-fixed #toggle-menu,
+#page-header.nav-fixed #nav a,
+#page-header.nav-fixed #nav #site-name {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
 /* 胶囊与下拉面板自带底板，不需要投影 */
 #nav #menus a,
 #nav .menus_item_child a {
@@ -3514,6 +3543,15 @@ a:hover { color: var(--rj-brand-2); }
   color: var(--rj-text-strong);
   /* 亮色下深色文字本身够清，投影只会把渐变 logo 描出一圈黑边 */
   text-shadow: none;
+}
+/* 亮色：滚动态渐隐要用白色，深色那版会在白底页面上刷出一条黑带 */
+[data-theme='light'] #nav.nav-fixed::before,
+[data-theme='light'] #page-header.nav-fixed #nav::before {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 62%,
+    rgba(255, 255, 255, 0.5) 82%,
+    rgba(255, 255, 255, 0) 100%);
 }
 [data-theme='light'] #nav #menus {
   /* 浅色下导航条本身已是白玻璃，纯白胶囊会糊在一起 —— 掺一点品牌紫才立得起来 */
