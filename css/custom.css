@@ -1477,20 +1477,6 @@ img {
   text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 80%, transparent);
 }
 
-/* 右上角导航文字全部紫色 */
-#nav #menus .site-page,
-#nav .menus_item_child .site-page {
-  color: var(--rj-brand-3);
-}
-#nav #menus .site-page i,
-#nav .menus_item_child .site-page i {
-  color: var(--rj-brand-3);
-}
-#nav #menus .site-page:hover,
-#nav .menus_item_child .site-page:hover {
-  color: var(--rj-brand-5);
-}
-
 /* ============================================================
    右下角聊天按钮 — 豆包对话框 V10
    豆包女生头像按钮 + 毛玻璃弹窗内嵌豆包网页聊天
@@ -1723,9 +1709,13 @@ a:hover { color: var(--rj-brand-2); }
 #article-container a:not(.headerlink):hover { color: var(--rj-brand-2); border-bottom-color: var(--rj-brand-2); }
 #article-container h2::before, #article-container h3::before, #article-container h4::before,
 #article-container h5::before, #article-container h6::before { color: var(--rj-brand); text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 70%, transparent); }
-#nav #menus .site-page, #nav .menus_item_child .site-page { color: var(--rj-brand); }
-#nav #menus .site-page i, #nav .menus_item_child .site-page i { color: var(--rj-brand); }
-#nav #menus .site-page:hover, #nav .menus_item_child .site-page:hover { color: var(--rj-brand-5); }
+/* 顶部导航：文字提亮到淡紫白（原 #8b5cf6 在深底上发闷），图标保持紫调同族 */
+#nav #menus .site-page, #nav .menus_item_child .site-page { color: var(--rj-brand-4); }
+#nav #menus .site-page i, #nav .menus_item_child .site-page i { color: var(--rj-brand-3); }
+#nav #menus .site-page:hover, #nav .menus_item_child .site-page:hover {
+  color: var(--rj-brand-6);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 55%, transparent);
+}
 #site-subtitle #subtitle { color: var(--rj-brand); }
 #site-subtitle .typed-cursor { color: var(--rj-brand); }
 #scroll-down i { color: var(--rj-brand); }
@@ -1746,10 +1736,16 @@ a:hover { color: var(--rj-brand-2); }
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
+/* 站点文字 Logo：淡紫 → 紫 → 淡丁香，三段柔渐变 + 品牌光晕，避免深紫发闷 */
 #site-name {
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  background: linear-gradient(135deg, var(--rj-brand-8) 0%, var(--rj-brand-4) 42%, var(--rj-brand-3) 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--rj-brand) 42%, transparent));
+  transition: filter var(--rj-dur-base) var(--rj-ease-out);
+}
+#site-name:hover {
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--rj-brand) 72%, transparent));
 }
 .pagination .page-number.current, .pagination .page-number:hover {
   background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
@@ -1795,15 +1791,57 @@ a:hover { color: var(--rj-brand-2); }
   border-color: color-mix(in srgb, var(--rj-brand) 50%, transparent);
   box-shadow: 0 10px 28px color-mix(in srgb, var(--rj-ink-glow) 30%, transparent), 0 22px 60px var(--rj-shadow-6), inset 0 1px 0 var(--rj-hairline-6);
 }
-#nav .menus_item_child {
-  background: color-mix(in srgb, var(--rj-ink-surface) 72%, transparent);
-  backdrop-filter: blur(26px) saturate(170%);
-  -webkit-backdrop-filter: blur(26px) saturate(170%);
-  border: 1px solid var(--rj-hairline-5);
-  border-radius: 18px;
-  box-shadow: 0 14px 38px var(--rj-shadow-6), inset 0 1px 0 var(--rj-hairline-4);
+/* —— 右上角导航下拉：通透毛玻璃（低底色 + 高饱和模糊，背景内容能透出来） —— */
+/* 选择器需带全 .menus_items .menus_item 链，否则被主题同权重规则（#nav .menus_items .menus_item .menus_item_child）压掉 */
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) {
+  padding: 6px;
+  /* 双层：半透明底色（透）+ 左上斜向高光（玻璃反光面，纯黑底上也能看出材质） */
+  background-color: color-mix(in srgb, var(--rj-ink-surface) 46%, transparent);
+  background-image: linear-gradient(157deg,
+    var(--rj-hairline-7) 0%,
+    transparent 42%,
+    transparent 100%);
+  backdrop-filter: blur(36px) saturate(190%) brightness(0.84);
+  -webkit-backdrop-filter: blur(36px) saturate(190%) brightness(0.84);
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 26%, transparent);
+  border-top-color: var(--rj-hairline-7);
+  border-radius: 20px;
+  box-shadow:
+    0 22px 52px var(--rj-shadow-6),
+    inset 0 1px 0 var(--rj-hairline-6),
+    inset 0 -24px 46px -36px color-mix(in srgb, var(--rj-brand) 100%, transparent);
 }
-#nav .menus_item_child li a { border-radius: 10px; }
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li { border-radius: 13px; }
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a {
+  padding: 10px 16px;
+  border-radius: 13px;
+  transition: color var(--rj-dur-fast) var(--rj-ease-out), text-shadow var(--rj-dur-fast) var(--rj-ease-out);
+}
+/* —— 下拉菜单：文字 / 图标配色（正文冷白提高可读性，图标保留品牌紫） —— */
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a {
+  color: color-mix(in srgb, var(--rj-ink-text) 90%, transparent) !important;
+  text-shadow: 0 1px 3px color-mix(in srgb, var(--rj-ink-cast) 45%, transparent);
+}
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a i {
+  min-width: 1.15em;
+  text-align: center;
+  color: var(--rj-brand-3);
+  transition: color var(--rj-dur-fast) var(--rj-ease-out), transform var(--rj-dur-base) var(--rj-ease-spring);
+}
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover {
+  background-image: linear-gradient(135deg,
+    color-mix(in srgb, var(--rj-brand) 26%, transparent),
+    color-mix(in srgb, var(--rj-brand-2) 15%, transparent));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 30%, transparent);
+}
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover a {
+  color: var(--rj-brand-6) !important;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--rj-brand) 55%, transparent);
+}
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover a i {
+  color: var(--rj-brand-8) !important;
+  transform: scale(1.14);
+}
 #sidebar #sidebar-menus { background: color-mix(in srgb, var(--rj-ink-surface) 72%, transparent); backdrop-filter: blur(26px) saturate(170%); -webkit-backdrop-filter: blur(26px) saturate(170%); }
 .aplayer.aplayer-fixed .aplayer-body {
   border-radius: 18px;
@@ -1820,10 +1858,11 @@ a:hover { color: var(--rj-brand-2); }
 #article-container img { border-radius: 18px; }
 .post_cover { border-radius: 18px; overflow: hidden; }
 
-/* —— 打赏/加入我们 二维码菜单：纯透明，只留二维码与文字 —— */
-#nav .menus_item_child.rj-qr-menu,
-#sidebar-menus .menus_item_child.rj-qr-menu {
-  position: relative;
+/* —— 打赏/加入我们 二维码菜单：纯透明，只留二维码与文字 ——
+   选择器必须补齐 .menus_items .menus_item 链，否则被主题的
+   #nav .menus_items .menus_item .menus_item_child 背景/圆角/阴影压掉（此前一直显示为实心深板） */
+#nav .menus_items .menus_item .menus_item_child.rj-qr-menu,
+#sidebar-menus .menus_items .menus_item .menus_item_child.rj-qr-menu {
   display: none;
   flex-direction: row;
   gap: 14px;
@@ -1832,13 +1871,23 @@ a:hover { color: var(--rj-brand-2); }
   width: auto;
   border-radius: 0;
   background: transparent;
+  background-image: none;
   border: none;
   box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
-#nav .menus_item:hover .menus_item_child.rj-qr-menu,
-#sidebar-menus .menus_item:hover .menus_item_child.rj-qr-menu {
+#nav .menus_items .menus_item:hover .menus_item_child.rj-qr-menu,
+#sidebar-menus .menus_items .menus_item:hover .menus_item_child.rj-qr-menu {
   display: flex;
   animation: rjQrIn 0.22s ease;
+}
+/* 导航栏里的二维码菜单沿用主题的绝对定位（挂在导航项下方，右对齐），
+   不能改成 relative，否则会被塞进导航条内部而错位 */
+#nav .menus_items .menus_item .menus_item_child.rj-qr-menu {
+  position: absolute;
+  right: 0;
+  margin-top: 8px;
 }
 @keyframes rjQrIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -1859,12 +1908,14 @@ a:hover { color: var(--rj-brand-2); }
   transform: translateY(-2px);
   color: var(--rj-text-inverse) !important;
 }
-/* 二维码方形圆角，无背景无描边 */
+/* 二维码按原始比例完整显示：qq.png 是 1047×677 的横版合图，
+   用固定 108×108 + cover 会把二维码裁掉一半，改为定高、宽度自适应 */
 .rj-qr-item img {
-  width: 108px;
   height: 108px;
+  width: auto;
+  max-width: 210px;
   border-radius: 10px !important;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 .rj-qr-item span {
@@ -1951,7 +2002,7 @@ a:hover { color: var(--rj-brand-2); }
   #recent-posts > .recent-post-item, .layout_post > #page, .layout_post > #post,
   #aside-content .card-widget { border-radius: 18px; }
   #rj-globe canvas { height: 210px; }
-  #nav .menus_item_child.rj-qr-menu { min-width: 300px; }
+  #nav .menus_items .menus_item .menus_item_child.rj-qr-menu { min-width: 300px; }
   .rj-qr-item img { width: 86px; height: 86px; }
 }
 
@@ -2658,13 +2709,43 @@ a:hover { color: var(--rj-brand-2); }
 [data-theme='light'] #nav #search-button {
   color: var(--rj-text-strong);
 }
-[data-theme='light'] #nav .menus_item_child {
-  background: color-mix(in srgb, var(--rjp-white) 92%, transparent);
-  border: 1px solid color-mix(in srgb, var(--rj-ink-border) 10%, transparent);
-  box-shadow: 0 14px 38px color-mix(in srgb, var(--rj-ink-shadow) 12%, transparent);
+[data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) {
+  padding: 6px;
+  background-color: color-mix(in srgb, var(--rjp-white) 64%, transparent);
+  background-image: linear-gradient(157deg,
+    color-mix(in srgb, var(--rjp-white) 60%, transparent) 0%,
+    transparent 46%);
+  backdrop-filter: blur(32px) saturate(185%) brightness(1.03);
+  -webkit-backdrop-filter: blur(32px) saturate(185%) brightness(1.03);
+  border: 1px solid color-mix(in srgb, var(--rj-ink-border) 12%, transparent);
+  border-top-color: color-mix(in srgb, var(--rjp-white) 70%, transparent);
+  border-radius: 20px;
+  box-shadow:
+    0 20px 46px color-mix(in srgb, var(--rj-ink-shadow) 16%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 75%, transparent);
 }
-[data-theme='light'] #nav .menus_item_child a:hover {
-  background: color-mix(in srgb, var(--rj-brand) 10%, transparent);
+[data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a {
+  color: var(--rj-ink-text) !important;
+  text-shadow: none;
+}
+[data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover a {
+  color: var(--rj-brand) !important;
+  text-shadow: none;
+}
+[data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover {
+  background-image: none;
+  background-color: color-mix(in srgb, var(--rj-brand) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 22%, transparent);
+}
+/* 浅底上换成更深的紫（保证白底对比度），且必须补回 background-clip，
+   否则 background 简写会把 background-clip 重置成 border-box，文字变成一块色块 */
+[data-theme='light'] #site-name {
+  background: linear-gradient(135deg, var(--rj-brand) 0%, var(--rj-brand-2) 55%, var(--rj-brand-3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: none;
 }
 
 /* 卡片：提高不透明度，让浅底不被深图污染 */
