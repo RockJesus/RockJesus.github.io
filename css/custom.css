@@ -3063,12 +3063,27 @@ body {
   border-left-color: color-mix(in srgb, var(--rj-hud) 55%, var(--rj-brand));
 }
 
-/* ---------- 7. 页脚：双品牌铭文 ---------- */
+/* ---------- 7. 页脚：双品牌铭牌（logo 在上，文字在下） ---------- */
+/* 顶部装饰细线 */
 .footer_custom_text::before {
-  content: 'ALIENWARE × APPLE';
+  content: '';
   display: block;
+  margin: 20px auto 15px;
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--rjp-white) 42%, transparent),
+    transparent);
+}
+
+/* 铭牌本体：ALIENWARE / APPLE 两列，各列 logo 与文字竖向居中对齐 */
+.rj-brand-mark {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 13px;
   margin: 0 auto 18px;
-  padding-top: 20px;
   width: fit-content;
   font-family: var(--rj-font-mono);
   font-size: 11px;
@@ -3077,11 +3092,36 @@ body {
   letter-spacing: 0.34em;
   text-indent: 0.34em;
   color: color-mix(in srgb, var(--rjp-white) 86%, transparent);
-  background:
-    linear-gradient(90deg,
-      transparent,
-      color-mix(in srgb, var(--rjp-white) 42%, transparent),
-      transparent) top center / 120px 1px no-repeat;
+}
+.rj-brand-mark__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin-right: -0.34em;   /* 抵消末位字距，让两侧间距对称 */
+  white-space: nowrap;
+}
+.rj-brand-mark__x {
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-indent: 0;
+  opacity: 0.6;
+}
+/* 单色 logo：mask 取形状 + 背景取 currentColor，自动跟随深浅主题 */
+.rj-brand-mark__logo {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
+  -webkit-mask: var(--rj-mark) center / contain no-repeat;
+  mask: var(--rj-mark) center / contain no-repeat;
+}
+.rj-brand-mark__logo--aw { --rj-mark: url(/img/brand/logo-alienware.svg); }
+.rj-brand-mark__logo--apple {
+  --rj-mark: url(/img/brand/logo-apple.svg);
+  width: 24px;
+  height: 24px;
 }
 
 /* ---------- 8. 亮色：Apple 形态 ---------- */
@@ -3161,12 +3201,14 @@ body {
   color: var(--rj-brand);
 }
 [data-theme='light'] .footer_custom_text::before {
-  color: var(--rjp-apple-gray);
   background:
     linear-gradient(90deg,
       transparent,
       var(--rjp-apple-line),
-      transparent) top center / 120px 1px no-repeat;
+      transparent);
+}
+[data-theme='light'] .rj-brand-mark {
+  color: var(--rjp-apple-gray);
 }
 
 /* 亮色首屏取景框：中性灰，避免青在白底上过暗显脏 */
