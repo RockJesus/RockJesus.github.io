@@ -557,7 +557,7 @@
           var actx = new AC();
           var srcNode = actx.createMediaElementSource(au);
           var an = actx.createAnalyser();
-          an.fftSize = 256;
+          an.fftSize = 2048;              // 采样率可能是 44.1k~192k，用大窗保证 9kHz 内有足够 bin
           an.smoothingTimeConstant = 0.74;
           an.minDecibels = -88;
           srcNode.connect(an);
@@ -565,6 +565,7 @@
           viz.actx = actx;
           viz.an = an;
           viz.data = new Uint8Array(an.frequencyBinCount);
+          viz.binHz = actx.sampleRate / an.fftSize;   // 每个 bin 的频率宽度，映射要用
         } catch (e) {
           viz.an = null;
         }
@@ -584,24 +585,47 @@
       }
 
       // 频谱 → 36 根柱子（对数采样，前后镜像，视觉上左右对称）
+      // 按频率(40Hz~9kHz)映射而非写死 bin 序号：采样率可能是 44.1k~192k，
+      // 写死 maxBin=56 在 192kHz 下只有 7kHz 内有效，bin 24+ 全是超声波空数据
+      // —— 这正是"环下半圈（高频段）完全不动"的根因。
+      // 等响度补偿：音乐能量集中在低频，把高频段抬 0.7→3.0 倍。
+      var F_LO = 40, F_HI = 9000;
       function sampleBars(d) {
-        var maxBin = Math.min(d.length - 1, 56);   // 约到 10kHz
+        var binHz = viz.binHz || 187.5;
+        var lo = Math.max(1, Math.floor(F_LO / binHz));
+        var hi = Math.min(d.length - 1, Math.ceil(F_HI / binHz));
+        if (hi <= lo) hi = lo + 1;
         var half = EQ_N / 2;
         var tmp = [];
         for (var i = 0; i < half; i++) {
           var t0 = Math.pow(i / (half - 1), 1.7);
           var t1 = Math.pow((i + 1) / (half - 1), 1.7);
-          var lo = Math.min(maxBin, Math.floor(t0 * maxBin));
-          var hi = Math.max(lo + 1, Math.min(maxBin, Math.floor(t1 * maxBin)));
+          var b0 = Math.min(hi, Math.floor(lo * Math.pow(hi / lo, t0)));
+          var b1 = Math.max(b0 + 1, Math.min(hi, Math.ceil(lo * Math.pow(hi / lo, t1))));
           var sum = 0, n = 0;
-          for (var j = lo; j <= hi; j++) { sum += d[j]; n++; }
-          tmp.push(n ? (sum / n) / 255 : 0);
+          for (var j = b0; j <= b1; j++) { sum += d[j]; n++; }
+          var w = 0.7 + 2.3 * Math.pow(i / (half - 1), 1.2);
+          tmp.push(n ? ((sum / n) / 255) * w : 0);
         }
         var out = [];
         for (var k = 0; k < EQ_N; k++) {
           out.push(k < half ? tmp[k] : tmp[EQ_N - 1 - k]);
         }
         return out;
+      }
+
+      // 每频段自动增益（AGC）：各频段按自己的近期包络归一化，高频再弱也能随节奏起落。
+      // 包络要慢衰减（0.995/帧 ≈ 2.3s 半衰期）：镲片/擦片是稀疏脉冲，衰减太快
+      // 包络会塌回地板，输出就恒定了 —— 这正是"下半圈不动"的第二根因。
+      var vizEnv = [];
+      for (var vei = 0; vei < EQ_N; vei++) vizEnv.push(0);
+      function agc(bars) {
+        for (var i = 0; i < EQ_N; i++) {
+          var v = bars[i];
+          vizEnv[i] = Math.max(v, vizEnv[i] * 0.995, 0.02);
+          var g = v / vizEnv[i];
+          bars[i] = g / (1 + 0.35 * g);   // 饱和曲线：g=1.6→0.98，软限幅防溢出画布
+        }
       }
 
       function drawEq(bars, glow) {
@@ -633,11 +657,13 @@
         viz.raf = requestAnimationFrame(frame);
         var au = ap.audio;
         if (!au || au.paused) return;
-        var bars, low;
+        var bars, low, real = false;
         if (viz.an && viz.actx && viz.actx.state === 'running') {
           viz.an.getByteFrequencyData(viz.data);
           bars = sampleBars(viz.data);
           low = (bars[0] + bars[1] + bars[2]) / 3;
+          agc(bars);            // 每频段自动增益：低频拿去算 low/律动，柱子各自归一化
+          real = true;
         } else {
           // 合成节拍：约 92 BPM，kick 打点 + 慢速起伏，只在拿不到真实频谱时使用
           var t = now / 1000;
@@ -650,13 +676,15 @@
             bars.push(low * (0.4 + 0.6 * Math.abs(Math.sin(t * 2.1 + i * 0.72))));
           }
         }
-        // 动态归一化：音乐各频段能量差异大，不归一化柱子几乎一样长，看不出律动
-        var peak = 0;
-        for (var pi = 0; pi < EQ_N; pi++) { if (bars[pi] > peak) peak = bars[pi]; }
-        if (peak > 0.1) {
-          for (var pj = 0; pj < EQ_N; pj++) {
-            // 开方压缩动态范围：高频本来就弱，不抬一手环的两侧会空掉
-            bars[pj] = Math.min(1, Math.pow(bars[pj] / peak, 0.72) * 0.94);
+        // 动态归一化（仅合成节拍路径）：真实频谱已经过 AGC，各频段都在 0~1，
+        // 再按全局峰值归一化会把高频重新压扁，底部又会不动
+        if (!real) {
+          var peak = 0;
+          for (var pi = 0; pi < EQ_N; pi++) { if (bars[pi] > peak) peak = bars[pi]; }
+          if (peak > 0.1) {
+            for (var pj = 0; pj < EQ_N; pj++) {
+              bars[pj] = Math.min(1, Math.pow(bars[pj] / peak, 0.72) * 0.94);
+            }
           }
         }
         // 平滑：上升快、回落慢，跳起来有弹性但不抖
@@ -690,6 +718,7 @@
             eq2d.clearRect(0, 0, VIZ, VIZ);
           }
           for (var i = 0; i < EQ_N; i++) viz.smooth[i] = 0;
+          for (var j = 0; j < EQ_N; j++) vizEnv[j] = 0;
         }, 460);
       }
       function syncViz() {
