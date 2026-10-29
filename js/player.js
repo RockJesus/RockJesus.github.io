@@ -1472,7 +1472,39 @@
     }
     // 赛博朋克数据光点（固定种子伪随机，青/洋红交替）
     // 五大洲轮廓：world-atlas TopoJSON 合并大陆岸线，霓虹描边投影到球面
-    var landGeo = null;
+    var landGeo = null;     // 合并后的陆地多边形（填充 + 海岸线）
+    var borderGeo = null;   // topojson.mesh 全部弧段 = 国界 + 海岸线（国界细描边）
+    var landRings = null;   // 预计算单位球坐标（每环 Float32Array，stride 3：[cosLat*sinLng, sinLat, cosLat*cosLng]）
+    var borderRings = null; // 同上；避免每帧对 1.3 万点逐个做 sin/cos
+    // 把经纬度环转成单位球坐标缓存：加载时算一次，之后每帧只做旋转矩阵乘法
+    function buildRings(geo, isMultiPoly) {
+      var rings = [], gi, pi, ri, ring, n, out, lat, lng, latR, cosLat;
+      if (!geo) return null;
+      for (gi = 0; gi < geo.length; gi++) {
+        if (isMultiPoly) {
+          for (pi = 0; pi < geo[gi].length; pi++) { rings.push(geo[gi][pi]); }
+        } else {
+          rings.push(geo[gi]);
+        }
+      }
+      var res = [];
+      for (ri = 0; ri < rings.length; ri++) {
+        ring = rings[ri];
+        n = ring.length;
+        if (n < 2) continue;
+        out = new Float32Array(n * 3);
+        for (var i = 0; i < n; i++) {
+          lng = ring[i][0]; lat = ring[i][1];
+          latR = lat * Math.PI / 180;
+          cosLat = Math.cos(latR);
+          out[i * 3] = cosLat * Math.sin(lng * Math.PI / 180);
+          out[i * 3 + 1] = Math.sin(latR);
+          out[i * 3 + 2] = cosLat * Math.cos(lng * Math.PI / 180);
+        }
+        res.push(out);
+      }
+      return res;
+    }
     function loadLand() {
       var s = document.createElement('script');
       s.src = '/js/topojson-client.min.js?v=110';
@@ -1484,42 +1516,72 @@
             try {
               var merged = topojson.merge(topo, [topo.objects.countries]);
               landGeo = merged && merged.coordinates;
-              if (landGeo && landGeo.length) { drawLand(); }
-            } catch (e) { landGeo = null; }
+              // 无 filter 的 mesh = 所有弧段：既是海岸线也是每一段国界，用来画全部国家轮廓
+              var mesh = topojson.mesh(topo, topo.objects.countries);
+              borderGeo = mesh && mesh.coordinates;
+              // 缓存单位球坐标，把每帧的三角函数开销挪到加载时
+              landRings = buildRings(landGeo, true);
+              borderRings = buildRings(borderGeo, false);
+              if ((landGeo && landGeo.length) || (borderGeo && borderGeo.length)) { drawLand(); }
+            } catch (e) { landGeo = null; borderGeo = null; landRings = null; borderRings = null; }
           })
-          .catch(function () { landGeo = null; });
+          .catch(function () { landGeo = null; borderGeo = null; landRings = null; borderRings = null; });
       };
-      s.onerror = function () { landGeo = null; };
+      s.onerror = function () { landGeo = null; borderGeo = null; landRings = null; borderRings = null; };
       document.head.appendChild(s);
     }
-    function drawLand() {
-      if (!landGeo) return;
-      var gi, pi, ri, lp, ring, poly, needMove;
-      ctx.save();
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = 'rgba(125,240,255,.92)';
-      ctx.shadowColor = 'rgba(34,211,238,.95)';
-      ctx.shadowBlur = 9;
-      ctx.beginPath();
-      for (gi = 0; gi < landGeo.length; gi++) {
-        poly = landGeo[gi];
-        for (pi = 0; pi < poly.length; pi++) {
-          ring = poly[pi];
-          if (ring.length < 3) continue;
-          needMove = true;
-          for (ri = 0; ri < ring.length; ri++) {
-            lp = proj(ring[ri][1], ring[ri][0]);
-            if (lp.z < 0) { needMove = true; continue; }
-            if (needMove) { ctx.moveTo(lp.x, lp.y); needMove = false; }
-            else { ctx.lineTo(lp.x, lp.y); }
-          }
+    // 用缓存单位球坐标绘制：每帧只做 2 次乘法旋转，不再逐点三角函数
+    // x = cx + R*(ux*cosLon - uz*sinLon)   y = cy - R*uy   z = uz*cosLon + ux*sinLon
+    function strokeRings(rings, closeFill) {
+      var cl = Math.cos(lon * Math.PI / 180), sl = Math.sin(lon * Math.PI / 180);
+      var i, ring, n, ux, uy, uz, z, needMove, len = rings.length;
+      for (var r = 0; r < len; r++) {
+        ring = rings[r];
+        n = ring.length / 3;
+        needMove = true;
+        for (i = 0; i < n; i++) {
+          ux = ring[i * 3]; uy = ring[i * 3 + 1]; uz = ring[i * 3 + 2];
+          z = uz * cl + ux * sl;
+          if (z < 0) { needMove = true; continue; }   // 背面裁掉
+          if (needMove) { ctx.moveTo(cx + R * (ux * cl - uz * sl), cy - R * uy); needMove = false; }
+          else { ctx.lineTo(cx + R * (ux * cl - uz * sl), cy - R * uy); }
         }
       }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(34,211,238,.07)';
-      ctx.fill();
-      ctx.restore();
+    }
+    function drawLand() {
+      var gi, pi, ri, ring, poly, needMove, li, line, lp;
+      // 没有缓存时退化为逐点投影（老路径），保证任何情况下都能显示
+      if (!landRings && !borderRings) {
+        if (!landGeo && !borderGeo) return;
+        landRings = buildRings(landGeo, true);
+        borderRings = buildRings(borderGeo, false);
+        if (!landRings && !borderRings) return;
+      }
+      // ① 陆地面（合并多边形）：极淡填充，先铺底
+      if (landRings) {
+        ctx.save();
+        ctx.beginPath();
+        strokeRings(landRings);
+        ctx.fillStyle = 'rgba(34,211,238,.07)';
+        ctx.fill();
+        // ② 海岸线：霓虹发光描边（与国界区分层次）
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = 'rgba(125,240,255,.92)';
+        ctx.shadowColor = 'rgba(34,211,238,.95)';
+        ctx.shadowBlur = 9;
+        ctx.stroke();
+        ctx.restore();
+      }
+      // ③ 全部国家轮廓：mesh 的每段弧（含国界与海岸线），细线、低亮度、不加发光
+      if (borderRings) {
+        ctx.save();
+        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = 'rgba(147,235,255,.46)';
+        ctx.beginPath();
+        strokeRings(borderRings);
+        ctx.stroke();
+        ctx.restore();
+      }
     }
     function flagEmoji(cc) {
       if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return '🌍';
