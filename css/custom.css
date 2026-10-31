@@ -4847,3 +4847,272 @@ a.site-page.group > .rj-nav-icon:last-child {
 .menus_item:hover > a.group > .rj-nav-icon:last-child { transform: rotate(180deg); }
 /* 搜索按钮（无文字前的图标）与文字间自然留隙 */
 #search-button .rj-nav-icon { vertical-align: -0.2em; }
+
+/* ============================================================================
+   第三轮评审 · 批次 A / B / C（v1.9.20）
+   A：主列侧栏间距、玻璃卡统一底色、打字机提速（配置侧）
+   B：内页 header 压暗、亮色首屏换调、正文降噪、链接可辨、亮色面板补边界、社交图标成组
+   C：手机封面通栏、浮标归拢、音乐提示条居中、访客药丸可读
+   ============================================================================ */
+
+/* ---------- A1. 主列与侧栏：补 28px 间距 ----------
+   实测修复前 cardRight 996 / asideLeft 996 —— 两个容器边界完全重合，
+   视觉上的「缝」只是卡片 20px 圆角露出的背景，不是间距。 */
+#content-inner.layout {
+  column-gap: 28px;
+}
+/* 主列在 flex 里必须允许收缩，否则加 gap 会溢出 */
+#content-inner.layout > #recent-posts,
+#content-inner.layout > #post,
+#content-inner.layout > #page {
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  #content-inner.layout { column-gap: 0; }
+}
+
+/* ---------- A2. 玻璃卡：给一个统一的底色 ----------
+   卡片原来是 55%/38% 两档透明的渐变，背景大图的色相直接透上来：
+   主列背后是外星人眼（偏红紫），侧栏背后是星球（偏青），同一屏两套色。
+   把底色的不透明度提到 74%/56%，色相仍会渗一点（保留玻璃感），但两列回到同一条基准线上。 */
+:root:not([data-theme='light']) #recent-posts > .recent-post-item,
+:root:not([data-theme='light']) .layout_page > div:first-child:not(.recent-posts),
+:root:not([data-theme='light']) #aside-content .card-widget {
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--rj-ink-surface) 86%, transparent),
+    color-mix(in srgb, var(--rj-ink-surface-2) 66%, transparent));
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+}
+
+/* ---------- B1. 内页 header：白字压在亮色封面图上 ----------
+   归档/标签页的 top_img 是亮银色图，白字 39.9px 只靠 0.15 阴影撑不住。
+   暗色 78%→52% 的碳黑渐变，亮色单独给一档中性压暗（不要紫调，会把银图染色）。 */
+#page-header.not-home-page::before {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--rj-carbon) 78%, transparent) 0%,
+    color-mix(in srgb, var(--rj-carbon) 52%, transparent) 100%);
+}
+/* 亮色内页统一「浅底 + 深墨字」，和首屏、列表同一套明度逻辑。
+   压暗头图 + 白字在亮色主题里永远两头不讨好（图偏亮时白字发灰，图偏暗时整块突兀）。 */
+[data-theme='light'] #page-header.not-home-page::before {
+  background: linear-gradient(180deg, rgba(246, 247, 252, 0.93) 0%, rgba(240, 242, 250, 0.88) 100%);
+}
+[data-theme='light'] #page-header.post-bg::before {
+  background: linear-gradient(180deg, rgba(246, 247, 252, 0.92) 0%, rgba(244, 245, 250, 0.95) 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* ---------- B2. 亮色首屏：从「深色照片 + 亮字」换成「浅底 + 深墨字」 ----------
+   修复前亮色主题首屏仍是深色星空照，与下方浅色列表完全割裂；
+   现在 ::before 给一层 88% 的冷白，照片只留一点纹理，标题转深墨渐变。 */
+[data-theme='light'] #page-header.full_page::before {
+  /* 取景框那条规则给了 opacity:.5，会把 88% 的冷白压成灰 —— 必须收回 1 */
+  opacity: 1;
+  background-color: rgba(246, 247, 252, 0.88);
+}
+/* ::before 是内嵌的（inset: 86px 26px 26px），四周 26px 会露出 #page-header 自己的
+   深色星空头图 —— 暗色下看不出来，亮色下就是一圈黑框。亮色首屏直接不要头图。 */
+[data-theme='light'] #page-header.full_page {
+  /* 头图是模板写的行内 style，只能 !important 压掉；
+     纯色底面在 84vh 高度上会显得空，补一层极淡的径向光做纵深 */
+  background-image: radial-gradient(72% 62% at 50% 44%, #fdfdff 0%, #f1f2fa 58%, #eaecf7 100%) !important;
+  background-color: #f4f5fa;
+}
+[data-theme='light'] #page-header.full_page #site-title {
+  background: linear-gradient(90deg,
+    var(--rj-brand-4) 0%,
+    var(--rj-accent) 54%,
+    var(--rj-accent-4) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: none;
+}
+/* 内页（归档/标签/分类）的标题复用了同一个 #site-title，亮色下要单独给深墨实色，
+   否则会继承首屏的渐变 —— 深墨落在压暗的头图上等于看不见。 */
+[data-theme='light'] #page-header:not(.full_page) #site-title {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: var(--rj-brand-4);
+  color: var(--rj-brand-4);
+  filter: none;
+}
+[data-theme='light'] #page-header.full_page #site-subtitle #subtitle {
+  color: #47506b;
+  text-shadow: none;
+}
+[data-theme='light'] #page-header.full_page #site-info::after {
+  border-left-color: rgba(14, 116, 144, 0.45);
+  color: #4b5266;
+  text-shadow: none;
+}
+[data-theme='light'] .rj-hero-btn {
+  border-color: rgba(15, 23, 42, 0.14);
+  background-color: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 8px 22px rgba(20, 22, 40, 0.10), inset 0 1px 0 #fff;
+  color: #1f2537;
+}
+[data-theme='light'] .rj-hero-btn:hover {
+  background-color: rgba(255, 255, 255, 0.92);
+  color: var(--rj-brand-4);
+}
+[data-theme='light'] .rj-hero-btn.is-primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(124, 58, 237, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+[data-theme='light'] .rj-hero-btn.is-primary:hover {
+  color: #fff;
+}
+[data-theme='light'] #page-header.full_page #site_social_icons a {
+  color: #47506b;
+}
+
+/* ---------- B3. 正文降噪：h2 收一档、竖条收细 ----------
+   ah.md 一页 15 个 h2，26px 加 3px 霓虹竖条等于把目录感放大。
+   h2 收到 22px、竖条 3px→2px 且降到 45% 不透明，层级靠字号与留白，不靠发光。 */
+#article-container h2 {
+  font-size: 22px;
+}
+#article-container h2::before {
+  width: 2px;
+  opacity: 0.45;
+  box-shadow: none;
+}
+#article-container h2:hover::before {
+  opacity: 0.9;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand-8) 40%, transparent);
+}
+
+/* ---------- B4. 正文链接：看得出是链接 ----------
+   原来只有 1px 渐变底边 + 与正文只差一档的颜色，扫读时找不到。
+   改真下划线（offset 3px），颜色提到 brand-3，暗亮都够对比。 */
+#article-container a:not(.headerlink):not([data-fancybox]) {
+  color: var(--rj-brand-3);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--rj-brand-3) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  background-image: none;
+}
+#article-container a:not(.headerlink):not([data-fancybox]):hover {
+  color: var(--rj-brand-4);
+  text-decoration-color: var(--rj-brand-4);
+  text-decoration-thickness: 2px;
+  background-image: none;
+}
+
+/* ---------- B5. 亮色文章面板：把边界画出来 ----------
+   亮色页面底 #f5f5f7 / 面板纯白，只差 3% 明度，面板像浮在雾里。 */
+[data-theme='light'] #body-wrap.post #post,
+[data-theme='light'] #body-wrap.page #page {
+  border-color: color-mix(in srgb, var(--rj-ink-border) 16%, transparent);
+  box-shadow:
+    0 1px 3px rgba(20, 22, 40, 0.05),
+    0 12px 34px rgba(20, 22, 40, 0.08);
+}
+
+/* ---------- C1. 手机端封面：图在上通栏 ----------
+   修复前 cardW 380 / coverW 159，左右各内缩 111px，图片居中成一小块。 */
+@media (max-width: 768px) {
+  #recent-posts > .recent-post-item {
+    height: auto;
+  }
+  /* 必须抄全批次 B 的 `#recent-posts > .recent-post-item > .post_cover` 链，
+     否则 42% 那条（1 id + 2 class）压过 `#recent-posts .post_cover`（1 id + 1 class） */
+  #recent-posts > .recent-post-item > .post_cover {
+    width: 100%;
+    height: 178px;
+    border-radius: 20px 20px 0 0;
+  }
+  #recent-posts > .recent-post-item > .post_cover img.post_bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px 20px 0 0;
+  }
+  #recent-posts > .recent-post-item > .post_cover::after {
+    border-radius: 20px 20px 0 0;
+  }
+  #recent-posts > .recent-post-item .recent-post-info {
+    padding: 14px 18px 16px;
+  }
+}
+
+/* ---------- C2. 手机端右下浮标：竖排、不出画布 ----------
+   修复前 #rightside 里两个 40px 按钮横排（x=354 / x=398），
+   后者整个超出 390 视口 —— 返回顶部在手机上根本点不到。 */
+@media (max-width: 768px) {
+  #rightside {
+    right: 12px;
+    bottom: 84px;
+    width: auto;
+  }
+  #rightside > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  #rightside > div > button,
+  #rightside > div > a {
+    margin: 0 !important;
+  }
+}
+
+/* ---------- C3. 音乐提示条：底部居中胶囊 ----------
+   原来 left:16px / bottom:100px / width:328px，正好压住首张卡片的元信息行。 */
+.rj-muted-tip {
+  left: 50%;
+  right: auto;
+  bottom: 92px;
+  width: auto;
+  max-width: min(420px, calc(100vw - 32px));
+  transform: translateX(-50%);
+  padding: 9px 20px;
+}
+@media (max-width: 768px) {
+  .rj-muted-tip {
+    bottom: 88px;
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* ---------- C4. 访客分布药丸：可读性 ---------- */
+.rj-globe-stat-item {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--rj-text-strong);
+  background: color-mix(in srgb, var(--rj-brand) 16%, transparent);
+  border-color: color-mix(in srgb, var(--rj-brand) 32%, transparent);
+  padding: 2px 10px;
+}
+/* 居中版入场动画：原 rjTipIn 只动 translateY，会把 translateX(-50%) 冲掉（动画期间贴到左边缘） */
+@keyframes rjTipInCenter {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.rj-muted-tip {
+  animation: rjTipInCenter 0.4s ease;
+}
+
+/* 侧栏卡片背后是亮青色星球，86% 仍能透出一层青调，和主列对不上；
+   单独给侧栏再提两档不透明度（模糊与高光不动，玻璃感保留）。 */
+:root:not([data-theme='light']) #aside-content .card-widget {
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--rj-ink-surface) 93%, transparent),
+    color-mix(in srgb, var(--rj-ink-surface-2) 80%, transparent));
+}
+
+/* 内页页头的标题容器必须排在 ::before 蒙层（z-index:1）之上，
+   否则亮色下 93% 的浅色蒙层会把标题洗成一层淡影。
+   ⚠️ 只处理 #page-site-info（归档/标签页）。#post-info 不能给 position ——
+   主题依赖它的 absolute + bottom:100px，改 relative 会让标题顶进导航栏（V14 踩过）。 */
+#page-header #page-site-info {
+  position: relative;
+  z-index: 2;
+}

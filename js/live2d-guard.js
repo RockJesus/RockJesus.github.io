@@ -29,7 +29,7 @@
     model: { jsonPath: '/live2dw/assets/miku.model.json' },
     // hOffset 0 = 贴右边缘：侧栏右边界在 1292 左右，模型 1240 起，只压住
     // 卡片右沿 50px；配合下方 CSS 的 z-index 让卡片盖在它上面，等于「从卡片后面探出来」。
-    display: { position: 'right', width: 200, height: 400, hOffset: 0, vOffset: -68 },
+    display: { position: 'right', width: 200, height: 400, hOffset: 0, vOffset: -28 },
     mobile: { show: false, scale: 0.5 },
     log: false,
     pluginJsPath: 'lib/',
