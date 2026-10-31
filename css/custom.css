@@ -2543,26 +2543,53 @@ a:hover { color: var(--rj-brand-2); }
     color-mix(in srgb, var(--rj-brand-2) 16%, transparent));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 32%, transparent);
 }
-/* —— 抽屉模式（窄屏）：胶囊整体收起，只留汉堡，否则会把导航撑出横向滚动 ——
+/* —— 抽屉模式（窄屏 / 手机）：菜单项收进抽屉，右上角只剩汉堡。
+   汉堡不能是裸图标 —— 左边站名是一枚玻璃胶囊，右上留一个光秃秃的图标会像没做完，
+   所以把 #menus 本身收成同款 38px 玻璃胶囊（手机 34px），里面只装一枚汉堡。
    注意必须压过上面的 .menus_items { display: flex }，主题的
    .hide-menu .menus_items { display: none } 权重不够。 */
 #nav.hide-menu #menus {
-  height: auto;
+  width: 38px;
+  height: 38px;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
   gap: 0;
+  justify-content: center;
+  border: 1px solid var(--rj-hairline-7);
+  border-radius: 19px;
+  background-color: color-mix(in srgb, var(--rj-ink-surface) 52%, transparent);
+  background-image: linear-gradient(157deg, var(--rj-hairline-6) 0%, transparent 46%);
+  backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
+  -webkit-backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
+  box-shadow: 0 10px 28px var(--rj-shadow-5), inset 0 1px 0 var(--rj-hairline-7);
 }
 #nav.hide-menu #menus::after { display: none; }
 #nav.hide-menu #menus .menus_items { display: none; }
-#nav.hide-menu #menus .site-page {
+/* 胶囊里只有一枚 18px 图标：铺满整个胶囊做居中，悬停只提亮图标（36px 见方没有铺底的余量） */
+#nav.hide-menu #menus #toggle-menu,
+#nav.hide-menu #menus #toggle-menu .site-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   padding: 0;
+  border-radius: 19px;
   background-image: none;
   box-shadow: none;
+}
+#nav.hide-menu #menus #toggle-menu .site-page:hover { background-image: none; }
+#nav.hide-menu #menus #toggle-menu:hover .site-page i { color: #fff; }
+[data-theme='light'] #nav.hide-menu #menus #toggle-menu:hover .site-page i { color: var(--rj-brand); }
+@media screen and (max-width: 768px) {
+  #nav.hide-menu #menus {
+    width: 34px;
+    height: 34px;
+    border-radius: 17px;
+  }
+  #nav.hide-menu #menus #toggle-menu,
+  #nav.hide-menu #menus #toggle-menu .site-page { border-radius: 17px; }
+  /* 34px 圆里 20px 宽的三道杠太满，收一档留出呼吸 */
+  #nav.hide-menu #menus #toggle-menu i { font-size: 15px; }
 }
 
 /* —— 右上角导航下拉：通透毛玻璃（低底色 + 高饱和模糊，背景内容能透出来） —— */
@@ -3637,6 +3664,16 @@ a:hover { color: var(--rj-brand-2); }
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 [data-theme='light'] #nav #menus::after { opacity: 0.7; }
+/* 亮色：汉堡胶囊与站名胶囊同色（上面的深色配方权重更高，必须单独覆盖） */
+[data-theme='light'] #nav.hide-menu #menus {
+  background-color: color-mix(in srgb, var(--rj-brand) 7%, rgba(255, 255, 255, 0.86));
+  background-image: linear-gradient(157deg, rgba(255, 255, 255, 0.62) 0%, transparent 46%);
+  backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
+  -webkit-backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
+  border-color: color-mix(in srgb, var(--rj-brand) 16%, transparent);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--rj-ink-shadow) 12%, transparent),
+              inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
 [data-theme='light'] #nav #menus #search-button::after {
   background: color-mix(in srgb, var(--rj-ink-border) 16%, transparent);
 }
