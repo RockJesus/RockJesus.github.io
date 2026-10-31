@@ -514,6 +514,16 @@ img {
 .aplayer .aplayer-loop {
   display: none !important;
 }
+/* APlayer 自带的居中错误提示（"An audio error occurred… N seconds."）：直链 403 时
+   会在圆盘正中弹出一块 70×122 的深灰圆角框，折叠态下正好垫在整个频谱环背后，
+   看起来就像播放器多了一块底板 → 彻底隐藏。跳过死链由 player.js 自己处理，
+   这里不需要任何提示文案。 */
+.aplayer .aplayer-notice,
+.aplayer .aplayer-notice.aplayer-notice-active {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
 
 /* —— 折叠态：完全透明的圆形唱片（只留封面本身，背景/描边/模糊底全部去掉） —— */
 .aplayer.aplayer-fixed.rj-pl-collapsed {
