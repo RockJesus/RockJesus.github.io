@@ -622,7 +622,9 @@
       // 写死 maxBin=56 在 192kHz 下只有 7kHz 内有效，bin 24+ 全是超声波空数据
       // —— 这正是"环下半圈（高频段）完全不动"的根因。
       // 等响度补偿：音乐能量集中在低频，把高频段抬 0.7→3.0 倍。
-      var F_LO = 40, F_HI = 9000;
+      // F_LO 40 → 100：40~100Hz（次低频）实测跳幅只有 0.2px，纯粹占着柱子不动。
+      // 抬到 100Hz 后 12 点方向能吃到底鼓基频，柱长才真的跟着鼓点走。
+      var F_LO = 100, F_HI = 6500;
       function sampleBars(d) {
         var binHz = viz.binHz || 187.5;
         var lo = Math.max(1, Math.floor(F_LO / binHz));
@@ -631,8 +633,12 @@
         var half = EQ_N / 2;
         var tmp = [];
         for (var i = 0; i < half; i++) {
-          var t0 = Math.pow(i / (half - 1), 1.7);
-          var t1 = Math.pow((i + 1) / (half - 1), 1.7);
+          // 指数 1.7 → 1.0 → 0.6。前两档都试过：只要上半圈有 8 根以上柱子落在
+          // 40~300Hz，它们就必然是"静止"的 —— 那个频段的能量波动实测不到 1%，
+          // 是噪声级，靠收窄归一化窗口也放不出来（收太窄就只剩抖）。
+          // 0.6 让 18 根柱子在第 6 根就爬到 600Hz，上半圈能吃到鼓点/贝斯泛音/人声基频。
+          var t0 = Math.pow(i / (half - 1), 0.6);
+          var t1 = Math.pow((i + 1) / (half - 1), 0.6);
           var b0 = Math.min(hi, Math.floor(lo * Math.pow(hi / lo, t0)));
           var b1 = Math.max(b0 + 1, Math.min(hi, Math.ceil(lo * Math.pow(hi / lo, t1))));
           var sum = 0, n = 0;
@@ -686,6 +692,7 @@
         var out = [];
         for (var k = 0; k < EQ_N; k++) {
           var raw = bars[k];
+          var d = Math.abs(k - halfN + 0.5) / halfN;   // 0=低频 1=高频
           // 绝对分量：全局归一化，保留低频鼓点的真实起伏
           var abs = Math.min(0.95, raw / gEnv);
           // 相对分量：raw ÷ 自身近期均值。1.0 = 刚好在平均水平，
@@ -693,12 +700,27 @@
           var m0 = vizMean[k] || (raw > 0 ? raw : 0.02);
           var rel = raw / Math.max(0.015, m0);
           vizMean[k] = m0 + (raw - m0) * MEAN_A;
-          var ag = (rel - 0.45) / 1.45;
+          // 归一化窗口随频段变化。低频（40~300Hz，贝斯持续音）能量本来就只波动
+          // ±3%，用高频那套 ±145% 的宽窗口等于把起伏压没了 —— 实测 12 点方向
+          // 跳幅 0.19~1.5px，而 6 点方向有 4~6px。低频改用窄窗口，
+          // 让 ±6% 的起伏就能铺满柱长；高频端窗口保持原值（用户认可的下半圈）。
+          var dd = Math.pow(d, 0.6);
+          var span = 0.12 + (1.45 - 0.12) * dd;   // 低频 0.12，高频 1.45
+          var mid = 0.94 + (0.45 - 0.94) * dd;    // rel=1 处两端都落在 ag≈0.4~0.5
+          var ag = (rel - mid) / span;
           if (ag < 0) ag = 0; else if (ag > 1) ag = 1;
-          var d = Math.abs(k - halfN + 0.5) / halfN;   // 0=低频 1=高频
-          var w = 0.2 + 0.62 * d;                  // 低频偏绝对，高频偏 AGC
-          out.push((abs * (1 - w) + ag * w) * (1 + 0.12 * punch));  // 打点时整环亮一下
-                                                                  // 增益别太大，否则整环一起顶满
+          // 低频段必须给 AGC 足够权重。abs = raw / 全局峰值包络，而低频 raw 常年
+          // 贴着峰值、再被上面的 min(0.95) 裁一刀 → 长短几乎恒定。实测四首歌
+          // 12 点方向跳幅只有 0.19~1.26px，而 6 点方向有 0.44~4.31px，
+          // 这就是"上半圈看着不动、下半圈在跳"的全部原因。
+          // 曲线不从 0.2 线性拉到 0.82，而是 0.55 → 0.82：高频端保持用户认可的原值不动。
+          var w = 0.55 + 0.27 * d;
+          var mix = abs * (1 - w) + ag * w;
+          // 补偿：abs 常年 0.95、ag 均值只有 0.38，AGC 占主导后整体会掉 2px 左右。
+          // 按 d 反向补回，让上半柱的绝对长度不变、只是跳起来。
+          var gain = 1 + 0.3 * (1 - d);
+          out.push(mix * gain * (1 + 0.12 * punch));  // 打点时整环亮一下
+                                                      // 增益别太大，否则整环一起顶满
         }
         return { bars: out, punch: punch };
       }
