@@ -681,9 +681,10 @@
         var maxLen = R - r0 - 3;            // 14.5px（原来 13.1）：留 3px 给辉光，否则柱子末端被画布硬切
         eq2d.lineCap = 'round';
 
-        // 辉光克制一点：原来 blur 到 18px 会向内糊住唱片封面、向外让 36 根柱子连成一片
+        // 辉光克制一点：原来 blur 到 18px 会向内糊住唱片封面、向外让 36 根柱子连成一片。
+        // 颜色改成每根柱子跟随自身色相（见循环内），不再统一用紫 ——
+        // 统一紫辉光只给青色柱子描了边，紫柱子反而和辉光糊成一片。
         eq2d.shadowBlur = 5 + glow * 7;
-        eq2d.shadowColor = 'rgba(139, 92, 246, ' + (0.22 + glow * 0.34).toFixed(2) + ')';
 
         for (var i = 0; i < EQ_N; i++) {
           var v = bars[i];
@@ -692,15 +693,40 @@
           var len = 2.2 + Math.pow(v, 1.05) * maxLen; // gamma 略>1：压住中间值，只有真峰值才顶满，
                                                       // 峰谷对比拉大 → 看起来才像在跳
           var c = Math.cos(a), sn = Math.sin(a);
-          var hue = 264 - 76 * (1 - Math.abs(i - EQ_N / 2) / (EQ_N / 2));   // 12 点紫、6 点青，左右对称
-          eq2d.strokeStyle = 'hsla(' + hue.toFixed(0) + ', 94%, ' + (58 + v * 24).toFixed(0) + '%, ' + (0.5 + v * 0.48).toFixed(2) + ')';
+          // t：1 = 12 点（最低频，紫），0 = 6 点（最高频，青），左右对称
+          var t = Math.abs(i - EQ_N / 2) / (EQ_N / 2);
+          var hue = 264 - 76 * (1 - t);
+          // 同样 HSL 亮度下，青(188°)的感知亮度约是紫(264°)的 1.6 倍 ——
+          // 实测上半环平均亮度 112、下半环 137（差 23%），上半看着"没效果"。
+          // 紫端整体抬一点亮度；真正让它立住的是下面那道亮芯。
+          var light = 58 + v * 24 + 8 * t - 2 * (1 - t);
+          var satur = 94 - 8 * t;
+          var alpha = (0.5 + v * 0.48).toFixed(2);
+          var col = 'hsla(' + hue.toFixed(0) + ', ' + satur.toFixed(0) + '%, ' + light.toFixed(0) + '%, ';
+          eq2d.strokeStyle = col + alpha + ')';
+          eq2d.shadowColor = col + (0.12 + glow * 0.26).toFixed(2) + ')';
           eq2d.lineWidth = 3.0;
           eq2d.beginPath();
           eq2d.moveTo(R + c * r0, R + sn * r0);
           eq2d.lineTo(R + c * (r0 + len), R + sn * (r0 + len));
           eq2d.stroke();
+          // 亮芯：柱身中间一道近乎白的细丝。紫色在深紫辉光 / 浅色玻璃面板上都容易糊成一团，
+          // 白芯让柱子轮廓和长度在任何背景上都读得出来。
+          // 只加在上半环（t 越大越强），下半环保持原本用户认可的青色表现，不整体泛白。
+          var core = (t - 0.3) / 0.45;
+          core = core < 0 ? 0 : (core > 1 ? 1 : core);
+          if (core > 0.01) {
+            eq2d.shadowBlur = 0;
+            eq2d.strokeStyle = 'hsla(' + hue.toFixed(0) + ', 96%, 96%, ' +
+              ((0.06 + v * 0.46) * core).toFixed(2) + ')';
+            eq2d.lineWidth = 1.1;
+            eq2d.stroke();
+            eq2d.shadowBlur = 5 + glow * 7;
+          }
         }
+        // 画出画布后把阴影状态复位，避免影响同 canvas 上的其他绘制
         eq2d.shadowBlur = 0;
+        eq2d.shadowColor = 'transparent';
       }
 
       function frame(now) {
@@ -941,12 +967,20 @@
     t.className = 'rj-muted-tip';
     t.textContent = '🔇 音乐已自动播放 · 点击页面任意处开启声音';
     document.body.appendChild(t);
-    // 提示条贴在播放器顶部上方，播放器展开歌单变高时跟着上移，避免压在歌单上
+    // 提示条贴在播放器顶部上方，播放器展开歌单变高时跟着上移，避免压在歌单上。
+    // 注意要按「环形频谱」的上沿算，而不是播放器盒子：频谱画布 104px 比 66px 的圆盘
+    // 四周各多出 19px，按播放器顶边放会把环的上半圈（12 点方向）整段压住。
     var place = function () {
       var p = document.querySelector('.aplayer.aplayer-fixed');
       if (!p || !t.parentNode) return;
       var r = p.getBoundingClientRect();
-      t.style.bottom = Math.round(window.innerHeight - r.top + 8) + 'px';
+      var top = r.top;
+      var eq = p.querySelector('.rj-pl-eq');
+      if (eq && getComputedStyle(eq).display !== 'none') {
+        var er = eq.getBoundingClientRect();
+        if (er.height > 0) top = Math.min(top, er.top);
+      }
+      t.style.bottom = Math.round(window.innerHeight - top + 8) + 'px';
     };
     place();
     t.__rjPlace = place;
