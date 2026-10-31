@@ -7,7 +7,7 @@
   // 仍返回旧歌单，而它恰恰响应最快（~250ms）——只要前一个源慢一点，它就会
   // 抢先返回旧数据，表现成「列表又变回 30 首」。宁可少一个兜底，也不要错数据。
   var PLAYLIST_URLS = [
-    '/data/playlist.json?v=1.2.1',                                            // 本站构建产物（主）
+    '/data/playlist.json?v=1.2.2',                                            // 本站构建产物（主，已剔除无直链曲目）
     'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'  // 素材仓直连（兜底）
   ];
   var SEED = {
