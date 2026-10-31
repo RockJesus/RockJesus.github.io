@@ -1727,6 +1727,15 @@ img {
     transparent);
   opacity: 0.8;
 }
+/* 主题给 hr::before 画的是一枚 FontAwesome 剪刀（content:'\f0c4'），
+   本地字体子集里没有这个码位 → Chrome 渲染成「方框+叉」的破图，
+   在手机抽屉那条虚线中间特别显眼。分隔线本身已经足够说明结构，装饰字形直接去掉。 */
+hr::before { content: none !important; }
+/* 抽屉里这条虚线顺手收成品牌紫：中性灰压在玻璃面板上会跳出来抢视线 */
+#sidebar #sidebar-menus hr {
+  border-color: color-mix(in srgb, var(--rj-brand) 22%, transparent);
+  opacity: 0.9;
+}
 #article-container kbd {
   display: inline-block;
   margin: 0 3px;
