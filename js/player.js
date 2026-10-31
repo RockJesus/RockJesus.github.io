@@ -245,6 +245,34 @@
       } catch (e) {}
     }
     if (ap.audio) ap.audio.addEventListener('loadedmetadata', rjSkipPreview);
+    // —— 首播前置校验 V1.8.16 ——
+    // 现实：歌单里约 1/4 曲目的 vkey 已被 QQ 限流，直链返回 403。只有真的加载才会
+    // 触发 <audio> 的 error，而 APlayer 的错误自动切歌每首要 ~2s，实测最坏一次
+    // 「点了播放，连跳 3 首，7.2 秒后才出声」。
+    // 做法：空闲时用 1 字节 Range 请求悄悄探一下当前曲目，403 就先换到下一首
+    // （保持暂停、不动播放状态），让用户第一次点播放就出声。
+    // 三个保护：只在「还没播过」时切、探查回来时若已在播就放弃、网络异常不乱跳。
+    function rjPreflight(depth) {
+      try {
+        if (!ap || !ap.audio || !ap.audio.paused) return;
+        if (ap.audio.currentTime > 0.5) return;
+        var a = curAudio();
+        if (!a || !a.url) return;
+        var url = a.url;
+        fetch(url, { method: 'GET', headers: { Range: 'bytes=0-0' }, cache: 'no-store' })
+          .then(function (r) {
+            if (r.status < 400) return;
+            // 回来时用户可能已经点播了 / 已经换歌了 → 不要再动
+            if (!ap.audio || !ap.audio.paused || ap.audio.currentTime > 0.5) return;
+            var now = curAudio();
+            if (!now || now.url !== url) return;
+            if (depth >= 4) return;                 // 连续 5 首都死，别再跳了
+            if (rjSkip(1)) rjPreflight(depth + 1);
+          })
+          .catch(function () {});                    // 跨域/网络问题：保持现状，交给 error 兜底
+      } catch (e) {}
+    }
+    window.__rjPreflight = rjPreflight;
     // —— 封面同步 V15：预加载新封面成功后再切换（消除旧图残留/跨域加载竞态），
     //    加载失败兜底默认封面；listswitch/play/loadeddata 三事件双保险，封面始终跟随播放中的歌曲 ——
     function syncCover() {
@@ -2092,6 +2120,10 @@
           var list = normalize(data && data.tracks); // 已过滤：只留可播曲目
           // 兜底：整份歌单一条直链都没有（vkey 全局过期）→ 退回种子曲，播放器不至于是死的
           init(list.length ? list : [SEED]);
+          // 列表就绪后空闲时探一下当前曲目能否真的取到音频（见 rjPreflight）
+          rjWhenIdle(function () {
+            if (window.__rjPreflight) window.__rjPreflight(0);
+          });
         })
         .catch(function () { init([SEED]); });
     });
