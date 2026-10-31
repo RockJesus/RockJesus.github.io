@@ -2952,39 +2952,31 @@ a:hover { color: var(--rj-brand-2); }
     rgba(7, 10, 20, 0.22) 76%,
     rgba(7, 10, 20, 0) 100%);
 }
-/* 滚动态：站名与徽标收一档，并整体进一枚和右侧菜单同款的玻璃胶囊。
-   这样不需要横贯全宽的深色带 —— 正文从两枚胶囊之间穿过去，
-   视觉上是「两块浮起来的玻璃」，而不是「一条压住内容的黑边」。 */
+/* 站名胶囊：不再区分「首屏 / 滚动」，始终是一枚和右侧菜单同款的玻璃胶囊。
+   首屏压在大图上时尤其需要它 —— 裸渐变字在杂乱照片上根本读不清；
+   胶囊同时承担「遮字」职责，所以首屏也不需要再垫深色带。 */
 #nav #blog_name {
   display: inline-flex;
   align-items: center;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 18px;
-  transition: padding var(--rj-dur-base) var(--rj-ease-out),
-              background-color var(--rj-dur-base) var(--rj-ease-out),
-              border-color var(--rj-dur-base) var(--rj-ease-out),
-              box-shadow var(--rj-dur-base) var(--rj-ease-out);
-}
-#nav.nav-fixed #blog_name,
-#page-header.nav-fixed #nav #blog_name {
   height: 38px;
   padding: 0 16px 0 10px;
+  border: 1px solid var(--rj-hairline-7);
   border-radius: 19px;
   background-color: color-mix(in srgb, var(--rj-ink-surface) 52%, transparent);
   background-image: linear-gradient(157deg, var(--rj-hairline-6) 0%, transparent 46%);
   backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
   -webkit-backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
-  border-color: var(--rj-hairline-7);
   box-shadow: 0 10px 28px var(--rj-shadow-5), inset 0 1px 0 var(--rj-hairline-7);
+  transition: background-color var(--rj-dur-base) var(--rj-ease-out),
+              border-color var(--rj-dur-base) var(--rj-ease-out),
+              box-shadow var(--rj-dur-base) var(--rj-ease-out);
 }
-#nav.nav-fixed #site-name,
-#page-header.nav-fixed #nav #site-name {
+#nav #site-name {
   font-size: 17px;
-  transition: font-size var(--rj-dur-base) var(--rj-ease-out);
+  /* 字在胶囊里，投影只留一点点定轮廓即可；0.8 那档会在渐变字外糊出黑边 */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
-#nav.nav-fixed #site-name .rj-logo-wrap,
-#page-header.nav-fixed #nav #site-name .rj-logo-wrap {
+#nav #site-name .rj-logo-wrap {
   height: 28px;
   transition: height var(--rj-dur-base) var(--rj-ease-out),
               filter var(--rj-dur-base) var(--rj-ease-out);
@@ -2992,19 +2984,16 @@ a:hover { color: var(--rj-brand-2); }
 /* 窄屏只有「logo + 汉堡」，胶囊不能去掉（会直接和正文叠字），
    但桌面那套 38px/17px 在手机上太占宽 → 收成 34px/15px 的小胶囊。 */
 @media screen and (max-width: 768px) {
-  #nav.nav-fixed #blog_name,
-  #page-header.nav-fixed #nav #blog_name {
+  #nav #blog_name {
     height: 34px;
     padding: 0 12px 0 8px;
     border-radius: 17px;
   }
-  #nav.nav-fixed #site-name,
-  #page-header.nav-fixed #nav #site-name {
+  #nav #site-name {
     font-size: 15px;
     gap: 7px;
   }
-  #nav.nav-fixed #site-name .rj-logo-wrap,
-  #page-header.nav-fixed #nav #site-name .rj-logo-wrap {
+  #nav #site-name .rj-logo-wrap {
     height: 23px;
   }
 }
@@ -3615,8 +3604,7 @@ a:hover { color: var(--rj-brand-2); }
   text-shadow: none;
 }
 /* 亮色：站名胶囊与右侧菜单胶囊同色，掺一点品牌紫才立得起来 */
-[data-theme='light'] #nav.nav-fixed #blog_name,
-[data-theme='light'] #page-header.nav-fixed #nav #blog_name {
+[data-theme='light'] #nav #blog_name {
   background-color: color-mix(in srgb, var(--rj-brand) 7%, rgba(255, 255, 255, 0.86));
   background-image: linear-gradient(157deg, rgba(255, 255, 255, 0.62) 0%, transparent 46%);
   backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
