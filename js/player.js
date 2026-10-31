@@ -665,10 +665,13 @@
       // 实测慢歌 4.5s 内 36 根里有 21 根几乎不动。改成均值型 EMA（≈0.58s），
       // 每根柱子永远能跟着自己这一段的节奏起伏，与整体音量无关。
       var vizMean = [];
-      for (var vmi = 0; vmi < EQ_N; vmi++) vizMean.push(0);
+      var prevBars = [];               // 频谱通量用：上一帧 bars（必须先于下面的初始化循环）
+      for (var vmi = 0; vmi < EQ_N; vmi++) { vizMean.push(0); prevBars.push(0); }
       var MEAN_A = 0.035;              // EMA 系数：约 0.58s 时间常数
       var vizPeak = 0;                 // 全局慢包络：留住频段之间的相对差异
       var lowFast = 0, lowSlow = 0;    // 低频快/慢双包络 → 冲击检测
+      var fluxMean = 0.02;             // 通量慢均值（onset 检测的基准）
+      var beatEnv = 0;                 // 节拍脉冲的视觉包络（快攻慢放）
       var halfN = EQ_N / 2;
 
       function shape(bars) {
@@ -688,6 +691,25 @@
         lowSlow += (lowSum - lowSlow) * 0.052;
         var punch = lowSlow > 0.012 ? Math.max(0, (lowFast - lowSlow) / lowSlow) : 0;
         if (punch > 1.6) punch = 1.6;
+
+        // 全局节拍脉冲：给 12 点附近「物理上就是平的」低频柱注入节奏。
+        // 12 点那几根柱（100~330Hz）在 808/贝斯持续音的歌里（KILL BILL、旧绪难平
+        // 实测跳幅 0.3~1.0px）电平就是一条直线 —— 低频自身的任何归一化都放不出动静。
+        // 脉冲源用频谱通量（帧间正增量之和）：每次起音都有频段上跳，是标准 onset 信号。
+        // 实测三个候选（600 帧）：总能量快慢包络差 p90 才 0.30、峰值/全局包络恒 ≈1，
+        // 只有通量有完整动态（归一化后 p50≈0.15 / p75≈0.45 / p90≈0.75 / 起音 1.4+）。
+        var flux = 0;
+        for (var fi = 0; fi < EQ_N; fi++) {
+          var df = bars[fi] - prevBars[fi];
+          if (df > 0) flux += df;
+          prevBars[fi] = bars[fi];
+        }
+        fluxMean += (flux - fluxMean) * 0.04;   // ≈0.5s 慢均值：节奏变快变慢都跟得上
+        var beat = fluxMean > 0.004 ? (flux / (fluxMean * 2.6) - 0.4) : 0;
+        if (beat < 0) beat = 0; else if (beat > 1) beat = 1;
+        // 视觉包络：快攻击、约 4 帧衰减（~65ms）。flux 本身逐帧抖动，
+        // 直接用会像频闪；包络后是「嘭—收」的一次弹跳，和鼓点手感一致。
+        beatEnv = beat > beatEnv ? beat : beatEnv * 0.86;
 
         var out = [];
         for (var k = 0; k < EQ_N; k++) {
@@ -719,7 +741,18 @@
           // 补偿：abs 常年 0.95、ag 均值只有 0.38，AGC 占主导后整体会掉 2px 左右。
           // 按 d 反向补回，让上半柱的绝对长度不变、只是跳起来。
           var gain = 1 + 0.3 * (1 - d);
-          out.push(mix * gain * (1 + 0.12 * punch));  // 打点时整环亮一下
+          // 中心柱叠加全局节拍脉冲（见 shape 开头的说明）。
+          // 权重 t（1=12点 0=6点，与配色同一定义）取平方：12 点=1、±45°≈0.37、±60°≈0.11、
+          // 6 点=0 —— 脉冲集中在 12 点一带，又不至于和两侧自由区之间留一圈死环。
+          // 注意 d 的方向与 t 相反（d=|k-17.5|/18，12 点 d≈0.97），
+          // 第一版误用 (1-dd)^1.5 把脉冲全加到了 6 点，柱长纹丝不动就是这么来的。
+          var tt = Math.abs(k - halfN) / halfN;
+          var kickW = tt * tt;
+          // 双向摆动：拍点弹起（+0.65×env）、拍间收拢（mix×0.72）。
+          // 均值几乎不变、摆幅比单向注入大一倍，也不会把柱子整体顶到满格。
+          var puls = mix * (1 - 0.28 * kickW * (1 - beatEnv)) + 0.65 * beatEnv * kickW;
+          out.push(puls * gain * (1 + 0.12 * punch));
+                                                      // 打点时整环亮一下
                                                       // 增益别太大，否则整环一起顶满
         }
         return { bars: out, punch: punch };
