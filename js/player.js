@@ -266,8 +266,10 @@
             if (!ap.audio || !ap.audio.paused || ap.audio.currentTime > 0.5) return;
             var now = curAudio();
             if (!now || now.url !== url) return;
-            if (depth >= 4) return;                 // 连续 5 首都死，别再跳了
-            if (rjSkip(1)) rjPreflight(depth + 1);
+            if (depth >= 8) return;                 // 连跳上限：实测死链比例高，4 首不够用
+            // rjSkip 内部要走封面预加载/switch，紧接着再探会读到还没换完的状态，
+            // 隔一拍再探（实测同一 tick 连探会停在第二个死链上）
+            if (rjSkip(1)) setTimeout(function () { rjPreflight(depth + 1); }, 150);
           })
           .catch(function () {});                    // 跨域/网络问题：保持现状，交给 error 兜底
       } catch (e) {}
