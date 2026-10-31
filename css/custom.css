@@ -2412,7 +2412,8 @@ a:hover { color: var(--rj-brand-2); }
 #article-container h5::before, #article-container h6::before { color: var(--rj-brand); text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 70%, transparent); }
 /* 顶部导航：文字提亮到淡紫白（原 #8b5cf6 在深底上发闷），图标保持紫调同族 */
 #nav #menus .site-page, #nav .menus_item_child .site-page { color: var(--rj-brand-4); }
-#nav #menus .site-page i, #nav .menus_item_child .site-page i { color: var(--rj-brand-3); }
+#nav #menus .site-page i, #nav #menus .site-page .rj-nav-icon,
+#nav .menus_item_child .site-page i, #nav .menus_item_child .site-page .rj-nav-icon { color: var(--rj-brand-3); }
 #nav #menus .site-page:hover, #nav .menus_item_child .site-page:hover {
   color: var(--rj-brand-6);
   text-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 55%, transparent);
@@ -2588,8 +2589,10 @@ a:hover { color: var(--rj-brand-2); }
   box-shadow: none;
 }
 #nav.hide-menu #menus #toggle-menu .site-page:hover { background-image: none; }
-#nav.hide-menu #menus #toggle-menu:hover .site-page i { color: #fff; }
-[data-theme='light'] #nav.hide-menu #menus #toggle-menu:hover .site-page i { color: var(--rj-brand); }
+#nav.hide-menu #menus #toggle-menu:hover .site-page i,
+#nav.hide-menu #menus #toggle-menu:hover .site-page .rj-nav-icon { color: #fff; }
+[data-theme='light'] #nav.hide-menu #menus #toggle-menu:hover .site-page i,
+[data-theme='light'] #nav.hide-menu #menus #toggle-menu:hover .site-page .rj-nav-icon { color: var(--rj-brand); }
 @media screen and (max-width: 768px) {
   #nav.hide-menu #menus {
     width: 34px;
@@ -2600,6 +2603,7 @@ a:hover { color: var(--rj-brand-2); }
   #nav.hide-menu #menus #toggle-menu .site-page { border-radius: 17px; }
   /* 34px 圆里 20px 宽的三道杠太满，收一档留出呼吸 */
   #nav.hide-menu #menus #toggle-menu i { font-size: 15px; }
+  #nav.hide-menu #menus #toggle-menu .rj-nav-icon { width: 15px; height: 15px; }
 }
 
 /* —— 右上角导航下拉：通透毛玻璃（低底色 + 高饱和模糊，背景内容能透出来） —— */
@@ -2648,7 +2652,8 @@ a:hover { color: var(--rj-brand-2); }
   color: color-mix(in srgb, var(--rj-ink-text) 90%, transparent) !important;
   text-shadow: 0 1px 3px color-mix(in srgb, var(--rj-ink-cast) 45%, transparent);
 }
-#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a i {
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a i,
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a .rj-nav-icon {
   min-width: 1.15em;
   text-align: center;
   color: var(--rj-brand-3);
@@ -2664,7 +2669,8 @@ a:hover { color: var(--rj-brand-2); }
   color: var(--rj-brand-6) !important;
   text-shadow: 0 0 14px color-mix(in srgb, var(--rj-brand) 55%, transparent);
 }
-#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover a i {
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover a i,
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover a .rj-nav-icon {
   color: var(--rj-brand-8) !important;
   transform: scale(1.14);
 }
@@ -3942,6 +3948,10 @@ body {
 #nav #menus #toggle-menu .site-page i {
   font-size: 15px;
 }
+#nav #menus #toggle-menu .site-page .rj-nav-icon {
+  width: 15px;
+  height: 15px;
+}
 
 /* HUD 等宽层：只给状态/标签/计数用 */
 .article-meta,
@@ -4813,3 +4823,27 @@ select:focus-visible,
   outline-offset: 2px;
   border-radius: 8px;
 }
+
+/* ======================= C11：菜单图标线性 SVG（v1.9.19） ======================= */
+/* 图标由 menu_item.pug 按 `svg:名字` 配置渲染为内联 stroke SVG，currentColor 跟随文字。
+   尺寸对位 fa-fw（1.25em 槽位），1.1em 本体 + 2px 间距视觉最接近原字重。 */
+.rj-nav-icon {
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 2px;
+  vertical-align: -0.16em;
+  flex-shrink: 0;
+  overflow: visible;
+}
+/* 下拉箭头：小一档、不占 fw 槽位，主项文字后自然跟排 */
+a.site-page.group > .rj-nav-icon:last-child {
+  width: 0.9em;
+  height: 0.9em;
+  margin-right: 0;
+  margin-left: 1px;
+  vertical-align: -0.12em;
+  transition: transform var(--rj-dur-fast) var(--rj-ease-out);
+}
+.menus_item:hover > a.group > .rj-nav-icon:last-child { transform: rotate(180deg); }
+/* 搜索按钮（无文字前的图标）与文字间自然留隙 */
+#search-button .rj-nav-icon { vertical-align: -0.2em; }
