@@ -147,6 +147,9 @@
   --rj-text-dim:        rgba(196, 205, 255, 0.78);
   --rj-text-quote:      rgba(196, 205, 255, 0.90);
   --rj-text-mute:       rgba(148, 163, 184, 0.85);
+  /* 卡片元信息（日期/分类/标签）：主题的 meta_color 是 rgba(120,47,216,.7)，
+     紫字 70% 透明压在近黑底上只有约 2:1，实际读不出来。这里给它独立的中性令牌。 */
+  --rj-meta-text:       rgba(226, 232, 255, 0.62);
   --rj-text-inverse:    var(--rjp-white);
 
   /* 边框与分隔线 */
@@ -303,6 +306,7 @@
   --rj-text-dim:        rgba(29, 29, 31, 0.68);
   --rj-text-quote:      rgba(29, 29, 31, 0.78);
   --rj-text-mute:       var(--rjp-apple-gray);
+  --rj-meta-text:       rgba(29, 29, 31, 0.66);
   --rj-text-inverse:    var(--rjp-white);
 
   /* 边框与分隔线 */

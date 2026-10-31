@@ -1049,11 +1049,20 @@
   //    提示条一直停留，直到首次点击/按键恢复声音才消失 ——
   function showMutedTip() {
     if (document.getElementById('rj-muted-tip')) return;
+    // 同一访客只提示一次：这条常驻在播放器上方的提示会压住左下角卡片，
+    // 每次进站都弹一遍纯属打扰。第一次看过后记在 localStorage 里。
+    var SEEN = 'rj-muted-tip-seen';
+    try {
+      if (localStorage.getItem(SEEN)) return;
+      localStorage.setItem(SEEN, '1');
+    } catch (e) { /* 隐私模式下拿不到 localStorage，就每次显示 */ }
     var t = document.createElement('div');
     t.id = 'rj-muted-tip';
     t.className = 'rj-muted-tip';
-    t.textContent = '🔇 音乐已自动播放 · 点击页面任意处开启声音';
+    t.textContent = '🔇 音乐已自动播放 · 点击任意处开启声音';
     document.body.appendChild(t);
+    // 8 秒自动收起。原来是「一直停留直到点击」，等于每个访客都被它压住半屏。
+    t.__rjTimer = setTimeout(hideMutedTip, 8000);
     // 提示条贴在播放器顶部上方，播放器展开歌单变高时跟着上移，避免压在歌单上。
     // 注意要按「环形频谱」的上沿算，而不是播放器盒子：频谱画布 104px 比 66px 的圆盘
     // 四周各多出 19px，按播放器顶边放会把环的上半圈（12 点方向）整段压住。
@@ -1084,6 +1093,7 @@
   function hideMutedTip() {
     var t = document.getElementById('rj-muted-tip');
     if (t) {
+      if (t.__rjTimer) clearTimeout(t.__rjTimer);
       if (t.__rjRO) { try { t.__rjRO.disconnect(); } catch (e) {} }
       if (t.__rjPlace) window.removeEventListener('resize', t.__rjPlace);
       if (t.parentNode) t.parentNode.removeChild(t);

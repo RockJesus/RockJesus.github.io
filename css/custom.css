@@ -2153,12 +2153,13 @@ hr::before { content: none !important; }
 /* ============================================================
    主页首屏 V9 — 移除大标题 / 打字副标题下移纯紫 / 右上角导航紫色
    ============================================================ */
-/* 删除主页中央大标题（Alienware Hackintosh） */
+/* 主页中央大标题在 V9 曾整体删除（下面这条 display:none 保留作历史记录，
+   「批次 B」段已用 display:block + clamp() 尺寸把它请回来）。 */
 #site-title {
   display: none;
 }
 
-/* 打字副标题组：水平居中，垂直下移至 75%（即距首屏底部 25%） */
+/* 打字副标题组：水平居中（「批次 B」段已把 #site-info 改为 50% 居中） */
 #page-header.full_page #site-info {
   top: 75%;
 }
@@ -4378,4 +4379,437 @@ body {
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--rjp-apple-ink) 26%, transparent) 0%,
     color-mix(in srgb, var(--rjp-apple-ink) 10%, transparent) 100%);
+}
+
+/* ============================================================
+   批次 A · 止血（2026-11-01）
+   1. 看板娘闸门           2. 静音提示（见 player.js）
+   3. 卡片元信息可读性     4. 摘要排版           5. 单页隐藏分页器
+   ============================================================ */
+
+/* ---------- A1. 看板娘：可控、会避让 ---------- */
+/* 由 /js/live2d-guard.js 管理 el 的类。145/150 是 L2Dwidget 自己的层，
+   这里只管透明度与命中区域，不碰它的定位（定位由 cfg.hOffset/vOffset 决定）。 */
+/* L2Dwidget 内联写了 z-index:99999，把侧栏和右下角按钮全压住。
+   压到 1（CSS !important 可以盖掉内联），让正文/侧栏盖在它上面：
+   模型从卡片右沿「探出来」，不再是压在人脸上的贴纸。 */
+#live2d-widget {
+  z-index: 1 !important;
+}
+/* 只给 #aside-content 提层没用 —— 它所在的 #content-inner 自己形成了层叠上下文，
+   子元素的 z-index 只在这个上下文里比较，整体仍然输给 z-index:1 的看板娘。
+   要给整个内容区一个层级。 */
+#content-inner {
+  position: relative;
+  z-index: 2;
+}
+#live2d-widget.rj-l2d {
+  transition: opacity var(--rj-dur-slow) var(--rj-ease-out),
+              transform var(--rj-dur-slow) var(--rj-ease-out);
+}
+/* 滚过首屏 60% 淡出：正文/侧栏区域不再被这块 200×400 的画布压住 */
+#live2d-widget.rj-l2d-away {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16px);
+}
+/* 访客主动收起 */
+#live2d-widget.rj-l2d-off {
+  display: none !important;
+}
+.rj-l2d-toggle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 26px;
+  height: 26px;
+  /* L2Dwidget 给容器写了内联 pointer-events:none，子元素必须显式收回命中区，
+     否则这枚折叠按钮永远点不动。 */
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--rj-hairline-7);
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--rj-ink-surface) 55%, transparent);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  color: var(--rj-text-soft);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--rj-dur-base) var(--rj-ease-out), color var(--rj-dur-fast) linear;
+}
+#live2d-widget:hover .rj-l2d-toggle,
+.rj-l2d-toggle:focus-visible {
+  opacity: 1;
+}
+.rj-l2d-toggle:hover {
+  color: var(--rj-text-strong);
+}
+/* 触屏没有 hover，按钮常显，否则永远收不起来 */
+@media (hover: none) {
+  .rj-l2d-toggle { opacity: 1; }
+}
+
+/* ---------- A3. 卡片元信息：紫字 70% → 中性 62%，12.6px → 13px ---------- */
+/* 主题的 meta_color（rgba(120,47,216,.7)）是 2:1，属于"看不见"级别。
+   这里用 2 个 id 级选择器压过主题的 `.recent-post-info > .article-meta-wrap`。 */
+/* 主题那条是 `#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap`
+   （1 个 id + 3 个 class），比 `.recent-post-info .article-meta-wrap` 高一级，
+   所以这里必须把整条链抄全 —— 同权重、写在后面才压得住。 */
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap,
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap a,
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap time,
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap span,
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap i {
+  color: var(--rj-meta-text);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap i {
+  color: color-mix(in srgb, var(--rj-brand-3) 68%, var(--rj-meta-text));
+  margin-right: 5px;
+  font-size: 12px;
+}
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap a:hover {
+  color: var(--rj-brand-3);
+}
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap .article-meta-separator {
+  color: color-mix(in srgb, var(--rj-meta-text) 50%, transparent);
+  margin: 0 8px;
+}
+/* 置顶标记：主题给的是 $sticky-color（橙红 255,114,66）斜体图钉，
+   在一行灰字里像报错提示 → 中性 HUD 青、小一号、拉开字距 */
+#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap .sticky {
+  color: var(--rj-hud-text);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-style: normal;
+}
+
+/* ---------- A4. 摘要：15px / 1.7 / 两行截断 ---------- */
+/* 原来 14px、行高 28px（2.0），一行只放得下 20 来个字却占两行高度，
+   读起来又散又长。两行截断让每张卡的信息量可预期。 */
+#recent-posts .recent-post-info .content {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--rj-text-dim);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-wrap: pretty;
+}
+@media screen and (max-width: 768px) {
+  #recent-posts .recent-post-info .content {
+    font-size: 14px;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+/* ---------- A5. 只有一页时隐藏整个分页器 ----------
+   站内 11 篇文章、每页 10 篇 → 分页器就是一个孤零零的「1」浮在空白里。
+   仅当 .pagination 里只有当前页一个节点时才隐藏，多页不受影响。 */
+#pagination:has(> .pagination > .page-number.current:only-child) {
+  display: none;
+}
+
+/* ============================================================
+   批次 B · 视觉统一（2026-11-01）
+   6. 卡片网格/封面      7. 标题字重       8. 首屏（H1 + CTA + 聚光）
+   9. 正文排版           10. 页脚
+   ============================================================ */
+
+/* ---------- B6. 卡片：图片统一在右、间距 28、封面统一裁切 + 压暗 ---------- */
+/* 原来 cover.position 是 both，图片左右交替：每翻一张卡，眼睛都要重新找
+   文字的起点。统一到右侧后，标题永远从同一个 x 开始。 */
+#recent-posts > .recent-post-item {
+  border-radius: 20px;
+  margin-bottom: 28px;
+  height: 17.6em;
+}
+#recent-posts > .recent-post-item:not(:first-child) {
+  margin-top: 0;
+}
+#recent-posts > .recent-post-item > .post_cover {
+  position: relative;
+  width: 42%;
+  border-radius: 12px;
+}
+/* 封面风格横跨「纯黑外星人头 / 白底产品照 / 橙色插画」，直接并排像拼贴；
+   统一降一点饱和 + 右下压暗，让它们先成为一个整体再看内容。 */
+#recent-posts > .recent-post-item > .post_cover img.post_bg {
+  object-fit: cover;
+  filter: saturate(0.88) contrast(1.04) brightness(0.94);
+}
+#recent-posts > .recent-post-item > .post_cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 46%,
+      color-mix(in srgb, var(--rj-ink-surface) 55%, transparent) 100%),
+    linear-gradient(118deg,
+      color-mix(in srgb, var(--rj-brand) 14%, transparent) 0%,
+      transparent 52%);
+}
+#recent-posts > .recent-post-item > .recent-post-info {
+  padding: 0 34px;
+}
+
+/* ---------- B7. 卡片标题：24px 却只有 400 字重，撑不起视觉锚点 ---------- */
+#recent-posts .recent-post-info > .article-title {
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  line-height: 1.32;
+}
+
+/* ---------- B8. 首屏：把 H1 请回来 + 两个入口 + 径向聚光 ---------- */
+/* V9 曾把主标题整个删掉，结果 900px 的首屏只剩一行打字副标题。
+   这里恢复成真正的展示标题，但不再用 2.85em 的巨字，改为按视口收敛。 */
+#site-title {
+  display: block;
+  font-size: clamp(42px, 5.2vw, 68px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  margin: 0 0 6px;
+}
+#page-header.full_page {
+  height: 84vh;
+  min-height: 600px;
+}
+/* 整块内容居中，并允许用 order 把 CTA 排到副标题正下方 */
+#page-header.full_page #site-info {
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#page-header.full_page #site-info #site-subtitle {
+  order: 1;
+}
+#page-header.full_page #site-info #site_social_icons {
+  order: 3;
+}
+#page-header.full_page #site-info #rj-hero-cta {
+  order: 2;
+}
+
+#rj-hero-cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 28px;
+}
+.rj-hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background-color: rgba(12, 14, 26, 0.42);
+  backdrop-filter: blur(20px) saturate(170%);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none !important;
+  transition: transform var(--rj-dur-base) var(--rj-ease-out),
+              box-shadow var(--rj-dur-base) var(--rj-ease-out),
+              background-color var(--rj-dur-base) var(--rj-ease-out);
+}
+.rj-hero-btn:hover {
+  transform: translateY(-2px);
+  background-color: rgba(12, 14, 26, 0.58);
+  color: #fff;
+}
+.rj-hero-btn.is-primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  box-shadow: 0 12px 30px rgba(88, 28, 135, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.rj-hero-btn.is-primary:hover {
+  box-shadow: 0 16px 38px rgba(88, 28, 135, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+/* 径向聚光：把视线收到标题上，压住背景图两侧的杂点。
+   注意 ::after 是 HUD 状态条，flex 下默认 order:0，会被顶到副标题前面。 */
+#page-header.full_page #site-info::after {
+  order: 4;
+}
+/* 主题给首屏压了一层 30% 黑，叠上径向暗角后整块发黑，背景图几乎看不出内容。
+   暗色下收到 16%，亮色那条（rgba .42）不动。 */
+:root:not([data-theme='light']) #page-header.full_page::before {
+  background-color: rgba(7, 9, 20, 0.16);
+}
+#page-header.full_page::before {
+  background-image: radial-gradient(74% 68% at 50% 44%,
+    transparent 0%,
+    color-mix(in srgb, var(--rj-ink-surface) 22%, transparent) 68%,
+    color-mix(in srgb, var(--rj-ink-surface) 52%, transparent) 100%);
+}
+
+@media screen and (max-width: 768px) {
+  #page-header.full_page { height: 76vh; }
+  #site-title {
+    font-size: clamp(30px, 8.6vw, 40px);
+    letter-spacing: -0.028em;
+  }
+  #rj-hero-cta { margin-top: 22px; gap: 10px; }
+  .rj-hero-btn { height: 40px; padding: 0 18px; font-size: 13.5px; }
+  /* 首屏社交图标在手机上排成两行、紧贴按钮，把半屏都占满了；
+     同样的入口在抽屉菜单的「留言/社交」里都有，这里让位给标题和 CTA。 */
+  #page-header.full_page #site_social_icons {
+    display: none;
+  }
+}
+
+/* ---------- B9. 正文：列宽 / 段距 / h2 ---------- */
+/* 786px × 15.5px ≈ 48 汉字/行，太长了 —— 读到换行容易串行。
+   收到 720px 并把字号提到 16.5px，约 43 字/行。 */
+#article-container {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 16.5px;
+  line-height: 1.86;
+}
+#article-container > p:first-of-type {
+  font-size: 17.4px;
+}
+/* 段距 16px 配 30.5px 行高 → 段落之间比行内还紧，糊成一片 */
+#article-container p {
+  margin: 0 0 22px;
+}
+#article-container h2 {
+  font-size: 26px;
+  letter-spacing: -0.01em;
+}
+@media screen and (max-width: 768px) {
+  #article-container h2 { font-size: 21px; }
+  #article-container p { margin-bottom: 18px; }
+}
+/* 文章面板几乎不透明：正文背后就是那张星空壁纸，读到第二屏很累。
+   注意 #post 并不在 #body-wrap 的直接子层 —— 用 `.layout_post > #post`
+   根本命中不了，主题的 #post{background:var(--card-bg)}（= 62% 玻璃）一直都是生效的。
+   这里改成祖先选择器压过它。 */
+/* 实测 DOM 是 body > #body-wrap.post > #content-inner.layout > #post，
+   并没有 `.layout_post` 这个祖先 —— 文件开头那组 `.layout_post > #post`
+   选择器一直是死的，真正生效的是主题的 #post{background:var(--card-bg)}。 */
+#body-wrap.post #post {
+  /* 97% 不透明的墨色仍和页面底色同一个色阶，卡片等于看不见；
+     掺 6% 白提亮一档，再补边框和投影，读起来才是「一张纸」而不是「一块更黑的空」。 */
+  background: color-mix(in srgb, var(--rj-ink-surface) 94%, var(--rjp-white));
+  border: 1px solid var(--rj-hairline-3);
+  border-radius: 20px;
+  box-shadow: 0 18px 46px var(--rj-shadow-6), inset 0 1px 0 var(--rj-hairline-2);
+}
+
+/* ---------- B10. 页脚：紫渐变 → 极暗底 + 一条分隔线 ---------- */
+#footer {
+  background: var(--rj-carbon);
+  background-image: none;
+  animation: none;
+  -webkit-animation: none;
+  border-top: 1px solid var(--rj-hairline-3);
+  border-radius: 0;
+  font-size: 13px;
+  /* 主题给的上下留白配渐变底刚好，配纯深色就成了一块 270px 高的空黑板 */
+  padding-top: 26px;
+  padding-bottom: 22px;
+}
+#footer:before {
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+#footer .footer-copyright,
+#footer .footer-framework,
+#footer .copyright,
+#footer .framework-info {
+  color: var(--rj-text-dim);
+  font-size: 13px;
+}
+#footer a {
+  color: var(--rj-brand-4);
+}
+
+/* 亮色主题：整站背景原来是那张深色星空照片，只有外壳变白，
+   卡片缝隙里全在透黑底，看起来像做了一半的换肤。这里给出中性浅底。 */
+[data-theme='light'] #web_bg {
+  background: linear-gradient(180deg, #f7f8fc 0%, #edeff8 58%, #f2ecf6 100%);
+}
+
+/* ============================================================
+   批次 C · 打磨与无障碍（2026-11-01）
+   11. 菜单图标（见交付说明：本轮未改，需单独做一套线性图标）
+   12. 亮色主题首屏标题      13. 点击区与焦点环      14. 置顶收敛（数据侧）
+   ============================================================ */
+
+/* ---------- C12. 首屏标题：两种主题都压在同一张深色照片上 ---------- */
+/* 亮色模式下 --rj-brand-3 是 #6d28d9、--rj-accent 是 #0e7490，
+   渐变整体压暗在深照片上会「沉」下去，这里提亮到浅紫→浅青。 */
+[data-theme='light'] #site-title {
+  background: linear-gradient(90deg, #c4b5fd 0%, #7ff9ff 52%, #f0abfc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 22px rgba(0, 0, 0, 0.55));
+}
+[data-theme='light'] #site-subtitle #subtitle {
+  color: #d8c3ff;
+  text-shadow: 0 0 14px rgba(0, 0, 0, 0.6), 0 0 10px rgba(139, 92, 246, 0.45);
+}
+
+/* ---------- C13. 点击区 ≥40px + 可见焦点环 ---------- */
+/* 右下角一排图标按钮（日夜/阅读模式/目录/评论…）主题只给 35px。 */
+#rightside > div > button,
+#rightside > div > a,
+#rightside-config-hide > button,
+#rightside-config-show > button,
+#rightside-config-show > a {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 侧栏社交图标原本 20px 的小圆点，手指很难点中 */
+#card-info .social-icon,
+#aside-content .social-icon {
+  min-width: 34px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 汉堡按钮在抽屉态是 38/34px 的胶囊，补足命中区（视觉尺寸不变） */
+#nav #toggle-menu a.site-page::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+#nav #toggle-menu a.site-page {
+  position: relative;
+}
+/* 键盘可达性：所有可交互元素统一焦点环（站点原来完全没有 focus 样式） */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--rj-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
 }
