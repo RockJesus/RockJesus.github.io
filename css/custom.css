@@ -3913,6 +3913,35 @@ body {
   letter-spacing: var(--rj-track-display);
 }
 
+/* 右上角菜单与左上角站名用同一套字。
+   主题给 .site-page 的是「0.78em / 400 / normal」，和站名的
+   「17px / 700 / -0.022em + Display 光学尺寸」并排时像两套字体 ——
+   左边是铭牌、右边是正文小字。这里把字族、字号、字重、字距四项一起对齐，
+   下拉面板的二级项也一并改，否则展开菜单会跳回旧字。 */
+#nav #menus .site-page,
+#nav .menus_item_child .site-page,
+#nav #menus #search-button span {
+  font-family: var(--rj-font-display);
+  /* 站名 17px 是拉丁文，菜单是 CJK：汉字同尺寸会明显更"胖"，
+     且实测 17px 会把胶囊从 694px 撑到 776px（超 700 会提前塌成汉堡）。
+     16px 是「看起来一样大」又不挤占宽度预算的上限。 */
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: var(--rj-track-display);
+  /* 主题原本 1.5 行高会让 chip 顶出 38px 胶囊，收到 1.15 */
+  line-height: 1.15;
+}
+/* 下拉面板比一级菜单低一档字号，但仍沿用同一字族/字重/字距：
+   完全同尺寸会让二级项撑出面板宽度。 */
+#nav #menus .menus_item_child .site-page {
+  font-size: 15px;
+  letter-spacing: var(--rj-track-tight);
+}
+/* 汉堡按钮里的图标继承文字字号会变大，单独锁回 15px（38px 胶囊里 15px 最稳） */
+#nav #menus #toggle-menu .site-page i {
+  font-size: 15px;
+}
+
 /* HUD 等宽层：只给状态/标签/计数用 */
 .article-meta,
 .post-meta-date,
