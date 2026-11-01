@@ -211,8 +211,15 @@
     v.setAttribute('aria-hidden', 'true');
     v.setAttribute('tabindex', '-1');
     /* 手机竖屏按 cover 裁完只剩中间一条，672 宽够用；
-       桌面全屏铺开才需要 1344 那一档 */
-    v.src = window.innerWidth < 820 ? '/img/hero-bg-sm.mp4' : '/img/hero-bg.mp4';
+       桌面全屏铺开才需要 1344 那一档。
+       AV1 优先：同画质体积比 H.264 省 ~53%（桌面 372→173KB），
+       canPlayType('av01') 能探测 —— Chrome/Edge(含 dav1d 软解)、iOS 17+、
+       新安卓返回 'probably'；不支持的（旧 Safari/老安卓）返回 ''，自动落回 H.264。
+       即使探测误判，下面 error 监听仍会撤层兜底，不会白屏。 */
+    var av1 = !!v.canPlayType('video/mp4; codecs="av01.0.05M.08"');
+    v.src = window.innerWidth < 820
+      ? (av1 ? '/img/hero-bg-sm.av1.mp4' : '/img/hero-bg-sm.mp4')
+      : (av1 ? '/img/hero-bg.av1.mp4' : '/img/hero-bg.mp4');
 
     v.addEventListener(
       'canplay',
