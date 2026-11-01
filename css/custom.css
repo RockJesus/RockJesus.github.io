@@ -2398,7 +2398,6 @@ a:hover { color: var(--rj-brand-2); }
 }
 #site-subtitle #subtitle { color: var(--rj-brand); }
 #site-subtitle .typed-cursor { color: var(--rj-brand); }
-#scroll-down i { color: var(--rj-brand); }
 .recent-post-info .article-meta-wrap i { color: var(--rj-brand); }
 .recent-post-info .article-meta-wrap a { color: var(--rj-brand); }
 .recent-post-info .article-meta-wrap a:hover { color: var(--rj-brand-2); }
@@ -2786,8 +2785,6 @@ a:hover { color: var(--rj-brand-2); }
 /* —— 正文列表 marker hover：紫 —— */
 #article-container ul li:hover::marker,
 #article-container ol li:hover::marker { color: var(--rj-brand); }
-/* —— 首屏下滑箭头光晕：紫 —— */
-#scroll-down i { text-shadow: 0 0 14px color-mix(in srgb, var(--rj-brand) 65%, transparent); }
 /* —— 按钮 hover 光晕：紫 —— */
 #card-info-btn:hover { box-shadow: 0 10px 26px color-mix(in srgb, var(--rj-brand) 50%, transparent); }
 .btn-beautify a:hover,
@@ -4261,13 +4258,16 @@ body {
     0 0 0 1px color-mix(in srgb, var(--rj-shadow-1) 40%, transparent);
 }
 
-/* 移动端：首屏底部已被看板娘与播放提示占据，HUD 状态条不再叠加 */
+/* 移动端：HUD 状态条先让位（首屏底部有看板娘与播放提示），
+   头图则要铺满整屏 —— 早前这里是 `inset: 70px 16px 16px` 的悬浮卡片，
+   76vh 时像个相框，满屏之后四条缝会变成「屏幕上贴了一张图」。 */
 @media (max-width: 768px) {
   #page-header.full_page #site-info::after {
     display: none;
   }
   #page-header.full_page::before {
-    inset: 70px 16px 16px;
+    inset: 0;
+    width: auto;
   }
 }
 
@@ -4493,10 +4493,13 @@ body {
   margin: 0 0 6px;
 }
 #page-header.full_page {
-  /* 84vh 时首屏只剩标题，下面是 300px 的空场；76vh 让第一排卡片露一条边，
-     页面立刻有「继续往下」的暗示。 */
-  height: 76vh;
-  min-height: 540px;
+  /* 首屏占满一屏：进来只看到头图 + 站名，滑下去才是内容。
+     `100vh` 给老浏览器兜底，`100svh` 是移动端的稳定值 —— 用 dvh 的话，
+     地址栏收起时高度会变，整页跟着跳一下。min-height 不能再设，
+     否则 540px 会在矮窗口里把首屏撑出视口。 */
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
 }
 /* 整块内容居中，并用 order 控制标题 / 副标题 / HUD 的先后 */
 #page-header.full_page #site-info {
@@ -4530,7 +4533,10 @@ body {
 }
 
 @media screen and (max-width: 768px) {
-  #page-header.full_page { height: 76vh; }
+  #page-header.full_page {
+    height: 100vh;
+    height: 100svh;
+  }
   #site-title {
     font-size: clamp(30px, 8.6vw, 40px);
     letter-spacing: -0.028em;
@@ -5742,7 +5748,9 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
   border-left: 0;
   font-size: 9.5px;
   letter-spacing: 0.22em;
-  color: color-mix(in srgb, var(--rj-text-mute) 88%, transparent);
+  /* 满屏之后这行是标题下方唯一的「技术注脚」，原来在 mute 上又乘了 88%，
+     落在黑色头图上只剩 3:1 上下 —— 小字至少要 4.5:1 才不费眼。 */
+  color: var(--rj-text-mute);
   text-shadow: none;
 }
 [data-theme='light'] #page-header.full_page #site-info::after {
@@ -5772,7 +5780,10 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 }
 /* 亮色头图压到 10% 存在感：留纹理，不留色块 */
 [data-theme='light'] #page-header.full_page::before {
-  background-color: rgba(248, 249, 252, 0.90);
+  /* 0.90 在 76vh 时刚好是「一层纸」，占满一屏之后整屏接近纯白，
+     标题孤零零浮在空白上。收到 0.87，外星人轮廓与颗粒留一点存在，
+     又不至于回到早年那块灰渍。 */
+  background-color: rgba(248, 249, 252, 0.87);
 }
 
 /* ---------------------------------------------------------------------------
@@ -6014,8 +6025,9 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 }
 @media screen and (max-width: 768px) {
   #page-header.full_page {
-    height: 70vh;
-    min-height: 460px;
+    height: 100vh;
+    height: 100svh;
+    min-height: 0;
   }
   #site-title,
   #page-header #site-title {
@@ -6291,4 +6303,34 @@ hr.hr-line-dashed,
     left: 14px !important;
     bottom: 14px !important;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   25. 首屏满屏（100svh）的配套修正
+   1) 主题给 #page-header::before 留了 `right: 16px` 的滚动条补偿，同时又给了
+      `width: 100%` —— 两个一起就是「右边多出 16px」。这在 76vh 的首屏上只是
+      一条看不出来的缝，满屏之后它就变成右侧一条贯穿整屏的亮边，手机上还能
+      左右晃 16px。用 `right: 0` + `width: auto` 让 left/right 决定宽度。
+   2) 下滑箭头原本分散在三处定义，其中两处是紫色（还带 14px 外发光）。
+      首屏满屏后它是页面上唯一「下面还有内容」的提示，必须是中性的 ——
+      它属于导航语义，不是装饰。
+   --------------------------------------------------------------------------- */
+#page-header::before {
+  right: 0;
+  width: auto;
+}
+#scroll-down {
+  opacity: 0.7;
+  transition: opacity var(--rj-dur-base) var(--rj-ease-out);
+}
+#scroll-down:hover {
+  opacity: 1;
+}
+#scroll-down i {
+  font-size: 18px;
+  color: color-mix(in srgb, var(--rj-text-soft) 62%, transparent);
+  text-shadow: none;
+}
+[data-theme='light'] #scroll-down i {
+  color: color-mix(in srgb, var(--rjp-apple-ink) 40%, transparent);
 }
