@@ -1059,6 +1059,8 @@
     var t = document.createElement('div');
     t.id = 'rj-muted-tip';
     t.className = 'rj-muted-tip';
+    t.setAttribute('role', 'status');
+    t.setAttribute('aria-live', 'polite');
     t.textContent = '🔇 音乐已自动播放 · 点击任意处开启声音';
     document.body.appendChild(t);
     // 8 秒自动收起。原来是「一直停留直到点击」，等于每个访客都被它压住半屏。

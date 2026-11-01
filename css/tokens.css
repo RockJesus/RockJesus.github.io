@@ -6,6 +6,11 @@
      Tier 2  Semantic   语义令牌    --rj-*     组件只消费这一层
      Tier 3  Component  组件令牌    （按需，见文件末）
 
+   对比度约定（新增灰色/低饱和用途必读）：
+     正文级文字   ≥ 4.5:1（WCAG AA）
+     大字(≥24px)  ≥ 3.0:1
+     定义新令牌时在值后面加注释标注实测对比度，示例见 --rj-meta-text。
+
    规则：
      1. custom.css 不得再出现颜色字面量，只允许 var(--rj-*) / color-mix(--rj-*)
      2. 新增颜色 → 先进 Tier 1，再在 Tier 2 建立语义映射
