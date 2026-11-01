@@ -4538,6 +4538,7 @@ body {
 :root:not([data-theme='light']) #page-header.full_page #site-subtitle #subtitle {
   text-shadow:
     0 1px 2px var(--rj-on-media-shadow),
+    0 2px 14px color-mix(in srgb, var(--rj-ink-cast) 82%, transparent),
     0 10px 44px color-mix(in srgb, var(--rj-ink-cast) 72%, transparent);
 }
 
@@ -4782,8 +4783,10 @@ a.site-page.group > .rj-nav-icon:last-child {
   color: var(--rjp-apple-ink);
   filter: none;
 }
+/* v1.9.32：这条原本是给 16px 小字配的柔和灰蓝（#47506b），
+   现在这行字接替了大标题的位置，42px 下灰蓝会显得发虚，改成深墨。 */
 [data-theme='light'] #page-header.full_page #site-subtitle #subtitle {
-  color: #47506b;
+  color: var(--rjp-apple-ink);
   text-shadow: none;
 }
 [data-theme='light'] #page-header.full_page #site-info::after {
@@ -6405,4 +6408,39 @@ hr.hr-line-dashed,
    原来是为了压住静帧边缘的色阶，现在画面本身在动，压太重会闷。 */
 :root:not([data-theme='light']) #page-header.full_page {
   background-color: var(--rj-ink-surface);
+}
+
+/* ---------- v1.9.32 首屏去掉大标题 ----------
+   「Alienware Hackintosh」在首屏出现三次：导航左上、正中的大标题、
+   下面打字机的第一条。字号最大那一层反而挡住了动态背景的主体，
+   删掉后画面更多让给视频。
+   DOM 里的 h1 保留 —— 首页主标题对搜索引擎有意义，只做视觉移除；
+   本规则限定 .full_page，内页（归档/标签/分类）的标题不受影响。 */
+#page-header.full_page #site-title {
+  display: none;
+}
+
+/* ---------- v1.9.32 打字机接管主标题 ----------
+   大标题撤掉后，首屏只剩 16px 的打字机文字，撑不住整屏 —— 暗色下
+   几乎融进背景，亮色下整屏一片灰白没有落点。把这一层提到标题级，
+   它就成了唯一的视觉焦点。
+   顺带解决了文字重复：原来「Alienware Hackintosh」同时出现在大标题
+   和轮播第一条，现在只说一遍。 */
+#page-header.full_page #site-subtitle,
+#page-header.full_page #site-subtitle #subtitle {
+  font-size: clamp(26px, 3.3vw, 42px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.022em;
+  /* --rj-text-strong 在亮色模式下已切换成深墨，两套主题共用一条规则 */
+  color: var(--rj-text-strong);
+}
+/* 上面没有标题压着了，12px 的上边距成了浮空的白边，收掉 */
+#page-header.full_page #site-subtitle {
+  margin-top: 0;
+}
+/* HUD 条随字号一起退到次级：间距拉开一档，
+   否则贴着 42px 的大字会像标签贴错了位置 */
+#page-header.full_page #site-info::after {
+  margin-top: 26px;
 }
