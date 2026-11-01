@@ -6444,3 +6444,51 @@ hr.hr-line-dashed,
 #page-header.full_page #site-info::after {
   margin-top: 26px;
 }
+
+/* ---------- v1.9.33 文字组下移到向下箭头上面 ----------
+   原来这组文字用 top:46% + translateY(-50%) 悬在画面正中，正好压着
+   视频里发光的卵，每次峰值得靠文字投影硬扛。移到页面底部之后：
+     · 让出中间整块画面给背景，构图重心从「文字居中」变成「文字托底」；
+     · 底部是压暗层最厚的位置（径向暗角向下收），文字天然读得清。
+   top 必须显式设 auto —— 只写 bottom 会留下 46% 的 top，
+   绝对定位下 top + bottom + 高度自动 = 元素被纵向拉满屏。
+   间距：箭头容器 32px 贴底，其元素因 keyframes 还会上浮到 43px，
+   所以文字底留 66px，与箭头最高点之间约 23px。 */
+#page-header.full_page #site-info {
+  top: auto;
+  bottom: 66px;
+  transform: none;
+}
+/* 手机竖屏要再抬高一档：左下播放器折叠成 58px 圆盘，外面那圈环形频谱
+   实际占 104px（距底 16px），文字行居中时左端会伸进环里，
+   「A」被紫色光晕压住。抬到 136px 后文字底恒在环顶之上 16px。 */
+@media (max-width: 767px) {
+  #page-header.full_page #site-info {
+    bottom: 136px;
+  }
+}
+
+/* ---------- v1.9.33 播放器提示条让位到顶部 ----------
+   这条「音乐已自动播放」的提示原本 fixed 居中，bottom 由 player.js 按
+   播放器顶边算出来（约 115px）。首屏文字下移之后，它正好横穿那行主文字，
+   而它偏偏只对首次访问者出现 —— 被挡住的恰是最该读清标题的人。
+   JS 已改成按导航栏下沿定位；这里补齐 CSS，避免 place() 执行前那一帧
+   仍用旧位置闪一下。
+   bottom 必须显式归零：fixed + top + bottom + 高度自动 = 元素被竖向拉满。 */
+.rj-muted-tip {
+  top: 76px;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  /* left:50% 会让绝对定位元素的可用宽度只剩半屏，手机上一句话被切成
+     两行、还是个窄长条。max-content + 视口上限，单行居中。 */
+  width: max-content;
+  max-width: calc(100vw - 32px);
+}
+@media (max-width: 767px) {
+  .rj-muted-tip {
+    top: 68px;
+    bottom: auto;
+  }
+}

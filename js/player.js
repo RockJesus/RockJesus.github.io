@@ -1065,26 +1065,23 @@
     document.body.appendChild(t);
     // 8 秒自动收起。原来是「一直停留直到点击」，等于每个访客都被它压住半屏。
     t.__rjTimer = setTimeout(hideMutedTip, 8000);
-    // 提示条贴在播放器顶部上方，播放器展开歌单变高时跟着上移，避免压在歌单上。
-    // 注意要按「环形频谱」的上沿算，而不是播放器盒子：频谱画布 104px 比 66px 的圆盘
-    // 四周各多出 19px，按播放器顶边放会把环的上半圈（12 点方向）整段压住。
+    // v1.9.33 起改贴导航栏下方。
+    // 原来跟着播放器顶边走（bottom = 视口高 - 播放器顶 + 8），而播放器在左下、
+    // 首屏文字居中偏下 —— 一条常驻 8 秒的横条正好横穿那行主文字。
+    // 提示本该只对首访者出现，被挡的恰好是最该看清标题的人。
+    // 换成顶部之后：桌面/手机都不压首屏文字，也不碰播放器、看板娘和右下浮标。
     var place = function () {
-      var p = document.querySelector('.aplayer.aplayer-fixed');
-      if (!p || !t.parentNode) return;
-      var r = p.getBoundingClientRect();
-      var top = r.top;
-      var eq = p.querySelector('.rj-pl-eq');
-      if (eq && getComputedStyle(eq).display !== 'none') {
-        var er = eq.getBoundingClientRect();
-        if (er.height > 0) top = Math.min(top, er.top);
-      }
-      t.style.bottom = Math.round(window.innerHeight - top + 8) + 'px';
+      if (!t.parentNode) return;
+      var nav = document.getElementById('nav');
+      var navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
+      t.style.top = Math.round(Math.max(navBottom, 56) + 14) + 'px';
+      t.style.bottom = 'auto';
     };
     place();
     t.__rjPlace = place;
     if (window.ResizeObserver) {
       var ro = new ResizeObserver(place);
-      var host = document.querySelector('.aplayer.aplayer-fixed');
+      var host = document.getElementById('nav');
       if (host) ro.observe(host);
       t.__rjRO = ro;
     }
