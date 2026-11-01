@@ -5427,12 +5427,13 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
    ============================================================================ */
 
 /* ---------------------------------------------------------------------------
-   1. 画布：把壁纸压成「纹理」
-   壁纸本身是站点气质的一部分，不该删；但它现在是全屏高饱和的照片，
-   每张卡片都在跟它抢注意力，而且把侧栏染成青绿。压到 50% 左右之后，
-   它只提供一点星空颗粒感，版面立刻安静下来。
+   1. 画布：只在亮色下压成「纹理」
+   暗色不盖任何遮罩 —— 壁纸（oc.webp）本身就是深色星空，再叠一层近黑
+   会让整页黑成一块，看不出图也看不出层次。暗色只靠卡片自身的玻璃底
+   与阴影分区，画布原样透出。
+   亮色壁纸偏亮会顶到正文，仍保留一层冷白薄纱。
    --------------------------------------------------------------------------- */
-#web_bg::after {
+[data-theme='light'] #web_bg::after {
   content: '';
   position: fixed;
   inset: 0;
@@ -5445,10 +5446,10 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 
 /* ---------------------------------------------------------------------------
    2. 卡片：一套材质
-   · 底色：主列与侧栏用同一组不透明度（72% / 52%），保留玻璃的通透感，
-     又不至于让壁纸的色相把两列染成两种颜色
-   · backdrop 的 saturate 从 200% 降到 112%：这是侧栏「发青」的真正原因，
-     模糊只会让背景变虚，饱和度才会让青变成荧光
+   · 底色：主列 86% / 侧栏 72% —— 壁纸不再压暗之后，卡片太透会把壁纸上的
+     大号文字（oc.webp 里的 ALIENWARE 字样）透到正文里，像给卡片盖了水印。
+     加不透一点，玻璃感靠 backdrop 模糊与描边保留，不靠高透明度。
+   · backdrop 的 saturate 从 200% 降到 112%：这是侧栏「发青」的真正原因
    · 描边降到 hairline-4（白 10%）：深色界面里最强的塑料感来自过亮的硬边
    · 阴影换成三级体系里的 elev-2
    --------------------------------------------------------------------------- */
@@ -5462,8 +5463,8 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
       color-mix(in srgb, var(--rjp-white) 5%, transparent) 0%,
       transparent 46%),
     linear-gradient(145deg,
-      color-mix(in srgb, var(--rj-ink-surface) 72%, transparent),
-      color-mix(in srgb, var(--rj-ink-surface-2) 52%, transparent));
+      color-mix(in srgb, var(--rj-ink-surface) 86%, transparent),
+      color-mix(in srgb, var(--rj-ink-surface-2) 72%, transparent));
   backdrop-filter: blur(28px) saturate(112%);
   -webkit-backdrop-filter: blur(28px) saturate(112%);
   box-shadow: var(--rj-elev-2);
@@ -5769,21 +5770,17 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 }
 
 /* ---------------------------------------------------------------------------
-   9. 画布再压一档 + 去饱和
-   深色界面的「贵」几乎都来自一件事：背景安静。壁纸本身是青蓝色调的高饱和
-   星球照，只压暗会把青变成脏；同时降饱和度才真正退成一层有颗粒的暗色织物。
+   9. 暗色画布：不压暗、不去饱和
+   早前这一层是 `saturate(48%)` + `rgba(5,7,14,.44)` + 径向暗角，目的是把壁纸
+   退成「暗色织物」。但壁纸本身就是深色星空，叠上去等于给整页蒙一块黑布：
+   青绿星云看不见了，卡片与画布也失去明暗层次。
+   现在暗色原样透出壁纸，只靠卡片玻璃底 + 三级阴影分区。
    --------------------------------------------------------------------------- */
-:root:not([data-theme='light']) #web_bg {
-  filter: saturate(48%) contrast(102%);
-}
-:root:not([data-theme='light']) #web_bg::after {
-  background-color: rgba(5, 7, 14, 0.44);
-}
 /* 首屏压暗层：只负责压暗，不要再往这个伪元素上叠别的东西 ——
    上一版把颗粒贴在同一层并给了 opacity，结果亮色下把整层冷白一起透明掉，
    头图直接透上来，深墨标题落在深色照片上等于看不见。 */
 :root:not([data-theme='light']) #page-header.full_page::before {
-  background-color: rgba(7, 9, 20, 0.36);
+  background-color: rgba(7, 9, 20, 0.2);
 }
 
 /* ---------------------------------------------------------------------------
