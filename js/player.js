@@ -14,7 +14,13 @@
     name: 'RockJesus Station',
     artist: 'CC0 · Pixabay',
     url: 'https://cdn.jsdelivr.net/gh/rockjesus/rockjesus@main/music/seed1.mp3',
-    cover: '/img/header_oc.webp'
+    /* 默认封面必须是 1:1 的「唱片标签」，不能用横幅图：
+       3064 首里 2161 首没有封面，都会落到这张图上，而圆盘是正圆 + 旋转。
+       原来用 header_oc.webp（400×225 深底横幅、中间一块白卡片），
+       cover 裁进圆里就变成「圆中嵌一块被切碎的白方图」，在暗色 UI 里极跳。
+       现在这张是 480×480：深碳径向底 + 音槽 + 品牌渐变环 + 外星人头型，
+       66px 下仍能读成「一张唱片」。 */
+    cover: '/img/pl-cover-default.webp'
   };
 
   // 带超时的 fetch。歌单 583KB，CDN 冷回源时可能十几秒，超时给短了会直接掉到
@@ -286,6 +292,11 @@
         // 缩略封面也用这张图；不再把锐利大图铺到整卡，避免文字被照片压灰
         if (body) body.style.setProperty('--rj-pl-cover', 'url("' + u + '")');
         if (row) row.style.setProperty('--rj-pl-cover', 'url("' + u + '")');
+        // 落到默认唱片标签时给外壳打个标记：圆盘停止旋转。
+        // 专辑封面转起来是唱片质感，但默认标签中央是外星人头型，
+        // 整块跟着转一圈会像「图卡住了」——它本质是一块品牌铭牌，静止才成立。
+        var shell = container.querySelector('.rj-pl');
+        if (shell) shell.classList.toggle('rj-pl-default-art', u === SEED.cover);
       }
       var img = new Image();
       img.onload = function () {
@@ -1011,6 +1022,8 @@
       }
       if (!root.style.getPropertyValue('--rj-pl-cover')) {
         root.style.setProperty('--rj-pl-cover', 'url("' + SEED.cover + '")');
+        // 初始态就是默认标签 → 直接标上「不旋转」，避免首帧转一下再停
+        root.classList.add('rj-pl-default-art');
       }
       // APlayer 会按容器宽度自动挂 .aplayer-narrow，原生窄态会隐藏歌单与信息；
       // 折叠改由 rj-pl-collapsed 控制，这里持续摘掉原生窄态类
