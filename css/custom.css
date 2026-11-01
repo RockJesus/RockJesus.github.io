@@ -5010,10 +5010,11 @@ a.site-page.group > .rj-nav-icon:last-child {
 /* ---------- A2. 玻璃卡：给一个统一的底色 ----------
    卡片原来是 55%/38% 两档透明的渐变，背景大图的色相直接透上来：
    主列背后是外星人眼（偏红紫），侧栏背后是星球（偏青），同一屏两套色。
-   把底色的不透明度提到 74%/56%，色相仍会渗一点（保留玻璃感），但两列回到同一条基准线上。 */
+   把底色的不透明度提到 74%/56%，色相仍会渗一点（保留玻璃感），但两列回到同一条基准线上。
+   ⚠️ v1.9.23：侧栏卡片已按要求还原成原先的通透玻璃（见文件末尾「侧栏卡片还原」段），
+   因此这里只作用于主列 —— 不要再把 #aside-content .card-widget 加回来。 */
 :root:not([data-theme='light']) #recent-posts > .recent-post-item,
-:root:not([data-theme='light']) .layout_page > div:first-child:not(.recent-posts),
-:root:not([data-theme='light']) #aside-content .card-widget {
+:root:not([data-theme='light']) .layout_page > div:first-child:not(.recent-posts) {
   background: linear-gradient(145deg,
     color-mix(in srgb, var(--rj-ink-surface) 86%, transparent),
     color-mix(in srgb, var(--rj-ink-surface-2) 66%, transparent));
@@ -5240,14 +5241,13 @@ a.site-page.group > .rj-nav-icon:last-child {
 .rj-muted-tip {
   animation: rjTipInCenter 0.4s ease;
 }
-
-/* 侧栏卡片背后是亮青色星球，86% 仍能透出一层青调，和主列对不上；
-   单独给侧栏再提两档不透明度（模糊与高光不动，玻璃感保留）。 */
-:root:not([data-theme='light']) #aside-content .card-widget {
-  background: linear-gradient(145deg,
-    color-mix(in srgb, var(--rj-ink-surface) 93%, transparent),
-    color-mix(in srgb, var(--rj-ink-surface-2) 80%, transparent));
-}
+/* 侧栏卡片：v1.9.23 还原为原先的通透玻璃。
+   v1.9.20 曾为了「两列同一基准线」把这里提到 93%/80%（还砍了模糊强度），
+   结果侧栏变成一块块实心深板，星球/星野完全透不上来。
+   现在把提权规则删掉，回落到文件前段那条基础卡片规则
+   —— linear-gradient(145deg, --rj-surface-raised 55%, --rj-ink-surface-2 38%)
+   + blur(36px) saturate(200%)，即 v1.9.20 之前的原样。
+   ⚠️ 不要再在这里单独给侧栏写 background。 */
 
 /* 内页页头的标题容器必须排在 ::before 蒙层（z-index:1）之上，
    否则亮色下 93% 的浅色蒙层会把标题洗成一层淡影。
