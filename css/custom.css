@@ -4521,10 +4521,24 @@ body {
   background-color: rgba(7, 9, 20, 0.16);
 }
 #page-header.full_page::before {
-  background-image: radial-gradient(74% 68% at 50% 44%,
-    transparent 0%,
-    color-mix(in srgb, var(--rj-ink-surface) 22%, transparent) 68%,
-    color-mix(in srgb, var(--rj-ink-surface) 52%, transparent) 100%);
+  background-image: radial-gradient(116% 98% at 50% 46%,
+    color-mix(in srgb, var(--rj-ink-surface) 22%, transparent) 0%,
+    color-mix(in srgb, var(--rj-ink-surface) 12%, transparent) 40%,
+    color-mix(in srgb, var(--rj-ink-surface) 56%, transparent) 100%);
+}
+
+/* 动态背景的副作用：素材主体（发光的卵）正好在画面正中，也就是标题的位置。
+   峰值那 3 秒整屏被照亮，白字会陷进光里 —— 光靠压暗层要把画面压死才够，
+   代价太大。改成给文字自己加「暗色柔光」：近距 1px 锐化字边，
+   远距 44px 在字周围铺一层几乎看不出边界的暗晕，字浮起来、画面不用动。
+
+   只限暗色主题：亮色首屏是「浅底 + 深墨字」（见 B2），
+   深字再加暗投影只会显脏。 */
+:root:not([data-theme='light']) #page-header.full_page #site-title,
+:root:not([data-theme='light']) #page-header.full_page #site-subtitle #subtitle {
+  text-shadow:
+    0 1px 2px var(--rj-on-media-shadow),
+    0 10px 44px color-mix(in srgb, var(--rj-ink-cast) 72%, transparent);
 }
 
 @media screen and (max-width: 768px) {
@@ -6332,4 +6346,63 @@ hr.hr-line-dashed,
 }
 [data-theme='light'] #page-header #scroll-down .scroll-down-effects {
   color: color-mix(in srgb, var(--rjp-apple-ink) 46%, transparent);
+}
+
+/* ============================================================
+   批次 D · 首屏动态背景（2026-11-01）
+   ---------------------------------------------------------------------------
+   首屏原本是 /img/header_home.webp 一张静帧。现在让同一段素材动起来：
+   13.6s 静音循环视频（桌面 1344×756 / 465KB，移动 672×378 / 150KB），
+   源 GIF 是 47MB —— 直接当背景会让首屏彻底废掉，所以走视频压缩。
+
+   两个关键决定：
+   1) 循环起点对齐静帧。素材原序列是「黑 → 主体浮现 → 极亮 → 淡出到黑」，
+      这里把第 26 帧（≈现有静帧画面）转成第 0 帧，末尾接回原开头 ——
+      首帧与静帧同画面、循环点两端都是全黑，两头都看不出接缝。
+   2) 视频不写 poster。首屏的静帧还留在 #page-header 的内联背景上，
+      它本身就是海报，省一次请求；视频 canplay 后才淡入，此时画面已经
+      和静帧一致，切换过程不可见。
+   ---------------------------------------------------------------------------
+   层级（自下而上）：
+     ① #page-header 内联背景图   —— 兜底 / 无 JS / 省流时唯一可见的画面
+     ② .rj-hero-video  z-index:0 —— 视频层
+     ③ ::before        z-index:1 —— 压暗 + 径向聚光
+     ④ ::after         z-index:2 —— HUD 扫描线
+     ⑤ 正文/箭头       z-index:3
+   主题的 `#page-header:not(.not-top-img):before` 没设 z-index，视频是它的
+   子元素、会盖在压暗层上面 —— 不显式抬高档位，首屏会整体变亮、文字发飘。
+   ============================================================ */
+.rj-hero-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 与静帧的 `background-position: center center` 对齐，
+     手机竖屏裁两侧后主体仍在正中 */
+  object-position: center center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 900ms var(--rj-ease-out);
+}
+.rj-hero-video.is-ready {
+  opacity: 1;
+}
+
+#page-header.full_page::before {
+  z-index: 1;
+}
+#page-header.full_page::after {
+  z-index: 2;
+}
+#page-header.full_page #site-info,
+#page-header.full_page #scroll-down {
+  z-index: 3;
+}
+
+/* 视频接管画面后，首屏底部那条「图→黑」的过渡可以收短：
+   原来是为了压住静帧边缘的色阶，现在画面本身在动，压太重会闷。 */
+:root:not([data-theme='light']) #page-header.full_page {
+  background-color: var(--rj-ink-surface);
 }

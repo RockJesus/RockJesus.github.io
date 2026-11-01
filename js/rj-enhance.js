@@ -151,4 +151,120 @@
       h.appendChild(btn);
     });
   }
+
+  /* ---------- 6) 首屏动态背景 ----------
+     首页背景从静帧换成 13.6s 静音循环视频（详见 custom.css 批次 D）。
+     视频首帧与静帧同画面，所以淡入时看不到切换。
+
+     四条不做：
+       · 不做首屏阻塞 —— 等 load + 空闲才挂载，视频不跟标题抢带宽；
+       · 不做省流用户 —— Save-Data / 2G·3G 直接退回静帧，150KB 也是流量；
+       · 不做减弱动效 —— prefers-reduced-motion 下完全不挂载；
+       · 不做亮色主题 —— 亮色首屏是刻意做的「浅底 + 深墨字」，压着 87%
+         白蒙层（见 custom.css B2）。深色视频在下面只剩 13% 透光，
+         放进去既看不见、又白白耗电解码。切到暗色再挂。
+     进程内还会在离开首页时主动卸载，别让它在后台继续解码耗电。 */
+  function heroEligible() {
+    if (reduce) return false;
+    /* 亮色主题不挂：那里的首屏是浅底的 */
+    if (de.getAttribute('data-theme') === 'light') return false;
+    var c = navigator.connection;
+    if (!c) return true;
+    if (c.saveData) return false;
+    return !/^(slow-2g|2g|3g)$/.test(c.effectiveType || '');
+  }
+
+  var heroTimer = null;
+
+  function heroSync() {
+    var header = doc.getElementById('page-header');
+    var onHome = !!(header && /(^|\s)full_page(\s|$)/.test(header.className));
+    var video = header && header.querySelector('.rj-hero-video');
+
+    /* 不在首页、或者当前条件不该放视频（切到亮色主题就是这条）——
+       两个方向都收干净，别留一个看不见的 video 在后台解码 */
+    if (!onHome || !heroEligible()) {
+      if (video) {
+        video.pause();
+        video.remove();
+      }
+      return;
+    }
+    if (video) {
+      if (video.paused) {
+        var again = video.play();
+        if (again && again.catch) again.catch(function () {});
+      }
+      return;
+    }
+
+    var v = doc.createElement('video');
+    v.className = 'rj-hero-video';
+    v.muted = true;
+    v.defaultMuted = true;
+    v.loop = true;
+    v.playsInline = true;
+    v.autoplay = true;
+    v.preload = 'auto';
+    v.setAttribute('muted', '');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('aria-hidden', 'true');
+    v.setAttribute('tabindex', '-1');
+    /* 手机竖屏按 cover 裁完只剩中间一条，672 宽够用；
+       桌面全屏铺开才需要 1344 那一档 */
+    v.src = window.innerWidth < 820 ? '/img/hero-bg-sm.mp4' : '/img/hero-bg.mp4';
+
+    v.addEventListener(
+      'canplay',
+      function () {
+        v.classList.add('is-ready');
+        var p = v.play();
+        if (p && p.catch) p.catch(function () {});
+      },
+      { once: true }
+    );
+    /* 解码失败（编解码器不支持等）就把这一层撤掉，静帧继续兜底 */
+    v.addEventListener('error', function () {
+      v.remove();
+    });
+
+    header.insertBefore(v, header.firstChild);
+  }
+
+  function heroStart() {
+    if (heroTimer) return;
+    var run = function () {
+      heroTimer = null;
+      heroSync();
+    };
+    if (window.requestIdleCallback) {
+      heroTimer = requestIdleCallback(run, { timeout: 1800 });
+    } else {
+      heroTimer = setTimeout(run, 700);
+    }
+  }
+
+  if (doc.readyState === 'complete') {
+    heroStart();
+  } else {
+    window.addEventListener('load', heroStart, { once: true });
+  }
+
+  doc.addEventListener('pjax:complete', function () {
+    var header = doc.getElementById('page-header');
+    if (header && /(^|\s)full_page(\s|$)/.test(header.className)) {
+      heroStart();
+    } else {
+      heroSync();
+    }
+  });
+
+  /* 主题切换时同步一次：切到亮色要立刻收掉视频（那个主题的首屏是浅底的），
+     切回暗色再挂上。只在页面 load 完之后响应，避免初始化阶段的
+     data-theme 写入把视频提前拉起来、跟首屏抢带宽。 */
+  if (window.MutationObserver) {
+    new MutationObserver(function () {
+      if (doc.readyState === 'complete') heroSync();
+    }).observe(de, { attributes: true, attributeFilter: ['data-theme'] });
+  }
 })();
