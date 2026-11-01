@@ -70,52 +70,46 @@
   transform: scale(1.04);
 }
 
-/* ---------- 首屏标题：霓虹渐变字 ---------- */
-#site-title {
-  background: linear-gradient(90deg, var(--rj-brand-3) 0%, var(--rj-accent) 50%, var(--rj-accent-3) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--rj-brand) 55%, transparent));
-  font-weight: 700;
-  letter-spacing: 1px;
+/* ---------- 标题：实色油墨（v1.9.26 移除紫→青→粉渐变字）
+   渐变文字是「模板感」最重的信号：色相跨度大、边缘发虚、还有一圈 drop-shadow
+   光晕，任何背景上都像 PPT 艺术字。高级感来自字重、字距与留白，不来自发光。 ---------- */
+#site-title,
+#site-name {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--rj-text-strong);
+  filter: none;
+  text-shadow: 0 1px 24px color-mix(in srgb, var(--rj-ink-cast) 46%, transparent);
 }
 
 #site-subtitle {
-  color: var(--rj-text-quote);
-  text-shadow: 0 0 18px color-mix(in srgb, var(--rj-brand) 60%, transparent), 0 0 8px color-mix(in srgb, var(--rj-accent) 45%, transparent);
+  color: var(--rj-text-soft);
+  text-shadow: none;
 }
 
-/* 副标题打字文字：主题紫→青→粉渐变 */
+/* 副标题打字文字：与标题同色阶，只降一档明度做层级 */
 #site-subtitle #subtitle {
-  background: linear-gradient(90deg, var(--rj-brand-4) 0%, var(--rj-accent-2) 50%, var(--rj-accent-4) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--rj-brand) 50%, transparent));
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--rj-text-dim);
+  filter: none;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-shadow: none;
 }
 #site-subtitle .typed-cursor {
-  color: var(--rj-accent);
-  text-shadow: 0 0 10px color-mix(in srgb, var(--rj-accent) 80%, transparent);
+  color: color-mix(in srgb, var(--rj-text-dim) 80%, transparent);
+  text-shadow: none;
 }
 
-/* 首屏下滑箭头：主题色 */
+/* 首屏下滑箭头：不发光，只做明度呼吸 */
 #scroll-down i {
-  color: var(--rj-brand-3);
-  text-shadow: 0 0 14px color-mix(in srgb, var(--rj-accent) 65%, transparent);
-}
-
-#site-name {
-  background: linear-gradient(90deg, var(--rj-brand-4), var(--rj-accent-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  font-weight: 600;
+  color: color-mix(in srgb, var(--rj-text-soft) 68%, transparent);
+  text-shadow: none;
 }
 
 /* ---------- 文章标题与链接 ---------- */
@@ -124,11 +118,7 @@
   transition: color .2s ease, text-shadow .2s ease;
 }
 .article-title:hover {
-  background: linear-gradient(90deg, var(--rj-brand-3), var(--rj-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: var(--rj-brand-3);
 }
 
 /* ---------- 主页中间（文章卡片）字体：对齐站点主题色 ---------- */
@@ -175,15 +165,6 @@ a:hover {
   border-image: linear-gradient(180deg, var(--rj-brand), var(--rj-accent)) 1;
   border-radius: 4px;
   background: color-mix(in srgb, var(--rj-brand) 8%, transparent);
-}
-
-/* ---------- 侧栏 ---------- */
-.card-info .author-info__name {
-  background: linear-gradient(90deg, var(--rj-brand-3), var(--rj-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
 }
 
 .item-headline {
@@ -2164,15 +2145,6 @@ hr::before { content: none !important; }
   top: 75%;
 }
 
-/* 打字副标题：只要紫色文字（覆盖原渐变） */
-#site-subtitle #subtitle {
-  background: none;
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  -webkit-text-fill-color: initial;
-  color: var(--rj-brand-3);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 65%, transparent);
-}
 #site-subtitle .typed-cursor {
   color: var(--rj-brand-3);
   text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 80%, transparent);
@@ -2432,20 +2404,6 @@ a:hover { color: var(--rj-brand-2); }
 #article-container a.headerlink::after { color: var(--rj-brand); }
 #post .tag_share .post-meta__tags { border-color: color-mix(in srgb, var(--rj-brand) 60%, transparent); background: color-mix(in srgb, var(--rj-brand) 12%, transparent); color: var(--rj-brand-4); }
 
-/* —— 渐变应用点：Follow Me 同款 135deg var(--rj-brand)→var(--rj-brand-2) —— */
-.article-title:hover {
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
-}
-/* 站点文字 Logo：淡紫 → 紫 → 淡丁香，三段柔渐变 + 品牌光晕，避免深紫发闷 */
-#site-name {
-  background: linear-gradient(135deg, var(--rj-brand-8) 0%, var(--rj-brand-4) 42%, var(--rj-brand-3) 100%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--rj-brand) 42%, transparent));
-  transition: filter var(--rj-dur-base) var(--rj-ease-out);
-}
 #site-name:hover {
   filter: drop-shadow(0 0 16px color-mix(in srgb, var(--rj-brand) 72%, transparent));
 }
@@ -3168,17 +3126,6 @@ a:hover { color: var(--rj-brand-2); }
   color: var(--rj-brand);
 }
 /* 进度条：滑块与已播渐变紫强化（按钮态反馈） */
-/* —— 打字副标题：iOS27 玻璃渐变字 + 高光 —— */
-#site-subtitle #subtitle {
-  background: linear-gradient(135deg, var(--rj-brand-6) 0%, var(--rj-brand-4) 38%, var(--rj-brand) 72%, var(--rj-brand-2) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  font-weight: 600;
-  letter-spacing: .6px;
-  filter: drop-shadow(0 2px 16px color-mix(in srgb, var(--rj-brand) 60%, transparent));
-}
 /* —— 打字光标：渐变紫玻璃竖条 + 呼吸闪烁 —— */
 #site-subtitle .typed-cursor {
   color: transparent;
@@ -3507,17 +3454,6 @@ a:hover { color: var(--rj-brand-2); }
   padding: 42px 24px 34px !important;
   text-align: center;
 }
-#post-info .post-title {
-  font-size: 2.1em;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-  margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--rj-text-inverse) 10%, var(--rj-brand-4) 52%, var(--rj-accent-2) 96%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 6px 30px color-mix(in srgb, var(--rj-brand) 40%, transparent);
-}
 #post-meta {
   display: flex;
   flex-wrap: wrap;
@@ -3776,17 +3712,6 @@ a:hover { color: var(--rj-brand-2); }
   background-color: color-mix(in srgb, var(--rj-brand) 13%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 22%, transparent);
 }
-/* 浅底上换成更深的紫（保证白底对比度），且必须补回 background-clip，
-   否则 background 简写会把 background-clip 重置成 border-box，文字变成一块色块 */
-[data-theme='light'] #site-name {
-  background: linear-gradient(135deg, var(--rj-brand) 0%, var(--rj-brand-2) 55%, var(--rj-brand-3) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  filter: none;
-}
-
 /* 卡片：提高不透明度，让浅底不被深图污染 */
 [data-theme='light'] #recent-posts > .recent-post-item,
 [data-theme='light'] .layout_page > div:first-child:not(.recent-posts),
@@ -4082,53 +4007,9 @@ body {
    一条横贯的彩色塑料条（尤其压在深色背景上），已移除；分隔交给渐隐本身。 */
 
 /* ---------- 4. 首屏：HUD 取景框 ---------- */
-#page-header.full_page::before {
-  content: '';
-  position: absolute;
-  inset: 86px 26px 26px;
-  /* 主题给 :before 定了 width/height:100%，必须还原为 auto 才能按 inset 收缩，
-     否则取景框会溢出到视口右侧之外 */
-  width: auto;
-  height: auto;
-  pointer-events: none;
-  opacity: 0.42;
-  /* 四角取景括号：8 条渐变一次画完，不占额外 DOM。
-     必须用 background 简写才能写 position/size；主题的蒙层在暗色下 alpha 为 0，
-     因此不会损失原有压暗效果 */
-  background:
-    linear-gradient(var(--rj-hud), var(--rj-hud)) left top / 24px 1px no-repeat,
-    linear-gradient(var(--rj-hud), var(--rj-hud)) left top / 1px 24px no-repeat,
-    linear-gradient(var(--rj-hud), var(--rj-hud)) right top / 24px 1px no-repeat,
-    linear-gradient(var(--rj-hud), var(--rj-hud)) right top / 1px 24px no-repeat,
-    linear-gradient(var(--rj-hud), var(--rj-hud)) left bottom / 24px 1px no-repeat,
-    linear-gradient(var(--rj-hud), var(--rj-hud)) left bottom / 1px 24px no-repeat,
-    linear-gradient(var(--rj-hud), var(--rj-hud)) right bottom / 24px 1px no-repeat,
-    linear-gradient(var(--rj-hud), var(--rj-hud)) right bottom / 1px 24px no-repeat;
-}
-
-/* 横扫扫描线：Alienware 开机自检的一次性动效 */
-#page-header.full_page::after {
-  content: '';
-  position: absolute;
-  left: 26px;
-  right: 26px;
-  top: 86px;
-  height: 1px;
-  pointer-events: none;
-  background: linear-gradient(90deg,
-    transparent,
-    color-mix(in srgb, var(--rj-hud) 70%, transparent),
-    transparent);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--rj-hud) 50%, transparent);
-  animation: rjHudSweep 4.2s cubic-bezier(0.4, 0, 0.2, 1) 1 both;
-}
-
-@keyframes rjHudSweep {
-  0%   { transform: translateY(0);     opacity: 0; }
-  8%   { opacity: 0.9; }
-  62%  { opacity: 0.55; }
-  100% { transform: translateY(70vh);  opacity: 0; }
-}
+/* ---------- 4·v1.9.26 首屏：取景括号与扫描线已移除 ----------
+   四角青色直角 + 横扫扫描线是「科幻 UI 模板」的固定套路，在静止截图上尤其像素材包。
+   首屏的秩序改由三件事建立：留白、字阶、一层从底向上渐深的压暗。 ---------- */
 
 /* 打字副标题下方的 HUD 状态条 */
 #page-header.full_page #site-info::after {
@@ -4146,42 +4027,10 @@ body {
   text-shadow: 0 0 10px color-mix(in srgb, var(--rj-hud) 35%, transparent);
 }
 
-/* ---------- 5. 卡片：机甲切角 + 角落括号 ---------- */
-#recent-posts > .recent-post-item::after,
-#aside-content .card-widget::after {
-  content: '';
-  position: absolute;
-  /* 内缩到圆角切线之内，否则会被 overflow:hidden 的圆角切掉 */
-  top: 12px;
-  right: 12px;
-  width: 26px;
-  height: 26px;
-  pointer-events: none;
-  opacity: 0.5;
-  background:
-    linear-gradient(var(--rj-hud), var(--rj-hud)) 100% 0 / 16px 1px no-repeat,
-    linear-gradient(var(--rj-hud), var(--rj-hud)) 100% 0 / 1px 16px no-repeat;
-  transition: opacity var(--rj-dur-base) var(--rj-ease-out),
-              width var(--rj-dur-base) var(--rj-ease-out),
-              height var(--rj-dur-base) var(--rj-ease-out);
-}
-
-#recent-posts > .recent-post-item:hover::after,
-#aside-content .card-widget:hover::after {
-  opacity: 1;
-  width: 40px;
-  height: 40px;
-}
-
-/* hover 时描边从单紫转为紫青双色，并在底部透出青光 */
-#recent-posts > .recent-post-item:hover {
-  border-color: color-mix(in srgb, var(--rj-brand) 40%, var(--rj-hud));
-  box-shadow:
-    0 12px 32px color-mix(in srgb, var(--rj-ink-glow) 30%, transparent),
-    0 26px 70px var(--rj-shadow-7),
-    0 0 0 1px color-mix(in srgb, var(--rj-hud) 22%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, var(--rj-hud) 22%, transparent);
-}
+/* ---------- 5. 卡片：v1.9.26 移除右上角 HUD 括号 ----------
+   那条 16px 的青色直角 + hover 时放大到 40px 的动作，是整页「像模板」的元凶：
+   它不表达任何信息，纯粹在给卡片贴装饰。卡片的高级感只靠：细描边、
+   一层方向一致的柔和投影、悬停时 2px 上浮。---------- */
 
 /* ---------- 6. 文章正文：H2 青色定位标 ---------- */
 #article-container h2 {
@@ -4406,18 +4255,6 @@ body {
     0 0 0 1px color-mix(in srgb, var(--rj-shadow-1) 40%, transparent);
 }
 
-/* 文章页标题渐变：暗色从白起笔，亮色下横幅被压成浅色，白字起笔会消失 */
-[data-theme='light'] #post-info .post-title {
-  background: linear-gradient(135deg,
-    var(--rj-text-strong) 8%,
-    var(--rj-brand-4) 50%,
-    var(--rj-accent) 96%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: none;
-}
-
 /* 移动端：首屏底部已被看板娘与播放提示占据，HUD 状态条不再叠加 */
 @media (max-width: 768px) {
   #page-header.full_page #site-info::after {
@@ -4631,7 +4468,7 @@ body {
 }
 
 /* ---------- B7. 卡片标题：24px 却只有 400 字重，撑不起视觉锚点 ---------- */
-#recent-posts .recent-post-info > .article-title {
+#recent-posts > .recent-post-item > .recent-post-info > .article-title {
   font-weight: 600;
   letter-spacing: -0.012em;
   line-height: 1.32;
@@ -4650,8 +4487,10 @@ body {
   margin: 0 0 6px;
 }
 #page-header.full_page {
-  height: 84vh;
-  min-height: 600px;
+  /* 84vh 时首屏只剩标题，下面是 300px 的空场；76vh 让第一排卡片露一条边，
+     页面立刻有「继续往下」的暗示。 */
+  height: 76vh;
+  min-height: 540px;
 }
 /* 整块内容居中，并用 order 控制标题 / 副标题 / HUD 的先后 */
 #page-header.full_page #site-info {
@@ -4780,15 +4619,6 @@ body {
    ============================================================ */
 
 /* ---------- C12. 首屏标题：两种主题都压在同一张深色照片上 ---------- */
-/* 亮色模式下 --rj-brand-3 是 #6d28d9、--rj-accent 是 #0e7490，
-   渐变整体压暗在深照片上会「沉」下去，这里提亮到浅紫→浅青。 */
-[data-theme='light'] #site-title {
-  background: linear-gradient(90deg, #c4b5fd 0%, #7ff9ff 52%, #f0abfc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 22px rgba(0, 0, 0, 0.55));
-}
 [data-theme='light'] #site-subtitle #subtitle {
   color: #d8c3ff;
   text-shadow: 0 0 14px rgba(0, 0, 0, 0.6), 0 0 10px rgba(139, 92, 246, 0.45);
@@ -4918,30 +4748,17 @@ a.site-page.group > .rj-nav-icon:last-child {
 }
 /* ::before 是内嵌的（inset: 86px 26px 26px），四周 26px 会露出 #page-header 自己的
    深色星空头图 —— 暗色下看不出来，亮色下就是一圈黑框。亮色首屏直接不要头图。 */
-[data-theme='light'] #page-header.full_page {
-  /* 头图是模板写的行内 style，只能 !important 压掉；
-     纯色底面在 84vh 高度上会显得空，补一层极淡的径向光做纵深 */
-  background-image: radial-gradient(72% 62% at 50% 44%, #fdfdff 0%, #f1f2fa 58%, #eaecf7 100%) !important;
-  background-color: #f4f5fa;
-}
-[data-theme='light'] #page-header.full_page #site-title {
-  background: linear-gradient(90deg,
-    var(--rj-brand-4) 0%,
-    var(--rj-accent) 54%,
-    var(--rj-accent-4) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: none;
-}
-/* 内页（归档/标签/分类）的标题复用了同一个 #site-title，亮色下要单独给深墨实色，
-   否则会继承首屏的渐变 —— 深墨落在压暗的头图上等于看不见。 */
+/* v1.9.26：亮色首屏不再抹成一块纯白板 —— 头图留着，靠 ::before 的 90% 冷白
+   压成「纸背的纹理」，比纯色多点呼吸，也不会出现一圈边框。 */
+/* 内页（归档/标签/分类/留言板）的标题复用了同一个 #site-title。
+   早先这里给了 --rj-brand-4 紫，和首页站名（深墨）、文章标题（深墨）不一致 ——
+   同一个层级的标题出现两种颜色，是"拼凑感"的来源之一。统一为深墨。 */
 [data-theme='light'] #page-header:not(.full_page) #site-title {
   background: none;
   -webkit-background-clip: border-box;
   background-clip: border-box;
-  -webkit-text-fill-color: var(--rj-brand-4);
-  color: var(--rj-brand-4);
+  -webkit-text-fill-color: var(--rjp-apple-ink);
+  color: var(--rjp-apple-ink);
   filter: none;
 }
 [data-theme='light'] #page-header.full_page #site-subtitle #subtitle {
@@ -5589,4 +5406,886 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
     0 1px 2px color-mix(in srgb, var(--rj-shadow-1) 60%, transparent),
     0 8px 22px color-mix(in srgb, var(--rj-ink-shadow) 8%, transparent),
     inset 0 1px 0 var(--rjp-white);
+}
+
+/* ============================================================================
+   v1.9.26 · 视觉收敛 —— 去霓虹 / 去装饰 / 统一材质与字阶
+   ----------------------------------------------------------------------------
+   这一版改的都是「看得见、但说不出为什么廉价」的地方：
+
+   1. 渐变文字 + drop-shadow 光晕：紫→青→粉三色跨度，在任何背景上都像艺术字
+   2. `0 0 Npx` 的外发光：霓虹圈是科技模板的默认装饰，真实光源不会这样溢光
+   3. 卡片右上角青色取景括号、首屏四角括号、横扫扫描线：纯装饰，不承载信息
+   4. 同一屏两套底色：主列深墨、侧栏青玻璃 —— 壁纸的青色被 saturate(200%) 提纯了
+   5. 元信息四个描边胶囊：一行四个框，读起来像标签墙
+   6. 阴影没有体系：有 0 0 16px 发光、有 0 26px 70px 深投，光源方向互相矛盾
+
+   收敛后的三条原则：
+   · 光只从上方来 → 所有阴影 = 近距离小阴影定轮廓 + 远距离大阴影给高度
+   · 颜色只表达状态 → 品牌紫只给「可交互 / 当前项」，青色只留首屏一行 HUD 小字
+   · 层级靠字重、字距与留白，不靠发光
+   ============================================================================ */
+
+/* ---------------------------------------------------------------------------
+   1. 画布：把壁纸压成「纹理」
+   壁纸本身是站点气质的一部分，不该删；但它现在是全屏高饱和的照片，
+   每张卡片都在跟它抢注意力，而且把侧栏染成青绿。压到 50% 左右之后，
+   它只提供一点星空颗粒感，版面立刻安静下来。
+   --------------------------------------------------------------------------- */
+#web_bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-color: var(--rj-canvas-scrim);
+  background-image: radial-gradient(135% 105% at 50% 8%,
+    transparent 34%,
+    var(--rj-canvas-vignette) 100%);
+}
+
+/* ---------------------------------------------------------------------------
+   2. 卡片：一套材质
+   · 底色：主列与侧栏用同一组不透明度（72% / 52%），保留玻璃的通透感，
+     又不至于让壁纸的色相把两列染成两种颜色
+   · backdrop 的 saturate 从 200% 降到 112%：这是侧栏「发青」的真正原因，
+     模糊只会让背景变虚，饱和度才会让青变成荧光
+   · 描边降到 hairline-4（白 10%）：深色界面里最强的塑料感来自过亮的硬边
+   · 阴影换成三级体系里的 elev-2
+   --------------------------------------------------------------------------- */
+:root:not([data-theme='light']) #recent-posts > .recent-post-item,
+:root:not([data-theme='light']) .layout_page > div:first-child:not(.recent-posts),
+:root:not([data-theme='light']) #aside-content .card-widget {
+  border-radius: 18px;
+  border: 1px solid var(--rj-hairline-4);
+  background:
+    linear-gradient(158deg,
+      color-mix(in srgb, var(--rjp-white) 5%, transparent) 0%,
+      transparent 46%),
+    linear-gradient(145deg,
+      color-mix(in srgb, var(--rj-ink-surface) 72%, transparent),
+      color-mix(in srgb, var(--rj-ink-surface-2) 52%, transparent));
+  backdrop-filter: blur(28px) saturate(112%);
+  -webkit-backdrop-filter: blur(28px) saturate(112%);
+  box-shadow: var(--rj-elev-2);
+  transition: transform var(--rj-dur-base) var(--rj-ease-out),
+              box-shadow var(--rj-dur-base) var(--rj-ease-out),
+              border-color var(--rj-dur-base) var(--rj-ease-out);
+}
+/* 悬停只做「抬起 2px + 阴影加深 + 描边微亮」。
+   原来的 5px 位移配 70px 深投影会把整张卡甩出去，是小学生作业里的「卡片特效」。 */
+:root:not([data-theme='light']) #recent-posts > .recent-post-item:hover,
+:root:not([data-theme='light']) #aside-content .card-widget:hover {
+  transform: translateY(-2px);
+  border-color: var(--rj-hairline-6);
+  box-shadow: var(--rj-elev-3);
+}
+[data-theme='light'] #recent-posts > .recent-post-item,
+[data-theme='light'] .layout_page > div:first-child:not(.recent-posts),
+[data-theme='light'] #aside-content .card-widget {
+  border-color: var(--rjp-apple-line);
+  background:
+    linear-gradient(158deg, rgba(255, 255, 255, 0.9) 0%, transparent 46%),
+    var(--rjp-white);
+  box-shadow: var(--rj-elev-2);
+}
+[data-theme='light'] #recent-posts > .recent-post-item:hover,
+[data-theme='light'] #aside-content .card-widget:hover {
+  border-color: var(--rjp-apple-line);
+  box-shadow: var(--rj-elev-3);
+}
+
+/* 侧栏卡片的内边距统一（原来三张卡各写一套，左边缘差 2px） */
+#aside-content .card-widget {
+  padding: 20px 20px 18px;
+}
+#aside-content .item-headline {
+  margin-bottom: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* 封面：内嵌圆角与卡片圆角成比例（18 外 / 12 内），不再叠紫色描边 */
+#recent-posts > .recent-post-item > .post_cover {
+  border-radius: 12px;
+}
+#recent-posts > .recent-post-item > .post_cover img.post_bg {
+  filter: saturate(102%) contrast(101%);
+}
+
+/* ---------------------------------------------------------------------------
+   3. 字阶：一套 7 级，中文按 1.85 行高
+   --------------------------------------------------------------------------- */
+#site-title,
+#page-header #site-title {
+  font-size: clamp(38px, 4.4vw, 56px);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.032em;
+  color: var(--rj-text-strong);
+  margin: 0 0 4px;
+}
+[data-theme='light'] #page-header #site-title {
+  color: var(--rjp-apple-ink);
+  text-shadow: none;
+}
+#site-subtitle {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+#site-subtitle #subtitle {
+  font-size: 16px;
+}
+
+/* 列表卡：标题 19.5 / 摘要 14 —— 差距来自字号与颜色，不来自字号爆炸 */
+#recent-posts .recent-post-info > .article-title {
+  font-size: 19.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.006em;
+  margin-bottom: 10px;
+}
+#recent-posts > .recent-post-item > .recent-post-info > .article-title:hover {
+  color: var(--rj-brand-3);
+}
+/* 摘要：两行截断，行高 1.75，颜色退一档 */
+#recent-posts > .recent-post-item > .recent-post-info > .content {
+  font-size: 14px;
+  line-height: 1.75;
+  letter-spacing: 0.004em;
+  color: var(--rj-text-dim);
+}
+
+/* 正文：16.5 / 1.85，中文段落用 pretty 避免孤字 */
+#article-container {
+  font-size: 16.5px;
+  line-height: 1.85;
+  letter-spacing: 0.004em;
+  text-wrap: pretty;
+}
+#article-container p {
+  margin-bottom: 24px;
+}
+#article-container h2 {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin: 40px 0 16px;
+}
+#article-container h3 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin: 32px 0 12px;
+}
+/* h2 的竖条从「青色霓虹」退回中性发丝：它只是段落分界的标记 */
+#article-container h2::before {
+  background: color-mix(in srgb, var(--rj-text-mute) 55%, transparent);
+  box-shadow: none;
+}
+#article-container h2:hover::before {
+  background: color-mix(in srgb, var(--rj-brand) 70%, transparent);
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+   4. 元信息：四个描边胶囊 → 一行安静的小字
+   --------------------------------------------------------------------------- */
+#post-meta {
+  gap: 0 20px;
+  margin-top: 14px;
+}
+#post-meta .post-meta-date,
+#post-meta .post-meta-pv-cv {
+  padding: 0;
+  border: 0;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: var(--rj-meta-text);
+}
+#post-meta .post-meta-icon {
+  color: color-mix(in srgb, var(--rj-meta-text) 78%, transparent);
+  font-size: 12px;
+}
+#post-meta .post-meta-label {
+  color: var(--rj-meta-text);
+}
+#post-meta .post-meta-separator { display: none; }
+.rj-mins {
+  font-size: 12.5px;
+  margin-left: 0;
+  color: var(--rj-meta-text);
+}
+
+/* ---------------------------------------------------------------------------
+   5. 内页横幅：标题实色，压暗更实，不再叠 3px 模糊的「磨砂」
+   --------------------------------------------------------------------------- */
+#post-info {
+  padding: 40px 24px 30px !important;
+}
+#post-info .post-title {
+  font-size: clamp(24px, 2.5vw, 33px);
+  font-weight: 600;
+  line-height: 1.32;
+  letter-spacing: -0.012em;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--rj-text-inverse);
+  text-shadow: 0 1px 2px rgba(3, 6, 16, 0.5);
+}
+[data-theme='light'] #post-info .post-title {
+  color: var(--rjp-apple-ink);
+  text-shadow: none;
+}
+/* 横幅压暗：从「模糊 + 78% 深墨」换成纯渐变，图片纹理保留，文字对比度稳定 */
+#page-header.post-bg::before {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--rj-carbon) 72%, transparent) 0%,
+    color-mix(in srgb, var(--rj-carbon) 86%, transparent) 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+#page-header.post-bg {
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+   6. 正文图片：去掉紫色描边与光晕，只保留圆角与一层轻投影
+   --------------------------------------------------------------------------- */
+#article-container img {
+  border: 1px solid var(--rj-hairline-3);
+  border-radius: 12px;
+  box-shadow: var(--rj-elev-1);
+  transition: box-shadow var(--rj-dur-base) var(--rj-ease-out);
+}
+#article-container img:hover {
+  box-shadow: var(--rj-elev-2);
+  transform: none;
+}
+
+/* ---------------------------------------------------------------------------
+   7. 残留的外发光与渐变文字清尾
+   --------------------------------------------------------------------------- */
+#site-name:hover { filter: none; }
+.article-title:hover { color: var(--rj-brand-3); }
+.card-info .author-info__name {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--rj-text-strong);
+}
+.announcement_content.rj-creed b {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--rj-brand-3);
+}
+.rj-doubao-head span {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--rj-text-strong);
+}
+
+/* ---------------------------------------------------------------------------
+   8. 首屏构图：留白节奏 + 底部渐隐
+   首屏的问题不是「不好看」，是空得没有秩序：标题、副标题、HUD 三行挤在正中，
+   上下各留 300px 纯空。这里把整块当一张海报排：标题-副标题-状态行按 4/10/28
+   的间距成组，组块整体略高于几何中心（视觉中心比数学中心高 3~4% 才不显下坠），
+   底部再给一道渐隐，接住下面的文章列表。
+   --------------------------------------------------------------------------- */
+#page-header.full_page #site-info {
+  top: 46%;
+  transform: translateY(-50%);
+}
+#page-header.full_page #site-info #site-subtitle {
+  margin-top: 14px;
+}
+#site-subtitle,
+#page-header #site-subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.012em;
+  color: color-mix(in srgb, var(--rj-on-media-shadow) 0%, rgba(255, 255, 255, 0.72));
+}
+#site-subtitle #subtitle {
+  color: rgba(255, 255, 255, 0.72);
+}
+[data-theme='light'] #page-header #site-subtitle,
+[data-theme='light'] #site-subtitle #subtitle {
+  color: #4a5163;
+  text-shadow: none;
+}
+/* HUD 状态行：去掉左边那道 2px 竖线（它像一段没做完的分隔符），
+   只留字距与半透明，当作一行「技术注脚」 */
+#page-header.full_page #site-info::after {
+  margin-top: 26px;
+  padding-left: 0;
+  border-left: 0;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  color: color-mix(in srgb, var(--rj-text-mute) 88%, transparent);
+  text-shadow: none;
+}
+[data-theme='light'] #page-header.full_page #site-info::after {
+  color: #767c8f;
+  border-left: 0;
+  text-shadow: none;
+}
+/* 底部渐隐：首屏与文章列表之间不再是一条硬边 */
+#page-header.full_page::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 180px;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--rj-bg) 62%, transparent) 62%,
+    color-mix(in srgb, var(--rj-bg) 88%, transparent) 100%);
+}
+[data-theme='light'] #page-header.full_page::after {
+  background: linear-gradient(180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--rj-bg) 70%, transparent) 64%,
+    var(--rj-bg) 100%);
+}
+/* 亮色头图压到 10% 存在感：留纹理，不留色块 */
+[data-theme='light'] #page-header.full_page::before {
+  background-color: rgba(248, 249, 252, 0.90);
+}
+
+/* ---------------------------------------------------------------------------
+   9. 画布再压一档 + 去饱和
+   深色界面的「贵」几乎都来自一件事：背景安静。壁纸本身是青蓝色调的高饱和
+   星球照，只压暗会把青变成脏；同时降饱和度才真正退成一层有颗粒的暗色织物。
+   --------------------------------------------------------------------------- */
+:root:not([data-theme='light']) #web_bg {
+  filter: saturate(48%) contrast(102%);
+}
+:root:not([data-theme='light']) #web_bg::after {
+  background-color: rgba(5, 7, 14, 0.44);
+}
+/* 首屏压暗层：只负责压暗，不要再往这个伪元素上叠别的东西 ——
+   上一版把颗粒贴在同一层并给了 opacity，结果亮色下把整层冷白一起透明掉，
+   头图直接透上来，深墨标题落在深色照片上等于看不见。 */
+:root:not([data-theme='light']) #page-header.full_page::before {
+  background-color: rgba(7, 9, 20, 0.36);
+}
+
+/* ---------------------------------------------------------------------------
+   10. 按钮与高光：去掉扫光动画与紫色外发光
+   「白色高光条从左扫到右」是 2016 年的按钮动效，现在只会让人想到模板。
+   --------------------------------------------------------------------------- */
+#card-info-btn::after,
+.btn-beautify a::after,
+.buttons a::after {
+  content: none;
+  animation: none;
+}
+/* 侧栏 Follow Me：主题用 `#aside-content .card-info #card-info-btn`（2 id + 1 class）
+   设 `background-color: var(--btn-bg)`，亮色下 --btn-bg 是透明 → 变成灰白空胶囊。
+   选择器必须抄到同样权重才压得住，只写 `#card-info-btn` 会整条失效。 */
+#aside-content .card-info #card-info-btn,
+#card-info-btn,
+.btn-beautify a,
+.buttons a {
+  border-radius: 12px;
+  background: var(--rj-brand);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--rj-ink-shadow) 30%, transparent),
+    0 6px 16px color-mix(in srgb, var(--rj-brand) 22%, transparent);
+  transition: background-color var(--rj-dur-base) var(--rj-ease-out),
+              box-shadow var(--rj-dur-base) var(--rj-ease-out),
+              transform var(--rj-dur-base) var(--rj-ease-out);
+}
+#aside-content .card-info #card-info-btn:hover,
+#card-info-btn:hover,
+.btn-beautify a:hover,
+.buttons a:hover {
+  background: color-mix(in srgb, var(--rj-brand) 88%, var(--rj-ink-cast));
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--rj-ink-shadow) 34%, transparent),
+    0 10px 24px color-mix(in srgb, var(--rj-brand) 28%, transparent);
+  transform: translateY(-1px);
+}
+/* 亮色下品牌紫偏深，按钮上保持纯白字更稳（主题 --btn-color 在亮色是继承色） */
+#aside-content .card-info #card-info-btn,
+#aside-content .card-info #card-info-btn span {
+  color: #fff;
+}
+/* 作者头像：5px 紫色光环 → 1px 发丝 + 一层柔和投影 */
+#aside-content .card-info .author-info__avatar img,
+#aside-content .card-info .avatar-img {
+  border: 1px solid var(--rj-hairline-7);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--rj-ink-surface) 62%, transparent),
+    0 8px 22px color-mix(in srgb, var(--rj-ink-shadow) 34%, transparent);
+}
+
+/* 阅读进度条：紫 → 青的跨色渐变会显得花，收成同色相两档 */
+.rj-progress {
+  height: 2px;
+  background: linear-gradient(90deg, var(--rj-brand-2), var(--rj-brand-3));
+}
+
+/* ---------------------------------------------------------------------------
+   11. 播放提示：从「紫边发光胶囊」退回安静的一行
+   --------------------------------------------------------------------------- */
+.rj-muted-tip {
+  padding: 8px 16px;
+  border: 1px solid var(--rj-hairline-5);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--rj-ink-surface) 82%, transparent);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  color: var(--rj-text-dim);
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  box-shadow: var(--rj-elev-2);
+}
+[data-theme='light'] .rj-muted-tip {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: var(--rjp-apple-line);
+  color: var(--rj-text-dim);
+  box-shadow: var(--rj-elev-2);
+}
+
+/* ---------------------------------------------------------------------------
+   12. 侧栏社交图标：16 个描边圆点 → 一排安静的单色图标
+   --------------------------------------------------------------------------- */
+#aside-content .social-icon,
+#card-info .social-icon {
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: color-mix(in srgb, var(--rj-text-mute) 92%, transparent);
+  transition: color var(--rj-dur-fast) linear,
+              transform var(--rj-dur-fast) var(--rj-ease-out);
+}
+#aside-content .social-icon:hover,
+#card-info .social-icon:hover {
+  color: var(--rj-brand-3);
+  background: none !important;
+  transform: translateY(-1px);
+}
+
+/* ---------------------------------------------------------------------------
+   13. 导航胶囊：hover 的紫光晕收到「描边微亮」
+   --------------------------------------------------------------------------- */
+#nav #menus:hover,
+#nav #blog_name:hover {
+  border-color: color-mix(in srgb, var(--rj-brand) 42%, var(--rj-hairline-7));
+  box-shadow:
+    0 2px 6px color-mix(in srgb, var(--rj-ink-shadow) 26%, transparent),
+    0 12px 32px var(--rj-shadow-5),
+    inset 0 1px 0 var(--rj-hairline-8);
+  transform: none;
+}
+
+/* ---------------------------------------------------------------------------
+   14. 内页横幅统一：「每篇文章一张彩色大图」是最容易散掉的一环
+   横幅用的是各篇文章自己的封面，色相彼此无关（这张偏橙、那张偏紫），
+   与站点紫调没有关系。这里不换图，只把所有横幅统一降饱和 —— 图片保留，
+   但都退成同一族的暗色底，标题的白字也更稳。
+   backdrop-filter 作用在 ::before 后面的头图上，不会影响标题文字本身。
+   --------------------------------------------------------------------------- */
+#page-header.post-bg::before,
+#page-header.not-home-page::before {
+  backdrop-filter: saturate(32%);
+  -webkit-backdrop-filter: saturate(32%);
+}
+[data-theme='light'] #page-header.post-bg::before,
+[data-theme='light'] #page-header.not-home-page::before {
+  backdrop-filter: saturate(18%);
+  -webkit-backdrop-filter: saturate(18%);
+}
+/* 横幅下沿：给正文区一道极轻的分隔，而不是靠卡片自己去切 */
+#page-header.post-bg::after,
+#page-header.not-home-page::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--rjp-white) 8%, transparent);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+   15. 正文卡：纸面而非玻璃
+   一页长文要读十几分钟，玻璃底会让背后的壁纸纹理一直在动，眼睛很累。
+   --------------------------------------------------------------------------- */
+:root:not([data-theme='light']) #body-wrap.post #post {
+  background: color-mix(in srgb, var(--rj-ink-surface) 88%, var(--rjp-white));
+  border: 1px solid var(--rj-hairline-4);
+  border-radius: 18px;
+  box-shadow: var(--rj-elev-2);
+}
+[data-theme='light'] #body-wrap.post #post {
+  background: var(--rjp-white);
+  border: 1px solid var(--rjp-apple-line);
+  border-radius: 18px;
+  box-shadow: var(--rj-elev-2);
+}
+/* 正文首屏不要顶到卡片边：给一个呼吸的顶部留白 */
+#body-wrap.post #post {
+  padding: 40px 46px 56px;
+}
+@media screen and (max-width: 768px) {
+  #body-wrap.post #post {
+    padding: 26px 20px 36px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   16. 间距与衔接
+   --------------------------------------------------------------------------- */
+/* 内页：正文卡与横幅之间要断开，否则像贴在图片下沿 */
+#body-wrap.post #content-inner.layout,
+#body-wrap.page #content-inner.layout {
+  padding-top: 30px;
+}
+@media screen and (max-width: 768px) {
+  #body-wrap.post #content-inner.layout,
+  #body-wrap.page #content-inner.layout {
+    padding-top: 16px;
+  }
+}
+/* 亮色横幅：比页面底色再浅一点的「纸带」，让照片纹理留 18% 的存在感
+   （内页横幅的最终取值在下面第 17 节末尾，这里只管文章横幅） */
+[data-theme='light'] #page-header.post-bg::before {
+  background: linear-gradient(180deg,
+    rgba(250, 251, 253, 0.82) 0%,
+    rgba(244, 246, 251, 0.90) 100%);
+}
+/* 亮色导航胶囊：白底白页时靠这 1px 线立住，加深到 apple-line 的 1.4 倍 */
+[data-theme='light'] #nav #menus,
+[data-theme='light'] #nav #blog_name,
+[data-theme='light'] #nav.hide-menu #menus {
+  border-color: color-mix(in srgb, var(--rjp-apple-line) 100%, var(--rj-ink-border) 24%);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--rj-shadow-1) 70%, transparent),
+    0 6px 18px color-mix(in srgb, var(--rj-ink-shadow) 9%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   17. 首屏：给标题一块「安静的舞台」
+   头图那张外星人头像正好落在标题后面，白字压在高光上时右侧会发灰。
+   在文字区叠一层径向压暗（不是发光，是压暗），标题的对比度就稳定了。
+   --------------------------------------------------------------------------- */
+#page-header.full_page::after {
+  background:
+    radial-gradient(62% 50% at 50% 44%,
+      color-mix(in srgb, var(--rj-ink-cast) 58%, transparent) 0%,
+      color-mix(in srgb, var(--rj-ink-cast) 20%, transparent) 58%,
+      transparent 100%),
+    linear-gradient(180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--rj-bg) 62%, transparent) 62%,
+      color-mix(in srgb, var(--rj-bg) 88%, transparent) 100%);
+}
+[data-theme='light'] #page-header.full_page::after {
+  background:
+    radial-gradient(62% 50% at 50% 44%,
+      color-mix(in srgb, var(--rjp-white) 42%, transparent) 0%,
+      transparent 72%),
+    linear-gradient(180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--rj-bg) 70%, transparent) 64%,
+      var(--rj-bg) 100%);
+}
+@media screen and (max-width: 768px) {
+  #page-header.full_page {
+    height: 70vh;
+    min-height: 460px;
+  }
+  #site-title,
+  #page-header #site-title {
+    font-size: clamp(28px, 8.4vw, 38px);
+    letter-spacing: -0.026em;
+  }
+  #site-subtitle,
+  #page-header #site-subtitle {
+    font-size: 14px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   18. 归档时间轴：从「紫色圆环串」改成一条发丝线 + 小圆点
+   主题原本是 10px 的点配 5px 紫边（合计 20px），中心填的是卡片底色，
+   在深色卡片上就是一个突兀的白圈；年份点又是 6px + 3px 边，两套尺寸。
+   --------------------------------------------------------------------------- */
+.article-sort {
+  margin-left: 4px;
+  padding-left: 18px;
+  border-left: 1px solid var(--rj-hairline-4);
+}
+.article-sort-title {
+  margin-left: 6px;
+  padding-left: 18px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.article-sort-title:before {
+  top: calc(50% - 4px);
+  left: -5px;
+  width: 8px;
+  height: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--rj-brand);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--rj-brand) 14%, transparent);
+}
+.article-sort-title:after {
+  left: -1px;
+  width: 1px;
+  background: var(--rj-hairline-4);
+}
+.article-sort-item:before {
+  left: calc(-18px - 4px);
+  width: 5px;
+  height: 5px;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--rj-text-mute) 70%, transparent);
+  box-shadow: none;
+}
+.article-sort-item.year:before {
+  width: 6px;
+  height: 6px;
+  background: color-mix(in srgb, var(--rj-brand) 78%, transparent);
+}
+.article-sort-item.year {
+  margin: 18px 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--rj-text-mute);
+}
+.article-sort-item-title {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.6;
+  color: var(--rj-text);
+}
+.article-sort-item-title:hover {
+  color: var(--rj-brand-3);
+}
+.article-sort-item-img {
+  width: 76px;
+  height: 56px;
+  border-radius: 8px;
+  opacity: 0.92;
+}
+.article-sort-item-time {
+  font-size: 12px;
+  color: var(--rj-meta-text);
+}
+
+/* 非首页横幅：和文章横幅同一族底色，不再是一块中性灰板 */
+#page-header.not-home-page::before {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--rj-carbon) 84%, transparent) 0%,
+    color-mix(in srgb, var(--rj-carbon) 92%, transparent) 100%);
+}
+[data-theme='light'] #page-header.not-home-page::before {
+  /* 0.84 时内页头图上那块深色 Alienware 标志会透成一块灰斑，
+     落在标题后面像没擦干净的污渍。压到 0.92/0.965 只留一层几乎看不见的肌理。 */
+  background: linear-gradient(180deg,
+    rgba(250, 251, 253, 0.92) 0%,
+    rgba(245, 246, 251, 0.965) 100%);
+}
+
+/* ---------------------------------------------------------------------------
+   19. 彩色胶囊按钮（留言板的那一排 .btn-beautify）
+   原来 6 种高饱和纯色块并排（#428bca / #ff69b4 / #f00 / #5cb85c …），
+   是整站最「模板」的一处：颜色各自为政，也没有任何层级含义。
+   现在统一成同一块中性玻璃，颜色只保留在左侧图标上 —— 语义还在，噪音没了。
+   --------------------------------------------------------------------------- */
+/* 主题用的是 `#article-container .btn-beautify`（1 个 id + 1 个 class），
+   只写 `.btn-beautify` 会被它整条压掉 —— 底色会退回纯色块。必须抄全同一权重。 */
+#article-container .btn-beautify {
+  padding: 0 13px;
+  border: 1px solid var(--rj-hairline-4);
+  border-radius: 9px;
+  background-color: color-mix(in srgb, var(--rj-ink-surface) 58%, transparent);
+  color: var(--rj-text-dim) !important;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 2;
+  box-shadow: none;
+  transition: background-color var(--rj-dur-fast) linear,
+              border-color var(--rj-dur-fast) linear,
+              color var(--rj-dur-fast) linear;
+}
+#article-container .btn-beautify > i,
+#article-container .btn-beautify > .iconfont {
+  color: color-mix(in srgb, var(--btn-beautify-color, var(--rj-text-mute)) 72%, var(--rjp-white));
+  opacity: 0.85;
+}
+#article-container .btn-beautify:hover {
+  background-color: color-mix(in srgb, var(--rj-brand) 16%, transparent);
+  border-color: color-mix(in srgb, var(--rj-brand) 40%, transparent);
+  color: var(--rj-text-strong) !important;
+}
+[data-theme='light'] #article-container .btn-beautify {
+  border-color: var(--rjp-apple-line);
+  background-color: #fbfbfd;
+  color: var(--rj-text-dim) !important;
+}
+[data-theme='light'] #article-container .btn-beautify > i,
+[data-theme='light'] #article-container .btn-beautify > .iconfont {
+  color: var(--btn-beautify-color, var(--rj-text-mute));
+  opacity: 0.9;
+}
+[data-theme='light'] #article-container .btn-beautify:hover {
+  background-color: color-mix(in srgb, var(--rj-brand) 8%, #ffffff);
+  border-color: color-mix(in srgb, var(--rj-brand) 34%, transparent);
+}
+
+/* 分页当前页：紫渐变 + 外发光 → 实底 + 无发光 */
+.pagination .page-number.current,
+.pagination .page-number:hover {
+  background: var(--rj-brand);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+   20. 细节收尾：分隔线、外链徽章、行内代码
+   --------------------------------------------------------------------------- */
+/* 分隔线：主题默认是虚线（- - - -），在大面积深底上像没画完的表格线。
+   注意：留言板的 <hr> 直接挂在 #page 下，不在 #article-container 里，
+   只写 #article-container hr 覆盖不到；移动端侧栏菜单里还有一条写死白色的虚线。 */
+#page hr,
+#article-container hr,
+#sidebar-menus hr,
+hr.hr-line-dashed,
+#article-container .hr-line-dashed {
+  border: 0;
+  border-top: 1px solid var(--rj-hairline-4);
+  margin: 36px 0;
+  background: none;
+}
+/* 地球访问统计块：1px 虚线 → 发丝实线 */
+.rj-globe-stats {
+  border-style: solid;
+}
+/* shields.io 徽章：外链图片，配色由服务端决定（蓝/绿各一），
+   和站点的中性灰阶打架。统一压成灰阶，悬停再还原 —— 数据照样读得到。 */
+#article-container img[src*="img.shields.io"] {
+  filter: grayscale(1) contrast(0.92) brightness(1.04);
+  opacity: 0.6;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: none;
+  transition: filter var(--rj-dur-base) var(--rj-ease-out),
+              opacity var(--rj-dur-base) var(--rj-ease-out);
+}
+#article-container img[src*="img.shields.io"]:hover {
+  filter: none;
+  opacity: 1;
+  box-shadow: none;
+  transform: none;
+}
+/* 行内代码：紫底紫字 → 中性底 + 品牌色文字（紫底会把整段文字染成一片） */
+#article-container code:not([class*="language-"]) {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--rj-ink-surface-3) 82%, transparent);
+  border: 1px solid var(--rj-hairline-3);
+  color: var(--rj-brand-4);
+  font-size: 0.88em;
+}
+[data-theme='light'] #article-container code:not([class*="language-"]) {
+  background: #f4f5f8;
+  border-color: var(--rjp-apple-line);
+  color: var(--rj-brand-3);
+}
+
+/* ---------------------------------------------------------------------------
+   21. 渐变文字清退（收尾）
+   `background-clip:text` + 透明字色是 2021 年前后最典型的「AI 生成感」标题：
+   字重稍变就露出渐变的色带，缩放时还会出现毛边。全站只保留实色文字，
+   品牌色需要强调时用「色相 + 字重」，不用渐变。
+   --------------------------------------------------------------------------- */
+.announcement_content.rj-creed b,
+.rj-doubao-head span {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+}
+.announcement_content.rj-creed b {
+  color: var(--rj-brand-4);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.rj-doubao-head span {
+  color: var(--rj-text-strong);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   22. 目录卡：激活项原来是纯黑块（主题默认 background:#000 / color:#fff）
+   黑块在亮色页面上是一块「贴纸」，在暗色下又几乎看不见 —— 两种主题都不成立。
+   改成淡淡的品牌底色 + 品牌字色，靠色相而不是黑块标记当前位置。
+   --------------------------------------------------------------------------- */
+#aside-content #card-toc .toc-content .toc-link {
+  margin: 2px 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: var(--rj-text-muted);
+  transition: background-color var(--rj-dur-fast) var(--rj-ease-out),
+              color var(--rj-dur-fast) var(--rj-ease-out);
+}
+#aside-content #card-toc .toc-content .toc-link:hover {
+  color: var(--rj-brand-8);
+  background: color-mix(in srgb, var(--rj-brand) 8%, transparent);
+}
+#aside-content #card-toc .toc-content .toc-link.active {
+  background: color-mix(in srgb, var(--rj-brand) 13%, transparent);
+  color: var(--rj-brand-8);
+  font-weight: 600;
+}
+[data-theme='light'] #aside-content #card-toc .toc-content .toc-link.active {
+  background: color-mix(in srgb, var(--rj-brand) 9%, transparent);
+  color: var(--rj-brand-3);
+}
+
+/* ---------------------------------------------------------------------------
+   23. 移动端留白与遮挡
+   主题在手机上给 #content-inner 的是 `16px 5px 20px` —— 左右只有 5px，
+   卡片几乎顶着屏幕边缘，圆角被裁掉一半，横屏看像贴纸糊在边框上。
+   竖屏常用 14~16px 的边距，圆角才立得住。
+   --------------------------------------------------------------------------- */
+@media screen and (max-width: 768px) {
+  #content-inner,
+  #content-inner.layout {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  /* 迷你播放器的固定边距跟内容边距对齐，否则手机上 22px 的角距会让
+     左边内容线（14px）和唱片外沿（22px）错开一条。 */
+  .aplayer.aplayer-fixed {
+    left: 14px !important;
+    bottom: 14px !important;
+  }
 }
