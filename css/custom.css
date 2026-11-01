@@ -4725,7 +4725,8 @@ body {
   line-height: 1.32;
 }
 
-/* ---------- B8. 首屏：把 H1 请回来 + 两个入口 + 径向聚光 ---------- */
+/* ---------- B8. 首屏：把 H1 请回来 + 径向聚光 ----------
+   （原来这里还有「浏览全部文章 / 下载 EFI」两个按钮，v1.9.24 已移入侧栏快捷入口卡） */
 /* V9 曾把主标题整个删掉，结果 900px 的首屏只剩一行打字副标题。
    这里恢复成真正的展示标题，但不再用 2.85em 的巨字，改为按视口收敛。 */
 #site-title {
@@ -4740,7 +4741,7 @@ body {
   height: 84vh;
   min-height: 600px;
 }
-/* 整块内容居中，并允许用 order 把 CTA 排到副标题正下方 */
+/* 整块内容居中，并用 order 控制标题 / 副标题 / HUD 的先后 */
 #page-header.full_page #site-info {
   top: 50%;
   transform: translateY(-50%);
@@ -4753,50 +4754,6 @@ body {
 }
 #page-header.full_page #site-info #site_social_icons {
   order: 3;
-}
-#page-header.full_page #site-info #rj-hero-cta {
-  order: 2;
-}
-
-#rj-hero-cta {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 28px;
-}
-.rj-hero-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 44px;
-  padding: 0 24px;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background-color: rgba(12, 14, 26, 0.42);
-  backdrop-filter: blur(20px) saturate(170%);
-  -webkit-backdrop-filter: blur(20px) saturate(170%);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  color: #fff;
-  font-size: 14.5px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  text-decoration: none !important;
-  transition: transform var(--rj-dur-base) var(--rj-ease-out),
-              box-shadow var(--rj-dur-base) var(--rj-ease-out),
-              background-color var(--rj-dur-base) var(--rj-ease-out);
-}
-.rj-hero-btn:hover {
-  transform: translateY(-2px);
-  background-color: rgba(12, 14, 26, 0.58);
-  color: #fff;
-}
-.rj-hero-btn.is-primary {
-  border-color: transparent;
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
-  box-shadow: 0 12px 30px rgba(88, 28, 135, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-.rj-hero-btn.is-primary:hover {
-  box-shadow: 0 16px 38px rgba(88, 28, 135, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 /* 径向聚光：把视线收到标题上，压住背景图两侧的杂点。
    注意 ::after 是 HUD 状态条，flex 下默认 order:0，会被顶到副标题前面。 */
@@ -4821,8 +4778,6 @@ body {
     font-size: clamp(30px, 8.6vw, 40px);
     letter-spacing: -0.028em;
   }
-  #rj-hero-cta { margin-top: 22px; gap: 10px; }
-  .rj-hero-btn { height: 40px; padding: 0 18px; font-size: 13.5px; }
   /* 首屏社交图标在手机上排成两行、紧贴按钮，把半屏都占满了；
      同样的入口在抽屉菜单的「留言/社交」里都有，这里让位给标题和 CTA。 */
   #page-header.full_page #site_social_icons {
@@ -5085,25 +5040,6 @@ a.site-page.group > .rj-nav-icon:last-child {
   border-left-color: rgba(14, 116, 144, 0.45);
   color: #4b5266;
   text-shadow: none;
-}
-[data-theme='light'] .rj-hero-btn {
-  border-color: rgba(15, 23, 42, 0.14);
-  background-color: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 8px 22px rgba(20, 22, 40, 0.10), inset 0 1px 0 #fff;
-  color: #1f2537;
-}
-[data-theme='light'] .rj-hero-btn:hover {
-  background-color: rgba(255, 255, 255, 0.92);
-  color: var(--rj-brand-4);
-}
-[data-theme='light'] .rj-hero-btn.is-primary {
-  border-color: transparent;
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
-  color: #fff;
-  box-shadow: 0 10px 26px rgba(124, 58, 237, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.28);
-}
-[data-theme='light'] .rj-hero-btn.is-primary:hover {
-  color: #fff;
 }
 [data-theme='light'] #page-header.full_page #site_social_icons a {
   color: #47506b;
@@ -5445,4 +5381,174 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 /* 抽屉菜单滚到头不再带动页面橡皮筋 */
 #sidebar-menus {
   overscroll-behavior: contain;
+}
+
+/* ============================================================================
+   v1.9.24 · 侧栏「快捷入口」卡
+   「浏览全部文章 / 下载 EFI」从首屏搬到侧栏，做成每页常驻的两条入口。
+   视觉沿用站内语言：线性 SVG 图标 + 玻璃行 + 悬停紫渐变。
+   ========================================================================== */
+#rj-quick-entry .item-headline {
+  display: flex;
+  align-items: center;
+}
+#rj-quick-entry .item-headline svg.rj-qe-hd {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  color: var(--rj-brand-4);
+}
+.rj-qe-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rj-qe-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px 9px 9px;
+  border-radius: 14px;
+  /* 行底比卡片底再亮一档：侧栏卡片是 55%/38% 的通透玻璃，
+     没有这一层垫底，两条入口会直接糊在星球背景上 */
+  /* 行底压深 + 顶部一道微亮：在偏青的通透卡上，浅色底会被背景吃掉，
+     往深里压反而能立住，也和「可点击的凹槽」这个直觉一致 */
+  border: 1px solid var(--rj-hairline-5);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--rjp-white) 8%, transparent), transparent 62%),
+    color-mix(in srgb, var(--rj-carbon) 34%, transparent);
+  box-shadow: inset 0 1px 0 var(--rj-hairline-2);
+  text-decoration: none !important;
+  transition: background var(--rj-dur-base) var(--rj-ease-out),
+              border-color var(--rj-dur-base) var(--rj-ease-out),
+              transform var(--rj-dur-base) var(--rj-ease-out),
+              box-shadow var(--rj-dur-base) var(--rj-ease-out);
+}
+.rj-qe-item:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--rj-brand) 70%, transparent);
+  outline-offset: 2px;
+}
+.rj-qe-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 28%, transparent);
+  background: color-mix(in srgb, var(--rj-brand) 18%, transparent);
+  color: var(--rj-brand-4);
+  transition: background var(--rj-dur-base) var(--rj-ease-out),
+              border-color var(--rj-dur-base) var(--rj-ease-out),
+              color var(--rj-dur-base) var(--rj-ease-out);
+}
+.rj-qe-badge .rj-qe-svg {
+  width: 17px;
+  height: 17px;
+}
+.rj-qe-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.rj-qe-t {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  color: var(--rj-text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rj-qe-s {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--rj-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rj-qe-go {
+  flex: none;
+  display: inline-flex;
+  color: color-mix(in srgb, var(--rj-text-dim) 62%, transparent);
+  transition: transform var(--rj-dur-base) var(--rj-ease-out),
+              color var(--rj-dur-base) var(--rj-ease-out);
+}
+.rj-qe-go .rj-qe-svg {
+  width: 15px;
+  height: 15px;
+}
+/* 悬停：整行转成饱和紫（低透明度的紫压在青底上会变成脏灰蓝），
+   徽标翻成白底紫图标，在紫行上才立得住 */
+.rj-qe-item:hover {
+  border-color: color-mix(in srgb, var(--rj-brand-3) 70%, transparent);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--rj-brand) 84%, transparent),
+    color-mix(in srgb, var(--rj-brand-2) 72%, transparent));
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--rj-brand) 34%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 26%, transparent);
+  transform: translateY(-1px);
+}
+.rj-qe-item:hover .rj-qe-badge {
+  border-color: transparent;
+  background: var(--rjp-white);
+  color: var(--rj-brand-3);
+}
+.rj-qe-item:hover .rj-qe-s {
+  color: color-mix(in srgb, var(--rjp-white) 82%, transparent);
+}
+.rj-qe-item:hover .rj-qe-go {
+  color: var(--rj-text-inverse);
+  transform: translateX(2px);
+}
+.rj-qe-item:active {
+  transform: translateY(0) scale(0.995);
+}
+
+/* 亮色：白光卡上用一层极淡中性底，紫只留在徽标上 */
+[data-theme='light'] .rj-qe-item {
+  border-color: var(--rjp-apple-line);
+  background: rgba(20, 22, 43, 0.035);
+  box-shadow: none;
+}
+[data-theme='light'] .rj-qe-badge {
+  border-color: color-mix(in srgb, var(--rj-brand) 16%, transparent);
+  background: color-mix(in srgb, var(--rj-brand) 9%, transparent);
+  color: var(--rj-brand);
+}
+[data-theme='light'] .rj-qe-item:hover {
+  border-color: color-mix(in srgb, var(--rj-brand) 34%, transparent);
+  background: color-mix(in srgb, var(--rj-brand) 7%, transparent);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--rj-shadow-1) 70%, transparent);
+}
+[data-theme='light'] .rj-qe-item:hover .rj-qe-badge {
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2));
+  color: #fff;
+}
+[data-theme='light'] .rj-qe-item:hover .rj-qe-s {
+  color: var(--rj-text-dim);
+}
+
+/* 手机：侧栏整列落到正文下面，行高放大到 44px 触控区 */
+@media (max-width: 768px) {
+  .rj-qe-item {
+    padding: 11px 12px 11px 10px;
+  }
+  .rj-qe-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+  .rj-qe-badge .rj-qe-svg {
+    width: 18px;
+    height: 18px;
+  }
+  .rj-qe-t {
+    font-size: 14.5px;
+  }
 }
