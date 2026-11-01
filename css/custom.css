@@ -2508,25 +2508,8 @@ a:hover { color: var(--rj-brand-2); }
   height: 38px;
   padding: 0 5px;
   border-radius: 19px;
-  background-color: color-mix(in srgb, var(--rj-ink-surface) 52%, transparent);
-  background-image: linear-gradient(157deg,
-    var(--rj-hairline-6) 0%,
-    transparent 46%,
-    transparent 100%);
-  backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
-  -webkit-backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
-  border: 1px solid var(--rj-hairline-7);
-  box-shadow:
-    0 10px 28px var(--rj-shadow-5),
-    inset 0 1px 0 var(--rj-hairline-7);
-  transition: border-color var(--rj-dur-base) var(--rj-ease-out),
-              box-shadow var(--rj-dur-base) var(--rj-ease-out);
-}
-#nav #menus:hover {
-  border-color: color-mix(in srgb, var(--rj-brand) 34%, var(--rj-hairline-7));
-  box-shadow:
-    0 12px 32px var(--rj-shadow-6),
-    inset 0 1px 0 var(--rj-hairline-8);
+  /* 材质（底色 / 描边 / 模糊 / 阴影）统一在文件末尾「v1.9.25 导航玻璃」那一节，
+     这里只留几何，避免两处各写一套又互相压 */
 }
 
 /* 角标只留下拉面板那一处：导航条自身已有 HUD 底光、首屏还有取景框，
@@ -2565,13 +2548,8 @@ a:hover { color: var(--rj-brand-2); }
   padding: 0;
   gap: 0;
   justify-content: center;
-  border: 1px solid var(--rj-hairline-7);
   border-radius: 19px;
-  background-color: color-mix(in srgb, var(--rj-ink-surface) 52%, transparent);
-  background-image: linear-gradient(157deg, var(--rj-hairline-6) 0%, transparent 46%);
-  backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
-  -webkit-backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
-  box-shadow: 0 10px 28px var(--rj-shadow-5), inset 0 1px 0 var(--rj-hairline-7);
+  /* 材质见文件末尾 v1.9.25 一节 */
 }
 #nav.hide-menu #menus::after { display: none; }
 #nav.hide-menu #menus .menus_items { display: none; }
@@ -2610,22 +2588,9 @@ a:hover { color: var(--rj-brand-2); }
 /* 选择器需带全 .menus_items .menus_item 链，否则被主题同权重规则（#nav .menus_items .menus_item .menus_item_child）压掉 */
 #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) {
   padding: 6px;
-  /* 双层：半透明底色（透）+ 左上斜向高光（玻璃反光面，纯黑底上也能看出材质） */
-  background-color: color-mix(in srgb, var(--rj-ink-surface) 52%, transparent);
-  background-image: linear-gradient(157deg,
-    var(--rj-hairline-7) 0%,
-    transparent 42%,
-    transparent 100%);
-  backdrop-filter: blur(34px) saturate(190%) brightness(0.9);
-  -webkit-backdrop-filter: blur(34px) saturate(190%) brightness(0.9);
-  /* 描边与胶囊/卡片统一为发丝白，不再用品牌紫描边 */
-  border: 1px solid var(--rj-hairline-7);
-  border-top-color: var(--rj-hairline-8);
-  border-radius: 18px;
-  box-shadow:
-    0 22px 52px var(--rj-shadow-6),
-    inset 0 1px 0 var(--rj-hairline-6),
-    inset 0 -24px 46px -36px color-mix(in srgb, var(--rj-brand) 100%, transparent);
+  /* 面板比卡片窄一半，13% 的圆角比卡片的 9% 略软，视觉重量才相当 */
+  border-radius: 20px;
+  /* 材质见文件末尾 v1.9.25 一节 */
 }
 /* 下拉面板同款青色角标 */
 #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu)::after {
@@ -3003,16 +2968,8 @@ a:hover { color: var(--rj-brand-2); }
   align-items: center;
   height: 38px;
   padding: 0 16px 0 10px;
-  border: 1px solid var(--rj-hairline-7);
   border-radius: 19px;
-  background-color: color-mix(in srgb, var(--rj-ink-surface) 52%, transparent);
-  background-image: linear-gradient(157deg, var(--rj-hairline-6) 0%, transparent 46%);
-  backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
-  -webkit-backdrop-filter: blur(26px) saturate(185%) brightness(0.94);
-  box-shadow: 0 10px 28px var(--rj-shadow-5), inset 0 1px 0 var(--rj-hairline-7);
-  transition: background-color var(--rj-dur-base) var(--rj-ease-out),
-              border-color var(--rj-dur-base) var(--rj-ease-out),
-              box-shadow var(--rj-dur-base) var(--rj-ease-out);
+  /* 材质见文件末尾 v1.9.25 一节 */
 }
 #nav #site-name {
   font-size: 17px;
@@ -3780,16 +3737,7 @@ a:hover { color: var(--rj-brand-2); }
   /* 亮色下深色文字本身够清，投影只会把渐变 logo 描出一圈黑边 */
   text-shadow: none;
 }
-/* 亮色：站名胶囊与右侧菜单胶囊同色，掺一点品牌紫才立得起来 */
-[data-theme='light'] #nav #blog_name {
-  background-color: color-mix(in srgb, var(--rj-brand) 7%, rgba(255, 255, 255, 0.86));
-  background-image: linear-gradient(157deg, rgba(255, 255, 255, 0.62) 0%, transparent 46%);
-  backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
-  -webkit-backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
-  border-color: color-mix(in srgb, var(--rj-brand) 16%, transparent);
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--rj-ink-shadow) 12%, transparent),
-              inset 0 1px 0 rgba(255, 255, 255, 0.85);
-}
+/* 亮色：站名胶囊的材质与亮色卡片一致，见文件末尾 v1.9.25 一节 */
 
 /* 亮色：滚动态那层压暗要用白色，深色那版会在白底页面上刷出一条黑带 */
 [data-theme='light'] #nav.nav-fixed::before,
@@ -3800,30 +3748,8 @@ a:hover { color: var(--rj-brand-2); }
     rgba(255, 255, 255, 0.26) 76%,
     rgba(255, 255, 255, 0) 100%);
 }
-[data-theme='light'] #nav #menus {
-  /* 浅色下导航条本身已是白玻璃，纯白胶囊会糊在一起 —— 掺一点品牌紫才立得起来 */
-  background-color: color-mix(in srgb, var(--rj-brand) 7%, rgba(255, 255, 255, 0.86));
-  background-image: linear-gradient(157deg,
-    rgba(255, 255, 255, 0.62) 0%,
-    transparent 46%);
-  backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
-  -webkit-backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
-  border-color: color-mix(in srgb, var(--rj-brand) 16%, transparent);
-  box-shadow:
-    0 10px 26px color-mix(in srgb, var(--rj-ink-shadow) 12%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
-}
-[data-theme='light'] #nav #menus::after { opacity: 0.7; }
-/* 亮色：汉堡胶囊与站名胶囊同色（上面的深色配方权重更高，必须单独覆盖） */
-[data-theme='light'] #nav.hide-menu #menus {
-  background-color: color-mix(in srgb, var(--rj-brand) 7%, rgba(255, 255, 255, 0.86));
-  background-image: linear-gradient(157deg, rgba(255, 255, 255, 0.62) 0%, transparent 46%);
-  backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
-  -webkit-backdrop-filter: blur(24px) saturate(170%) brightness(1.02);
-  border-color: color-mix(in srgb, var(--rj-brand) 16%, transparent);
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--rj-ink-shadow) 12%, transparent),
-              inset 0 1px 0 rgba(255, 255, 255, 0.85);
-}
+/* 亮色：菜单胶囊的材质见文件末尾 v1.9.25 一节 */
+/* 亮色：汉堡胶囊的材质见文件末尾 v1.9.25 一节 */
 [data-theme='light'] #nav #menus #search-button::after {
   background: color-mix(in srgb, var(--rj-ink-border) 16%, transparent);
 }
@@ -3836,21 +3762,7 @@ a:hover { color: var(--rj-brand-2); }
     color-mix(in srgb, var(--rj-brand-2) 8%, transparent));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 20%, transparent);
 }
-[data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) {
-  padding: 6px;
-  background-color: color-mix(in srgb, var(--rjp-white) 64%, transparent);
-  background-image: linear-gradient(157deg,
-    color-mix(in srgb, var(--rjp-white) 60%, transparent) 0%,
-    transparent 46%);
-  backdrop-filter: blur(32px) saturate(185%) brightness(1.03);
-  -webkit-backdrop-filter: blur(32px) saturate(185%) brightness(1.03);
-  border: 1px solid color-mix(in srgb, var(--rj-ink-border) 12%, transparent);
-  border-top-color: color-mix(in srgb, var(--rjp-white) 70%, transparent);
-  border-radius: 18px;
-  box-shadow:
-    0 20px 46px color-mix(in srgb, var(--rj-ink-shadow) 16%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 75%, transparent);
-}
+/* 亮色：下拉面板的材质见文件末尾 v1.9.25 一节 */
 [data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a {
   color: var(--rj-ink-text) !important;
   text-shadow: none;
@@ -5551,4 +5463,130 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
   .rj-qe-t {
     font-size: 14.5px;
   }
+}
+
+/* ============================================================================
+   v1.9.25 · 导航胶囊 / 下拉面板换成「右侧信息卡」同一套玻璃
+   ----------------------------------------------------------------------------
+   参照物是 #aside-content .card-widget 在暗色下的实算样式，逐项照抄：
+     background   linear-gradient(145deg, rgba(32,36,66,.55), rgba(17,21,38,.38))
+     border       1px rgba(255,255,255,.16)
+     backdrop     blur(36px) saturate(200%)
+     box-shadow   0 4px 14px rgba(2,6,23,.28)
+                  0 18px 50px rgba(2,6,23,.50)
+                  inset 0 1px 0 rgba(255,255,255,.18)   ← 顶部受光边
+                  inset 0 -1px 0 rgba(139,92,246,.12)   ← 底部品牌反光
+   hover 也照卡片：描边转品牌紫 + 一圈紫光晕（卡片抬 5px，38px 高的胶囊只抬 1px）。
+
+   两处刻意的不同：
+   · 圆角不强求同值。卡片 26px 配 282px 宽 ≈ 9%；胶囊 38px 高只能是药丸 19px；
+     下拉 20px 配 148px 宽 ≈ 13%，比卡片略软一点，视觉重量才相当（直接写 26px
+     会在一张 148px 宽的面板上显得过圆，反而更不像同一套）。
+   · 删掉旧版那道 157deg 亮面斜切 —— 它是「塑料感」的来源，卡片没有这一层。
+   ========================================================================== */
+#nav #menus,
+#nav.hide-menu #menus,
+#nav #blog_name,
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) {
+  background: linear-gradient(145deg,
+    var(--rj-surface-raised),
+    color-mix(in srgb, var(--rj-ink-surface-2) 38%, transparent));
+  border: 1px solid var(--rj-hairline-7);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  box-shadow:
+    0 4px 14px color-mix(in srgb, var(--rj-ink-shadow) 28%, transparent),
+    0 18px 50px var(--rj-shadow-5),
+    inset 0 1px 0 var(--rj-hairline-8),
+    inset 0 -1px 0 color-mix(in srgb, var(--rj-brand) 12%, transparent);
+  transition: border-color var(--rj-dur-base) var(--rj-ease-out),
+              box-shadow var(--rj-dur-base) var(--rj-ease-out),
+              transform var(--rj-dur-base) var(--rj-ease-out);
+}
+
+/* 展开态 = 悬停态：下拉只在 hover 时出现，胶囊的 hover 天然覆盖「已展开」，
+   所以只写一份，不再另设 .active 之类——交互逻辑一个字没动。
+   注意面板本身不跟着转紫：它不是可点元素，一开就套一圈紫边会像霓虹描边，
+   而卡片静止时只有一根发丝——展开时该亮的是「触发器」，不是面板。 */
+#nav #menus:hover,
+#nav #blog_name:hover {
+  border-color: color-mix(in srgb, var(--rj-brand) 55%, transparent);
+  box-shadow:
+    0 10px 26px color-mix(in srgb, var(--rj-ink-glow) 30%, transparent),
+    0 22px 56px var(--rj-shadow-6),
+    inset 0 1px 0 var(--rj-hairline-8),
+    0 0 28px color-mix(in srgb, var(--rj-brand) 22%, transparent);
+}
+#nav #menus:hover,
+#nav #blog_name:hover {
+  transform: translateY(-1px);
+}
+
+/* 下拉里的每一项：悬停描边与卡片 hover 同一个紫（原来 32% 偏弱，读不出是同一套） */
+#nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 45%, transparent);
+}
+#nav #menus .site-page:hover {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 45%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   亮色：照抄亮色卡片 —— 纯白面 + apple 发丝边 + 极淡投影（卡片几乎没有阴影，
+   靠 1px 线立轮廓）。hover 也不换紫边，只加深投影，和卡片一致。
+   --------------------------------------------------------------------------- */
+[data-theme='light'] #nav #menus,
+[data-theme='light'] #nav.hide-menu #menus,
+[data-theme='light'] #nav #blog_name,
+[data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) {
+  background: var(--rjp-white);
+  border: 1px solid var(--rjp-apple-line);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--rj-shadow-1) 60%, transparent),
+    0 8px 22px color-mix(in srgb, var(--rj-ink-shadow) 8%, transparent),
+    inset 0 1px 0 var(--rjp-white);
+}
+[data-theme='light'] #nav #menus:hover,
+[data-theme='light'] #nav #blog_name:hover {
+  border-color: var(--rjp-apple-line);
+  box-shadow:
+    0 4px 16px color-mix(in srgb, var(--rj-shadow-1) 95%, transparent),
+    0 16px 40px color-mix(in srgb, var(--rj-ink-shadow) 12%, transparent),
+    inset 0 1px 0 var(--rjp-white);
+}
+/* 亮色下角标从青降到中性发丝（卡片亮色版就是这么做的） */
+[data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu)::after {
+  opacity: 0.35;
+  background:
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) 100% 0 / 11px 1px no-repeat,
+    linear-gradient(var(--rjp-apple-line), var(--rjp-apple-line)) 100% 0 / 1px 11px no-repeat;
+}
+
+/* ---------------------------------------------------------------------------
+   「加入我们 / 打赏」的二维码弹层：原本完全透明，两张二维码直接浮在页面上，
+   跟其他下拉不是一个材质。这里只补材质与内边距，尺寸、排列、开合动画都不动。
+   --------------------------------------------------------------------------- */
+#nav .menus_items .menus_item .menus_item_child.rj-qr-menu {
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid var(--rj-hairline-7);
+  background: linear-gradient(145deg,
+    var(--rj-surface-raised),
+    color-mix(in srgb, var(--rj-ink-surface-2) 38%, transparent));
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  box-shadow:
+    0 4px 14px color-mix(in srgb, var(--rj-ink-shadow) 28%, transparent),
+    0 18px 50px var(--rj-shadow-5),
+    inset 0 1px 0 var(--rj-hairline-8),
+    inset 0 -1px 0 color-mix(in srgb, var(--rj-brand) 12%, transparent);
+}
+[data-theme='light'] #nav .menus_items .menus_item .menus_item_child.rj-qr-menu {
+  background: var(--rjp-white);
+  border-color: var(--rjp-apple-line);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--rj-shadow-1) 60%, transparent),
+    0 8px 22px color-mix(in srgb, var(--rj-ink-shadow) 8%, transparent),
+    inset 0 1px 0 var(--rjp-white);
 }
