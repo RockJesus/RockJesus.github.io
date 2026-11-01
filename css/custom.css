@@ -6529,3 +6529,31 @@ hr.hr-line-dashed,
     -webkit-text-fill-color: currentColor;
   }
 }
+
+/* ---------- v1.9.35 文章 GIF → 视频化 ----------
+   17 张开机动画 GIF（合计 43.5MB）批量转成 H.264（CRF 28，抽帧比对无肉眼差异，
+   合计 1.57MB，−96.5%）。引用处由 <img> 换成 <video autoplay loop muted playsinline>，
+   poster 是同画面 WebP 抽帧（1~26KB），加载时先给静态帧、不空屏。
+   视频样式对齐文章图片（同样式不同名：不继承 img 的 hover 上浮，
+   也避开主题对 img 的 lazyload / fancybox 处理逻辑）。 */
+#article-container video.rj-gifv {
+  display: block;
+  margin: 24px auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--rj-radius-md);
+  border: 1px solid var(--rj-border-strong);
+  background: #000;
+}
+@media (max-width: 767px) {
+  #article-container video.rj-gifv {
+    margin: 20px auto;
+    border-radius: var(--rj-radius-sm);
+  }
+}
+/* 14.gif 这类 600×46 的超宽长条，撑满会字太小，限高居中 */
+#article-container video.rj-gifv.rj-gifv-strip {
+  width: auto;
+  max-height: 90px;
+  margin-left: 0;
+}
