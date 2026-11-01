@@ -1359,7 +1359,7 @@
     var DOUBAO_AVATAR = 'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao/web/doubao_avatar.png';
     btn.className = 'rj-doubao-btn';
     btn.innerHTML = '<img class="rj-doubao-avatar" src="' + DOUBAO_AVATAR + '" alt="豆包">';
-    btn.title = '和豆包聊天';
+    btn.setAttribute('aria-label', '和豆包聊天');
   }
   var rjPanel = null;
   function buildPanel() {

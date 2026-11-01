@@ -3141,14 +3141,9 @@ a:hover { color: var(--rj-brand-2); }
     inset 0 1px 0 color-mix(in srgb, var(--rj-ink-hairline) 30%, transparent);
 }
 
-/* —— 右侧悬浮按钮玻璃化 —— */
-#rightside > div > button {
-  background: var(--rj-hairline-3) !important;
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid var(--rj-hairline-8);
-  box-shadow: 0 4px 16px var(--rj-shadow-2), inset 0 1px 0 var(--rj-hairline-8);
-}
+/* —— 右侧悬浮按钮玻璃化 ——
+   V19 已接管（见「右下浮标组 V19」）。此处若保留 `background !important`
+   会把新玻璃渐变压成纯色，故删除。 */
 
 /* —— 播放器 / 豆包弹窗 / 搜索弹窗：内高光加强 —— */
 .aplayer.aplayer-fixed .aplayer-body {
@@ -3333,58 +3328,197 @@ a:hover { color: var(--rj-brand-2); }
 
 
 /* ============================================================
-   右下角图标统一风格 V13 — 液态玻璃紫调圆钮组（豆包/目录/评论/回顶）
-   统一 44px 圆形：紫玻璃背景 + 细紫边 + 柔和阴影 + 主题紫图标
-   hover：渐变紫填充 + 白图标 + 微上浮 + 紫光晕
+   右下浮标组 V19（v1.9.22）— 线性图标 + 玻璃圆钮 + 悬浮标签
+   ① 图标：原来是 FA 实心(fa-comments) 与细线(fa-arrow-up) 混排，
+      粗细/重心都不一致 → 全部换成 20px 线性 SVG，与导航菜单同一套语言
+   ② 钮身：中性玻璃 + 顶部 1px 高光 + 细描边（原来整圈紫边显脏）
+   ③ 节奏：44px 圆 / 10px 等距，不再用 margin 拼间距
+   ④ 反馈：hover 紫渐变覆盖层淡入（不是直接换 background，避免跳变）
+      + 上浮 + 紫光晕 + 左侧标签胶囊（内容读 aria-label）
+   ⑤ 豆包头像：满幅裁切 + 紫环；hover 提饱和而不缩放（缩放会出血到圆外）
+   ⑥ 回顶：外圈阅读进度环，仅文章页由 JS 写 --rj-doc-progress
    ============================================================ */
+#rightside > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
 #rightside > div > button,
 #rightside > div > a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* flex:none 必须留 —— #rightside-config-hide 折叠态 height:0，
+     不锁住伸缩比的话按钮会被 flex 压扁（实测 44 → 22px） */
+  flex: none;
+  box-sizing: border-box;
   width: 44px;
   height: 44px;
-  margin: 6px 0;
+  margin: 0;
+  padding: 0;
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 35%, transparent);
-  background: var(--rj-surface-input);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  color: var(--rj-brand-3);
-  font-size: 17px;
-  line-height: 42px;
-  box-shadow: 0 4px 14px var(--rj-shadow-2), inset 0 1px 0 var(--rj-hairline-2);
-  transition: all 0.25s ease;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 13%, transparent);
+  background:
+    linear-gradient(158deg, color-mix(in srgb, var(--rjp-white) 16%, transparent) 0%, color-mix(in srgb, var(--rjp-white) 1%, transparent) 58%),
+    color-mix(in srgb, var(--rj-ink-surface) 62%, transparent);
+  backdrop-filter: blur(20px) saturate(170%);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  color: var(--rj-brand-4);
+  box-shadow:
+    0 6px 16px var(--rj-shadow-3),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 15%, transparent);
+  transition: color .22s ease, border-color .22s ease, box-shadow .24s ease,
+              transform .24s cubic-bezier(.32, .72, 0, 1);
 }
-#rightside > div > button i,
-#rightside > div > a i {
-  font-size: 17px;
+/* hover 紫渐变：独立覆盖层淡入，避免渐变 background 无法过渡只能硬切 */
+#rightside > div > button::before,
+#rightside > div > a::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  border-radius: 50%;
+  background: linear-gradient(140deg, var(--rj-brand) 0%, var(--rj-brand-2) 100%);
+  opacity: 0;
+  transition: opacity .22s ease;
+  pointer-events: none;
 }
+#rightside > div > button:hover::before,
+#rightside > div > a:hover::before { opacity: 1; }
 #rightside > div > button:hover,
 #rightside > div > a:hover {
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important;
+  color: var(--rjp-white);
   border-color: transparent;
-  color: var(--rj-text-inverse) !important;
-  box-shadow: 0 0 18px color-mix(in srgb, var(--rj-brand) 60%, transparent), 0 4px 14px var(--rj-shadow-3);
+  box-shadow:
+    0 10px 26px color-mix(in srgb, var(--rj-brand-3) 42%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--rj-brand-3) 15%, transparent);
   transform: translateY(-2px);
 }
-/* 豆包按钮并入统一容器（头像保留） */
+#rightside > div > button:active,
+#rightside > div > a:active {
+  transform: translateY(0) scale(.94);
+}
+/* 图标：pointer-events:none 必须留 —— main.js 靠 e.target.id 分派，
+   点在 path 上会落到 svg 节点（无 id）导致回顶/设置点不动 */
+#rightside .rj-rs-ico {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  pointer-events: none;
+}
+/* 深浅色按钮：亮色下显月亮，暗色下显太阳（点一下切到对面） */
+#darkmode .rj-ico-sun { display: none; }
+[data-theme='dark'] #darkmode .rj-ico-sun { display: block; }
+[data-theme='dark'] #darkmode .rj-ico-moon { display: none; }
+/* 设置按钮展开态：与 hover 同样的实心反馈，告知「这些是二级开关」 */
+#rightside_config.show {
+  color: var(--rjp-white);
+  border-color: transparent;
+}
+#rightside_config.show::before { opacity: 1; }
+
+/* 悬浮标签：取代原生 title 的延迟黑块提示 */
+#rightside > div > button::after,
+#rightside > div > a::after {
+  content: attr(aria-label);
+  position: absolute;
+  right: calc(100% + 14px);
+  top: 50%;
+  z-index: 3;
+  padding: 6px 10px;
+  border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 11%, transparent);
+  background: color-mix(in srgb, var(--rj-ink-surface) 94%, transparent);
+  color: var(--rj-text-md);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  box-shadow: 0 8px 22px var(--rj-shadow-3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translate(6px, -50%);
+  transition: opacity .16s ease, transform .18s ease;
+  pointer-events: none;
+}
+#rightside > div > button:not(#translateLink):hover::after,
+#rightside > div > a:hover::after,
+#rightside > div > button:not(#translateLink):focus-visible::after,
+#rightside > div > a:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+/* 豆包头像：满幅圆形 + 紫环（头像不参与渐变覆盖层）
+   尺寸必须显式写 44 —— V10 那条是 46px（2 id 权重），会比其他钮胖 2px */
 #rightside #chat_btn.rj-doubao-btn {
   width: 44px;
   height: 44px;
-  margin: 6px 0;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--rj-brand-3) 50%, transparent);
-  background: var(--rj-surface-input);
-  box-shadow: 0 4px 14px var(--rj-shadow-2), 0 0 14px color-mix(in srgb, var(--rj-brand) 45%, transparent);
+  overflow: visible;
+  padding: 0;
+  box-sizing: border-box;
+  border-color: color-mix(in srgb, var(--rj-brand-4) 55%, transparent);
+  background: color-mix(in srgb, var(--rj-ink-surface) 78%, transparent);
+  box-shadow:
+    0 6px 18px var(--rj-shadow-3),
+    0 0 0 2px color-mix(in srgb, var(--rj-brand-3) 16%, transparent);
 }
+#rightside #chat_btn.rj-doubao-btn::before { display: none; }
 #rightside #chat_btn.rj-doubao-btn:hover {
-  background: color-mix(in srgb, var(--rj-brand) 35%, transparent);
-  border-color: color-mix(in srgb, var(--rj-brand-3) 85%, transparent);
-  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--rj-brand-4) 95%, transparent);
+  box-shadow:
+    0 10px 26px color-mix(in srgb, var(--rj-brand-3) 40%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--rj-brand-3) 20%, transparent);
 }
-#chat_btn.rj-doubao-btn .rj-doubao-avatar {
+#rightside #chat_btn.rj-doubao-btn .rj-doubao-avatar {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 50%;
-  transform: scale(0.9);
+  transform: none;
+  transition: filter .24s ease;
 }
+#rightside #chat_btn.rj-doubao-btn:hover .rj-doubao-avatar {
+  filter: saturate(1.08) brightness(1.05);
+}
+
+/* 二级按钮组折叠态：原来靠 height:0 + opacity:0 隐藏，
+   但 44px 子按钮会溢出 0 高容器继续吃点击（手机上右侧有一片隐形热区） */
+#rightside-config-hide {
+  visibility: hidden;
+  pointer-events: none;
+}
+#rightside-config-hide.show,
+#rightside-config-hide.status {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* 回顶外圈：阅读进度环（非文章页变量为 0，整圈透明不可见） */
+#go-up .rj-rs-ring {
+  position: absolute;
+  /* 外扩 4px：与按钮描边拉开距离，才看得出是「进度轨道」而不是粗细不匀的边 */
+  inset: -4px;
+  z-index: 1;
+  border-radius: 50%;
+  background: conic-gradient(from -90deg,
+    color-mix(in srgb, var(--rj-brand-4) 45%, transparent) calc(var(--rj-doc-progress, 0) * 1%), transparent 0);
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1.5px));
+  mask: radial-gradient(closest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1.5px));
+  /* 前 6% 淡入：刚进文章时不留一道莫名其妙的短弧 */
+  opacity: min(1, calc(var(--rj-doc-progress, 0) / 6));
+  transition: opacity .2s ease;
+  pointer-events: none;
+}
+#go-up:hover .rj-rs-ring { opacity: 0; }
 
 /* ============================================================
    文章页顶部 & 正文卡片 & 正文排版统一风格 V14
@@ -3762,16 +3896,28 @@ a:hover { color: var(--rj-brand-2); }
     0 18px 46px color-mix(in srgb, var(--rj-ink-shadow) 10%, transparent);
 }
 
-/* 图标组与悬浮按钮 */
+/* 图标组与悬浮按钮（亮色：白瓷底 + 深紫图标 + 无内高光失衡） */
 [data-theme='light'] #rightside > div > button,
 [data-theme='light'] #rightside > div > a {
-  background: color-mix(in srgb, var(--rjp-white) 86%, transparent);
-  color: var(--rj-text-md);
-  border: 1px solid color-mix(in srgb, var(--rj-ink-border) 10%, transparent);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--rj-ink-shadow) 10%, transparent);
+  background: color-mix(in srgb, var(--rjp-white) 90%, transparent);
+  color: var(--rj-brand-3);
+  border: 1px solid color-mix(in srgb, var(--rj-ink-border) 12%, transparent);
+  box-shadow: 0 6px 16px rgba(20, 22, 43, .10), inset 0 1px 0 #fff;
 }
-[data-theme='light'] #rightside > div > button:hover {
-  color: var(--rj-text-inverse);
+[data-theme='light'] #rightside > div > button:hover,
+[data-theme='light'] #rightside > div > a:hover {
+  color: var(--rjp-white);
+  border-color: transparent;
+  box-shadow:
+    0 10px 24px color-mix(in srgb, var(--rj-brand-3) 30%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--rj-brand-3) 10%, transparent);
+}
+[data-theme='light'] #rightside > div > button::after,
+[data-theme='light'] #rightside > div > a::after {
+  border-color: rgba(20, 22, 43, .10);
+  background: color-mix(in srgb, #ffffff 96%, transparent);
+  color: #2a2d43;
+  box-shadow: 0 8px 22px rgba(20, 22, 43, .14);
 }
 
 /* 排版细节：浅底上不要发光描边 */
@@ -4782,18 +4928,8 @@ body {
 }
 
 /* ---------- C13. 点击区 ≥40px + 可见焦点环 ---------- */
-/* 右下角一排图标按钮（日夜/阅读模式/目录/评论…）主题只给 35px。 */
-#rightside > div > button,
-#rightside > div > a,
-#rightside-config-hide > button,
-#rightside-config-show > button,
-#rightside-config-show > a {
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+/* 右下浮标已由 V19 统一成 44px 圆钮（见「右下浮标组 V19」），此处不再重复声明，
+   否则 40px 会覆盖 44px —— 曾经就是这样把点击区缩回去的。 */
 /* 侧栏社交图标原本 20px 的小圆点，手指很难点中 */
 #card-info .social-icon,
 #aside-content .social-icon {
@@ -5061,6 +5197,11 @@ a.site-page.group > .rj-nav-icon:last-child {
   #rightside > div > button,
   #rightside > div > a {
     margin: 0 !important;
+  }
+  /* 触屏没有 hover，残留的标签胶囊会挡内容 */
+  #rightside > div > button::after,
+  #rightside > div > a::after {
+    display: none;
   }
 }
 

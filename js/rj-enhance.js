@@ -1,5 +1,5 @@
 /**
- * rj-enhance.js v1.0.0 — 可访问性 + 动效层增强
+ * rj-enhance.js v1.0.1 — 可访问性 + 动效层增强
  * 内容：主题切换 View Transitions / 卡片渐显 / 阅读进度条 / h2 锚点复制 / 阅读时长
  * 约定：所有动效在 prefers-reduced-motion 下降级；无 JS 时页面完全正常（class 由 JS 添加）。
  */
@@ -84,6 +84,9 @@
       var total = r.height - window.innerHeight;
       var p = total > 0 ? Math.min(Math.max(-r.top / total, 0), 1) : 0;
       bar.style.transform = 'scaleX(' + p + ')';
+      /* 回顶按钮外圈进度环：pjax 会换掉 #go-up，所以每次现取 */
+      var up = doc.getElementById('go-up');
+      if (up) up.style.setProperty('--rj-doc-progress', (p * 100).toFixed(1));
     };
     window.addEventListener('scroll', upd, { passive: true });
     window.addEventListener('resize', upd);
