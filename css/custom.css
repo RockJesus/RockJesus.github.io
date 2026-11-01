@@ -6492,3 +6492,40 @@ hr.hr-line-dashed,
     bottom: auto;
   }
 }
+
+/* ---------- v1.9.34 左上角站名渐变字 ----------
+   站名原来是单色（暗色近白 / 亮色深墨），和右侧菜单同一个灰度，
+   在玻璃胶囊里没有「这是站点」的落点。改成全站签名渐变：紫 → 品红 → 青。
+   取色全部走主题令牌 —— 暗色下是 #8b5cf6 → #f0abfc → #00f0ff 的霓虹三色，
+   亮色下同一组变量自动换成 #7c3aed → #a21caf → #00666f 的深饱和版，
+   所以不需要第二套规则，切主题即换色。
+   角度用 100deg 而不是 135deg：站名只有 17px 高、90px 宽，斜角一大，
+   同一笔画的上缘和下缘就会串色，小字立刻显脏；100deg 几乎纯横切。
+   文字由 player.js 包成 .rj-brand-text —— background-clip: text 挂在
+   inline-flex 容器上时 WebKit 裁剪结果不稳定，普通 inline 盒子才稳。 */
+#site-name .rj-brand-text {
+  background-image: linear-gradient(100deg,
+    var(--rj-brand) 0%,
+    var(--rj-accent-4) 52%,
+    var(--rj-hud) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  /* 填充透明之后，从 #nav 继承来的投影仍会按字形轮廓画一圈暗边，
+     落在玻璃胶囊上就是脏边；渐变本身已经有足够的辨识度。 */
+  text-shadow: none;
+}
+/* 选中时把填充色还给浏览器，否则选区里是一段「无色字」 */
+#site-name .rj-brand-text::selection {
+  -webkit-text-fill-color: var(--rj-text-strong);
+  color: var(--rj-text-strong);
+  background: color-mix(in srgb, var(--rj-hud) 30%, transparent);
+}
+/* 极老浏览器不认 background-clip: text 时会整块刷底色，退回单色 */
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  #site-name .rj-brand-text {
+    color: var(--rj-brand-3);
+    -webkit-text-fill-color: currentColor;
+  }
+}

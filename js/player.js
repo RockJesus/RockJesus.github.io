@@ -2077,7 +2077,23 @@
   var RJ_LOGO_PNG = '/img/brand/alien-head.png';
   function initLogo() {
     var host = document.getElementById('site-name');
-    if (!host || host.querySelector('.rj-logo-wrap')) return;
+    if (!host) return;
+    // 站名文字先单独包一层 span：渐变字要靠 background-clip: text，
+    // 直接挂在这个 inline-flex 容器上时 WebKit 的裁剪不稳定（整块底色或文字隐身）。
+    // 普通 inline 盒子才是各浏览器都稳的路径。logo 之后插到最前面，顺序不变。
+    if (!host.querySelector('.rj-brand-text')) {
+      var text = document.createElement('span');
+      text.className = 'rj-brand-text';
+      var moved = false;
+      Array.prototype.slice.call(host.childNodes).forEach(function (n) {
+        if (n.nodeType === 3 && String(n.nodeValue).trim()) {
+          text.appendChild(n);
+          moved = true;
+        }
+      });
+      if (moved) host.appendChild(text);
+    }
+    if (host.querySelector('.rj-logo-wrap')) return;
     var wrap = document.createElement('span');
     wrap.className = 'rj-logo-wrap';
     var img = document.createElement('img');
