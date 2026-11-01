@@ -106,11 +106,6 @@
   text-shadow: none;
 }
 
-/* 首屏下滑箭头：不发光，只做明度呼吸 */
-#scroll-down i {
-  color: color-mix(in srgb, var(--rj-text-soft) 68%, transparent);
-  text-shadow: none;
-}
 
 /* ---------- 文章标题与链接 ---------- */
 .article-title {
@@ -6320,17 +6315,21 @@ hr.hr-line-dashed,
   width: auto;
 }
 #scroll-down {
-  opacity: 0.7;
+  opacity: 0.88;
   transition: opacity var(--rj-dur-base) var(--rj-ease-out);
 }
 #scroll-down:hover {
   opacity: 1;
 }
-#scroll-down i {
-  font-size: 18px;
-  color: color-mix(in srgb, var(--rj-text-soft) 62%, transparent);
+/* 箭头是 `<i class="fas fa-angle-down scroll-down-effects">` —— i 和 .scroll-down-effects
+   是**同一个元素**，主题那条 `#page-header #scroll-down .scroll-down-effects` 是 2 id + 1 class，
+   只写 `#scroll-down i` 会被整条压掉（之前一直没生效，箭头始终是主题的纯白 70%，
+   亮色下就变成浅灰近白，落在浅底上几乎看不见）。这里抄全同一串选择器。 */
+#page-header #scroll-down .scroll-down-effects {
+  font-size: 21px;
+  color: color-mix(in srgb, var(--rj-text-soft) 74%, transparent);
   text-shadow: none;
 }
-[data-theme='light'] #scroll-down i {
-  color: color-mix(in srgb, var(--rjp-apple-ink) 40%, transparent);
+[data-theme='light'] #page-header #scroll-down .scroll-down-effects {
+  color: color-mix(in srgb, var(--rjp-apple-ink) 46%, transparent);
 }
