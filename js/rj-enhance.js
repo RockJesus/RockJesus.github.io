@@ -230,8 +230,18 @@
       },
       { once: true }
     );
-    /* 解码失败（编解码器不支持等）就把这一层撤掉，静帧继续兜底 */
+    /* 解码失败：AV1 探测误判（个别 Safari 会对 av01 乐观返回 'maybe'，
+       真解码却失败）→ 原地换回 H.264 重试一次；H.264 也失败才撤层。
+       静帧海报一直垫在下面，任何一步失败都不会白屏。 */
     v.addEventListener('error', function () {
+      var cur = v.getAttribute('src') || '';
+      if (/\.av1\.mp4$/.test(cur)) {
+        v.setAttribute('src', cur.replace('.av1.mp4', '.mp4'));
+        v.load();
+        var p = v.play();
+        if (p && p.catch) p.catch(function () {});
+        return;
+      }
       v.remove();
     });
 
