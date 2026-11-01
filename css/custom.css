@@ -2382,13 +2382,19 @@ a:hover { color: var(--rj-brand-2); }
 #article-container a:not(.headerlink):hover { color: var(--rj-brand-2); border-bottom-color: var(--rj-brand-2); }
 #article-container h2::before, #article-container h3::before, #article-container h4::before,
 #article-container h5::before, #article-container h6::before { color: var(--rj-brand); text-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 70%, transparent); }
-/* 顶部导航：文字提亮到淡紫白（原 #8b5cf6 在深底上发闷），图标保持紫调同族 */
-#nav #menus .site-page, #nav .menus_item_child .site-page { color: var(--rj-brand-4); }
+/* 顶部导航文字：用正文色（v1.9.28 由整排淡紫改回）
+   原来一级项是淡紫（brand-4）、图标是紫罗兰（brand-3）—— 右侧一整排紫字把
+   「紫色」当成了装饰色，看上去像没调完的模板。现在文字与图标统一走正文色，
+   紫只留给 hover 与当前页这类**状态**，语义回到「可交互才上色」。 */
+#nav #menus .site-page, #nav .menus_item_child .site-page { color: var(--rj-text); }
 #nav #menus .site-page i, #nav #menus .site-page .rj-nav-icon,
-#nav .menus_item_child .site-page i, #nav .menus_item_child .site-page .rj-nav-icon { color: var(--rj-brand-3); }
+#nav .menus_item_child .site-page i, #nav .menus_item_child .site-page .rj-nav-icon { color: currentColor; }
+[data-theme='light'] #nav #menus .site-page,
+[data-theme='light'] #nav .menus_item_child .site-page { color: var(--rjp-apple-ink); }
+/* hover 只提亮 + 底色变紫（见下方 2482 那条），文字不再变紫、不加光晕 */
 #nav #menus .site-page:hover, #nav .menus_item_child .site-page:hover {
-  color: var(--rj-brand-6);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 55%, transparent);
+  color: var(--rj-text-strong);
+  text-shadow: none;
 }
 #site-subtitle #subtitle { color: var(--rj-brand); }
 #site-subtitle .typed-cursor { color: var(--rj-brand); }
