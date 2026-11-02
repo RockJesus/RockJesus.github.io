@@ -6609,3 +6609,53 @@ hr.hr-line-dashed,
 .rj-pl.rj-pl-default-art .rj-pl-art {
   animation: none;
 }
+
+/* ============================================================
+   批次 E · 首屏视频不加遮罩（2026-11-02）
+   ------------------------------------------------------------
+   视频层（.rj-hero-video）上面原本压了两层：
+     ::before —— 压暗层（暗色 16-20% 黑 + 径向聚光；亮色 88-90% 冷白）
+     ::after  —— 径向聚光（「安静的舞台」）
+   本批次全部撤掉，视频原样透出、不再有任何染色。
+   ::after 只保留底部渐隐 —— 那是首屏与正文之间的衔接缝，
+   不是画面遮罩。文字可读性由文字自身的暗色柔光承担。
+   注意：主题原生 ::before 是 30% 黑（head.styl），必须显式
+   写 background:none 才能盖回去，单删历史规则没用。
+   ============================================================ */
+#page-header.full_page::before,
+:root:not([data-theme='light']) #page-header.full_page::before,
+[data-theme='light'] #page-header.full_page::before {
+  background: none;
+  opacity: 1;
+}
+#page-header.full_page::after {
+  background: linear-gradient(180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--rj-bg) 62%, transparent) 62%,
+    color-mix(in srgb, var(--rj-bg) 88%, transparent) 100%);
+}
+[data-theme='light'] #page-header.full_page::after {
+  /* 4232 行曾对亮色整体 display:none，现在底部渐隐两个主题都要 */
+  display: block;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--rj-bg) 70%, transparent) 64%,
+    var(--rj-bg) 100%);
+}
+
+/* 亮色首屏从「浅底 + 深墨字」换回「深色视频 + 浅字」：
+   媒体上的安全色 + 黑基柔光（与暗色首屏同一套读法） */
+[data-theme='light'] #page-header.full_page #site-subtitle,
+[data-theme='light'] #page-header.full_page #site-subtitle #subtitle {
+  color: rgba(233, 238, 255, 0.95);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.80),
+    0 2px 14px rgba(0, 0, 0, 0.82),
+    0 10px 44px rgba(0, 0, 0, 0.72);
+}
+[data-theme='light'] #page-header.full_page #site-info::after {
+  color: rgba(233, 238, 255, 0.72);
+}
+[data-theme='light'] #page-header #scroll-down .scroll-down-effects {
+  color: rgba(226, 232, 255, 0.82);
+}
