@@ -156,18 +156,15 @@
      首页背景从静帧换成 13.6s 静音循环视频（详见 custom.css 批次 D）。
      视频首帧与静帧同画面，所以淡入时看不到切换。
 
-     四条不做：
+     三条不做：
        · 不做首屏阻塞 —— 等 load + 空闲才挂载，视频不跟标题抢带宽；
        · 不做省流用户 —— Save-Data / 2G·3G 直接退回静帧，150KB 也是流量；
-       · 不做减弱动效 —— prefers-reduced-motion 下完全不挂载；
-       · 不做亮色主题 —— 亮色首屏是刻意做的「浅底 + 深墨字」，压着 87%
-         白蒙层（见 custom.css B2）。深色视频在下面只剩 13% 透光，
-         放进去既看不见、又白白耗电解码。切到暗色再挂。
+       · 不做减弱动效 —— prefers-reduced-motion 下完全不挂载。
+     （原第四条「不做亮色主题」已取消：亮色首屏不再压白蒙层，
+       两个主题共用同一张深色视频，文字已换成媒体安全色，见 custom.css 批次 E）
      进程内还会在离开首页时主动卸载，别让它在后台继续解码耗电。 */
   function heroEligible() {
     if (reduce) return false;
-    /* 亮色主题不挂：那里的首屏是浅底的 */
-    if (de.getAttribute('data-theme') === 'light') return false;
     var c = navigator.connection;
     if (!c) return true;
     if (c.saveData) return false;
@@ -181,7 +178,7 @@
     var onHome = !!(header && /(^|\s)full_page(\s|$)/.test(header.className));
     var video = header && header.querySelector('.rj-hero-video');
 
-    /* 不在首页、或者当前条件不该放视频（切到亮色主题就是这条）——
+    /* 不在首页、或者是省流/减弱动效 ——
        两个方向都收干净，别留一个看不见的 video 在后台解码 */
     if (!onHome || !heroEligible()) {
       if (video) {
@@ -276,9 +273,9 @@
     }
   });
 
-  /* 主题切换时同步一次：切到亮色要立刻收掉视频（那个主题的首屏是浅底的），
-     切回暗色再挂上。只在页面 load 完之后响应，避免初始化阶段的
-     data-theme 写入把视频提前拉起来、跟首屏抢带宽。 */
+  /* 主题切换时同步一次：两个主题现在都用同一张视频（亮色首屏已是深色底），
+     这里只负责在省流/减弱动效条件变化时收放。只在页面 load 完之后响应，
+     避免初始化阶段的 data-theme 写入把视频提前拉起来、跟首屏抢带宽。 */
   if (window.MutationObserver) {
     new MutationObserver(function () {
       if (doc.readyState === 'complete') heroSync();
