@@ -2320,7 +2320,15 @@ hr::before { content: none !important; }
    z-index 99999 高于常规 UI，弹窗面板需在其之上 */
 #live2d-widget[data-rj-miku-chat] {
   pointer-events: auto !important; /* L2Dwidget 用内联样式置 none，需 !important */
-  cursor: pointer;
+  cursor: grab; /* 按住可拖到任意位置（live2d-guard.js），点一下仍是召唤豆包 */
+}
+#live2d-widget[data-rj-miku-chat]:active,
+#live2d-widget.rj-l2d-dragging {
+  cursor: grabbing;
+}
+/* 拖动时压住内部动效，避免画布抖动；松手恢复 */
+#live2d-widget.rj-l2d-dragging canvas {
+  pointer-events: none;
 }
 #live2d-widget[data-rj-miku-chat]::after {
   content: '点我召唤豆包 ✨';
@@ -4314,6 +4322,8 @@ body {
    悬停标签等浮层也永远在人物之上。 */
 #live2d-widget {
   z-index: 1 !important;
+  /* 触屏拖动由 guard 的 pointer 事件接管，别让浏览器抢去当滚动 */
+  touch-action: none;
 }
 /* 只给 #aside-content 提层没用 —— 它所在的 #content-inner 自己形成了层叠上下文，
    子元素的 z-index 只在这个上下文里比较，整体仍然输给 z-index:1 的看板娘。
