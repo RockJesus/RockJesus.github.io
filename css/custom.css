@@ -6659,3 +6659,63 @@ hr.hr-line-dashed,
 [data-theme='light'] #page-header #scroll-down .scroll-down-effects {
   color: rgba(226, 232, 255, 0.82);
 }
+
+/* ============================================================
+   批次 F · 浅色模式沿用暗色壁纸与首屏视频（2026-11-02）
+   ------------------------------------------------------------
+   浅色模式原本把 #web_bg 换成渐变底，并把首屏视频关掉（rj-enhance.js
+   里的 heroEligible）。现在两个主题共用同一张 oc.webp 壁纸和同一段
+   首屏视频，差异只剩「卡片材质 + 文字颜色」。
+
+   连着改三处：
+     1) #web_bg 恢复壁纸（与暗色同一条声明，不叠任何染色）
+     2) 撤掉亮色的冷白蒙层 —— 那层会把壁纸洗成灰白，等于又变回浅底
+     3) 首页首屏上（视频/海报之上）导航文字转浅色，滚下后随白玻璃转回深墨
+   ============================================================ */
+[data-theme='light'] #web_bg {
+  background: url(/img/oc.webp) center center / cover no-repeat local;
+}
+/* 蒙层撤掉，只留一层几乎看不见的四角压暗，防止壁纸边缘发灰时把卡片边咬掉 */
+[data-theme='light'] #web_bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-color: transparent;
+  background-image: radial-gradient(120% 95% at 50% 30%,
+    transparent 55%,
+    rgba(10, 12, 22, 0.28) 100%);
+}
+
+/* 首页首屏导航：底是深色视频，深墨字会糊掉。
+   .nav-fixed 一旦加上就是白玻璃底，那条规则（3679 行起）继续用深墨。
+   site-name 是浅色胶囊，保持深字，不参与这次翻转。 */
+[data-theme='light'] #page-header.full_page #nav:not(.nav-fixed) a,
+[data-theme='light'] #page-header.full_page #nav:not(.nav-fixed) #search-button,
+[data-theme='light'] #page-header.full_page #nav:not(.nav-fixed) .site-page i {
+  color: rgba(236, 240, 255, 0.94);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+[data-theme='light'] #page-header.full_page #nav:not(.nav-fixed) .site-page:hover {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+/* 菜单胶囊在浅色下是浅玻璃，浅字压上去就糊了 —— 首屏上直接换回暗色主题
+   同款深色玻璃（v1.9.25 的实算值），浅字才有底。滚下转白玻璃后由原规则接管。 */
+[data-theme='light'] #page-header.full_page #nav:not(.nav-fixed) #menus {
+  background: linear-gradient(145deg, rgba(32, 36, 66, 0.55), rgba(17, 21, 38, 0.38));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 4px 14px rgba(2, 6, 23, 0.28),
+    0 18px 50px rgba(2, 6, 23, 0.50),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+[data-theme='light'] #page-header.full_page #nav:not(.nav-fixed) #menus .site-page:hover {
+  color: #ffffff !important;
+}
+
+/* 批次 F 补充：壁纸改深色后，浅色首屏底部的「渐隐到浅灰」变成一道亮带，
+   撤掉 —— 底下接着的就是同一张壁纸，不需要衔接缝 */
+[data-theme='light'] #page-header.full_page::after {
+  background: none;
+}
