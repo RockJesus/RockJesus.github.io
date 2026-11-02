@@ -4151,7 +4151,7 @@ body {
 [data-theme='light'] .layout_post > #page,
 [data-theme='light'] .layout_post > #post,
 [data-theme='light'] #aside-content .card-widget {
-  background: var(--rjp-white);
+  background: #f5f6fa;
   border: 1px solid var(--rjp-apple-line);
   border-radius: 18px;
   box-shadow: 0 1px 2px color-mix(in srgb, var(--rj-shadow-1) 60%, transparent);
@@ -4189,7 +4189,7 @@ body {
 
 /* 亮色页脚：Apple 的深灰细字，不再是紫渐变 */
 [data-theme='light'] #footer {
-  background: var(--rjp-apple-bg);
+  background: var(--rj-bg); /* 高级灰：与画布同底，不再比页面亮一截 */
 }
 [data-theme='light'] #footer,
 [data-theme='light'] #footer .copyright,
@@ -4640,9 +4640,10 @@ body {
 }
 
 /* 亮色主题：整站背景原来是那张深色星空照片，只有外壳变白，
-   卡片缝隙里全在透黑底，看起来像做了一半的换肤。这里给出中性浅底。 */
+   卡片缝隙里全在透黑底，看起来像做了一半的换肤。这里给出中性浅底。
+   高级灰版：从近白降到冷灰，压住整页亮度，卡片改灰白后才有层次。 */
 [data-theme='light'] #web_bg {
-  background: linear-gradient(180deg, #f7f8fc 0%, #edeff8 58%, #f2ecf6 100%);
+  background: linear-gradient(180deg, #eef0f5 0%, #e3e6ee 58%, #e9e5f0 100%);
 }
 
 /* ============================================================
@@ -5390,7 +5391,8 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 [data-theme='light'] #nav.hide-menu #menus,
 [data-theme='light'] #nav #blog_name,
 [data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) {
-  background: var(--rjp-white);
+  /* 高级灰：菜单面板与卡面同族，比卡面亮半档保持悬浮感 */
+  background: #f8f9fc;
   border: 1px solid var(--rjp-apple-line);
   backdrop-filter: blur(36px) saturate(200%);
   -webkit-backdrop-filter: blur(36px) saturate(200%);
@@ -5435,7 +5437,7 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
     inset 0 -1px 0 color-mix(in srgb, var(--rj-brand) 12%, transparent);
 }
 [data-theme='light'] #nav .menus_items .menus_item .menus_item_child.rj-qr-menu {
-  background: var(--rjp-white);
+  background: #f8f9fc;
   border-color: var(--rjp-apple-line);
   box-shadow:
     0 1px 2px color-mix(in srgb, var(--rj-shadow-1) 60%, transparent),
@@ -5519,9 +5521,10 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 [data-theme='light'] .layout_page > div:first-child:not(.recent-posts),
 [data-theme='light'] #aside-content .card-widget {
   border-color: var(--rjp-apple-line);
+  /* 高级灰卡面：纯白 → 灰白纸面，在深了一档的冷灰画布上靠描边和投影分层 */
   background:
-    linear-gradient(158deg, rgba(255, 255, 255, 0.9) 0%, transparent 46%),
-    var(--rjp-white);
+    linear-gradient(158deg, rgba(255, 255, 255, 0.72) 0%, transparent 46%),
+    #f5f6fa;
   box-shadow: var(--rj-elev-2);
 }
 [data-theme='light'] #recent-posts > .recent-post-item:hover,
@@ -5805,8 +5808,8 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 [data-theme='light'] #page-header.full_page::before {
   /* 0.90 在 76vh 时刚好是「一层纸」，占满一屏之后整屏接近纯白，
      标题孤零零浮在空白上。收到 0.87，外星人轮廓与颗粒留一点存在，
-     又不至于回到早年那块灰渍。 */
-  background-color: rgba(248, 249, 252, 0.87);
+     又不至于回到早年那块灰渍。高级灰版：冷白 → 冷灰，压住首屏亮度。 */
+  background-color: rgba(241, 243, 248, 0.9);
 }
 
 /* ---------------------------------------------------------------------------
@@ -5974,7 +5977,7 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
   box-shadow: var(--rj-elev-2);
 }
 [data-theme='light'] #body-wrap.post #post {
-  background: var(--rjp-white);
+  background: #f5f6fa;
   border: 1px solid var(--rjp-apple-line);
   border-radius: 18px;
   box-shadow: var(--rj-elev-2);
@@ -6004,11 +6007,12 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
   }
 }
 /* 亮色横幅：比页面底色再浅一点的「纸带」，让照片纹理留 18% 的存在感
-   （内页横幅的最终取值在下面第 17 节末尾，这里只管文章横幅） */
+   （内页横幅的最终取值在下面第 17 节末尾，这里只管文章横幅）
+   高级灰版：跟着画布一起降档，避免横幅比正文卡还亮 */
 [data-theme='light'] #page-header.post-bg::before {
   background: linear-gradient(180deg,
-    rgba(250, 251, 253, 0.82) 0%,
-    rgba(244, 246, 251, 0.90) 100%);
+    rgba(240, 242, 248, 0.86) 0%,
+    rgba(236, 239, 246, 0.93) 100%);
 }
 /* 亮色导航胶囊：白底白页时靠这 1px 线立住，加深到 apple-line 的 1.4 倍 */
 [data-theme='light'] #nav #menus,
@@ -6145,10 +6149,11 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 }
 [data-theme='light'] #page-header.not-home-page::before {
   /* 0.84 时内页头图上那块深色 Alienware 标志会透成一块灰斑，
-     落在标题后面像没擦干净的污渍。压到 0.92/0.965 只留一层几乎看不见的肌理。 */
+     落在标题后面像没擦干净的污渍。压到 0.92/0.965 只留一层几乎看不见的肌理。
+     高级灰版：底色从冷白降到冷灰，与画布同族。 */
   background: linear-gradient(180deg,
-    rgba(250, 251, 253, 0.92) 0%,
-    rgba(245, 246, 251, 0.965) 100%);
+    rgba(242, 244, 249, 0.94) 0%,
+    rgba(238, 241, 247, 0.965) 100%);
 }
 
 /* ---------------------------------------------------------------------------
@@ -6249,7 +6254,7 @@ hr.hr-line-dashed,
   font-size: 0.88em;
 }
 [data-theme='light'] #article-container code:not([class*="language-"]) {
-  background: #f4f5f8;
+  background: #eceef4; /* 卡面降为灰白后，行内代码同步加深一档才不糊 */
   border-color: var(--rjp-apple-line);
   color: var(--rj-brand-3);
 }
