@@ -3621,6 +3621,17 @@ a:hover { color: var(--rj-brand-2); }
   #rj-doubao-panel { border-radius: 20px; }
   .rj-doubao-frame { border-radius: 0 0 20px 20px; }
 }
+/* —— 亮色跟随：外壳已通过 tokens（surface-3/input-2 亮色值）变浅，
+      头上的白字/白图标在浅紫底上对比度不足，这里压深 —— */
+[data-theme='light'] .rj-doubao-head span {
+  background: linear-gradient(135deg, var(--rj-brand-4), var(--rj-brand-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+[data-theme='light'] .rj-doubao-close,
+[data-theme='light'] .rj-doubao-pop {
+  color: var(--rjp-apple-ink);
+}
 
 /* ============================================================
    P1 — 亮色模式专项层
