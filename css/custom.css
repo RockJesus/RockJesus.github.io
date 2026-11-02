@@ -6719,3 +6719,62 @@ hr.hr-line-dashed,
 [data-theme='light'] #page-header.full_page::after {
   background: none;
 }
+
+/* ============================================================
+   批次 G · 浅色模式：卡片换 iOS 液态玻璃（2026-11-02）
+   ------------------------------------------------------------
+   壁纸在浅色下也透出来后，卡片还是「灰白实心纸面」，压在星空上像贴纸。
+   这里按 Apple 液态玻璃的构成重做材质，四层缺一不可：
+     ① 半透白面 + 纵向渐变（上亮下暗，模拟受光）
+     ② backdrop 模糊 + 提饱和 + 微微提亮 —— 壁纸在玻璃下化成色雾
+     ③ 1px 白描边（内部受光边），比深色描边更像玻璃切口
+     ④ 外投影分两级：贴地的 2px 定轮廓，18px 的远处散开
+   圆角一并从 18px 提到 22px —— 玻璃块太方会显得像塑料板。
+   ============================================================ */
+[data-theme='light'] #recent-posts > .recent-post-item,
+[data-theme='light'] .layout_page > div:first-child:not(.recent-posts),
+[data-theme='light'] .layout_post > #page,
+[data-theme='light'] .layout_post > #post,
+[data-theme='light'] #body-wrap.post #post,
+[data-theme='light'] #aside-content .card-widget {
+  background:
+    linear-gradient(162deg,
+      rgba(255, 255, 255, 0.74) 0%,
+      rgba(255, 255, 255, 0.52) 48%,
+      rgba(255, 255, 255, 0.60) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  border-radius: 22px;
+  backdrop-filter: blur(40px) saturate(150%) brightness(1.08);
+  -webkit-backdrop-filter: blur(40px) saturate(150%) brightness(1.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 6px rgba(10, 14, 26, 0.14),
+    0 18px 46px rgba(10, 14, 26, 0.22);
+}
+
+/* 悬停：只提亮玻璃、抬高 2px，不加彩色描边（玻璃的高光是白的，不是紫的） */
+[data-theme='light'] #recent-posts > .recent-post-item:hover,
+[data-theme='light'] #aside-content .card-widget:hover {
+  border-color: rgba(255, 255, 255, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.32),
+    0 4px 12px rgba(10, 14, 26, 0.16),
+    0 26px 60px rgba(10, 14, 26, 0.26);
+  transform: translateY(-2px);
+}
+
+/* 角落那组「括号」发丝是纸面时代的装饰，玻璃上只会像裂口 */
+[data-theme='light'] #recent-posts > .recent-post-item::after,
+[data-theme='light'] #aside-content .card-widget::after {
+  content: none;
+}
+
+/* 卡片内嵌的浅底小块（标签、置顶徽章、引用块）跟着玻璃走一档，
+   否则实心白方块压在玻璃上会像贴上的便签 */
+[data-theme='light'] #recent-posts .recent-post-info .article-meta-wrap a,
+[data-theme='light'] #aside-content .card-widget .card-tag-cloud a {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.7);
+}
