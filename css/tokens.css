@@ -307,17 +307,17 @@
   --rj-accent-3:        #be185d;
   --rj-accent-4:        #a21caf;
 
-  /* 画布与容器 */
-  --rj-bg:              var(--rjp-apple-bg);
-  --rj-bg-tint-1:       #ececf1;
-  --rj-bg-tint-2:       #e8eaf3;
-  --rj-bg-tint-3:       #f2ecf2;
-  --rj-surface:         rgba(255, 255, 255, 0.74);
-  --rj-surface-solid:   rgba(255, 255, 255, 0.93);
-  --rj-surface-raised:  rgba(255, 255, 255, 0.82);
-  --rj-surface-input:   rgba(255, 255, 255, 0.80);
-  --rj-overlay:         rgba(255, 255, 255, 0.55);
-  --rj-overlay-strong:  rgba(255, 255, 255, 0.70);
+  /* 画布与容器 —— 高级灰：整体降一档亮度，冷灰底 + 灰白卡面（Apple × Alienware） */
+  --rj-bg:              #e7e9ef;
+  --rj-bg-tint-1:       #dde1ea;
+  --rj-bg-tint-2:       #d9deec;
+  --rj-bg-tint-3:       #e5e0ec;
+  --rj-surface:         rgba(250, 251, 253, 0.78);
+  --rj-surface-solid:   rgba(246, 247, 251, 0.96);
+  --rj-surface-raised:  rgba(242, 244, 250, 0.88);
+  --rj-surface-input:   rgba(244, 246, 250, 0.85);
+  --rj-overlay:         rgba(240, 242, 247, 0.55);
+  --rj-overlay-strong:  rgba(238, 240, 246, 0.72);
 
   /* 文字 */
   --rj-text:            rgba(29, 29, 31, 0.86);
@@ -368,8 +368,8 @@
   --rj-elev-3:
     0 4px 12px rgba(20, 22, 43, 0.07),
     0 24px 56px rgba(20, 22, 43, 0.10);
-  --rj-canvas-scrim: rgba(247, 248, 252, 0.55);
-  --rj-canvas-vignette: rgba(232, 234, 244, 0.60);
+  --rj-canvas-scrim: rgba(233, 236, 243, 0.42);
+  --rj-canvas-vignette: rgba(214, 220, 233, 0.55);
 
   /* 投射阴影 */
   --rj-shadow-cast-1:   rgba(20, 22, 43, 0.10);
