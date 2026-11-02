@@ -2716,7 +2716,7 @@ a:hover { color: var(--rj-brand-2); }
 }
 /* —— 全世界访客分布统计（地球下方累积国旗） —— */
 .rj-globe-stats {
-  border-top: 1px dashed color-mix(in srgb, var(--rj-brand) 25%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--rj-brand) 25%, transparent);
   margin-top: 8px;
   padding: 8px 10px 10px;
 }
@@ -6210,10 +6210,6 @@ hr.hr-line-dashed,
   border-top: 1px solid var(--rj-hairline-4);
   margin: 36px 0;
   background: none;
-}
-/* 地球访问统计块：1px 虚线 → 发丝实线 */
-.rj-globe-stats {
-  border-style: solid;
 }
 /* shields.io 徽章：外链图片，配色由服务端决定（蓝/绿各一），
    和站点的中性灰阶打架。统一压成灰阶，悬停再还原 —— 数据照样读得到。 */
