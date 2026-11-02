@@ -402,6 +402,10 @@
 
   --rj-ink-surface:     #ffffff;
   --rj-ink-input:       #ffffff;
+  /* 补齐漏定义的亮色值：V15 豆包弹窗背景用的就是这两个令牌，
+     此前只有暗色定义 → 浅色模式下弹窗外壳一直是深玻璃 */
+  --rj-ink-surface-3:   var(--rjp-white);
+  --rj-ink-input-2:     var(--rjp-apple-bg);
   --rj-ink-shadow:      #8b90ad;
   --rj-ink-cast:        #5b6080;
   --rj-ink-hairline:    #14162b;
