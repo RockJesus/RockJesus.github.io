@@ -4869,6 +4869,14 @@ a.site-page.group > .rj-nav-icon:last-child {
   #rightside > div > a::after {
     display: none;
   }
+
+  /* [BUG-005 修复] 主题 main.js:263/299/309 用行内 transform:translateX(-58px)
+     把 right:-48px 的浮标推进视口；本查询块已把锚点改到视口内的 right:12px，
+     行内位移会再叠加 -58px，按钮组整体悬到距右缘约 70px 的半空。
+     这里禁掉该行内位移（!important 胜过行内样式），显隐仍由 JS 的 opacity 控制。 */
+  #rightside[style] {
+    transform: none !important;
+  }
 }
 
 /* ---------- C3. 音乐提示条：底部居中胶囊 ----------
