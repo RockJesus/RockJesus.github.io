@@ -6,9 +6,9 @@
 
    现在的行为：
      1. 常显 —— 不随滚动淡出，没有折叠按钮，也不读任何隐藏标记；
-     2. 站位 —— 整体抬高 vOffset 180，底边停在右下角按钮列上方
-        （按钮列 3 枚 44px + 2 个 12px gap + bottom -1px ≈ 157px 高，
-        留 ~23px 空隙），人物「站」在按钮列上，互不遮挡；
+     2. 站位 —— 贴地（vOffset -28，脚底压着页面底边，与最初版本一致），
+        左移 hOffset 60：画布右缘收进 1440px 处，右下角按钮列
+        （3 枚 44px，left ≈ 1446）从她右侧空白经过，双马尾完全不碰按钮；
         z-index 仍压到 1（见 custom.css 批次 A1），卡片照旧盖在她身上，
         形成「从卡片后面探出来」的效果；
      3. ≤768px / 系统「减少动态效果」仍不加载 —— 手机上这块画布
@@ -22,9 +22,9 @@
 
   var cfg = {
     model: { jsonPath: '/live2dw/assets/miku.model.json' },
-    // vOffset 180 = 底边距视口底 180px，正好停在按钮列上方；
-    // 改动这个值前先量 #rightside 的实际高度（3 枚 44px 桌面档）。
-    display: { position: 'right', width: 180, height: 360, hOffset: 0, vOffset: 180 },
+    // hOffset 60 = 整体左移 60px，给右下角按钮列（宽 44 + 右边距 10）让位；
+    // 改动前先确认双马尾尖端不碰按钮列（实测马尾展宽约 ±70px）。
+    display: { position: 'right', width: 200, height: 400, hOffset: 60, vOffset: -28 },
     mobile: { show: false, scale: 0.5 },
     log: false,
     pluginJsPath: 'lib/',
