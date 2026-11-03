@@ -4587,6 +4587,29 @@ body {
   padding-top: 26px;
   padding-bottom: 22px;
 }
+/* [BUG-006 修复] 页脚铺满到底，消除下方露出的星空壁纸缝
+   现象：页脚深色底（--rj-carbon = #06080b）下沿之下，露出 #web_bg 星空壁纸
+   渲染出的深紫色带（截图像素实测 rgb(38,28,61)），两者交界是一条硬边，
+   看起来像页面最底部“裂了一道缝”。
+   原因：#web_bg 是 position:fixed + z-index:-999 的固定壁纸，页面多高它都
+   铺满视口；而 #footer 只是文档流里的最后一个块。只要页脚没有正好贴住
+   文档最底（或有任何 1px 级的错位），壁纸就会从页脚下方透出来。
+   做法：双保险 ——
+   1) 让 #body-wrap（flex column, min-height:100vh）与页脚一起把文档撑满，
+      页脚用 margin-top:auto 牢牢贴在底部；
+   2) 给 html/body 兜一层与页脚同色的底，即使内容极短、键盘弹出、
+      或路由切换瞬间，页脚下方也不会闪出紫色壁纸。 */
+#body-wrap {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+#footer {
+  margin-top: auto;
+}
+html,
+body {
+  background-color: var(--rj-carbon);
+}
 #footer:before {
   background-color: transparent;
   backdrop-filter: none;
