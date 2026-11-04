@@ -1634,9 +1634,16 @@
   var rjGlobeDone = false;
   var rjCounted = false;   // 每次打开网站只统计一次（pjax 站内跳转不重复计）
   var rjGlobeStop = null;  // 旧地球实例的停止回调（pjax 重建时防止残留渲染循环）
-  // 云端计数通道：Upstash Redis REST（GitHub 账号注册，CORS 放行本域）
+  /* —— 云端计数通道 ——
+   * 2026-11-04 安全修复：原先把 Upstash 可写 token 明文写在这里，随前端公开，
+   * 任何人拿到即可读、写、清空整库（实测 FLUSHALL 可执行）。
+   * 现在前端不再持有 token，改为请求同域 /api/stats，由 Cloudflare Worker 代持密钥。
+   * 旧实现（本地增量 + 直接写 Upstash）用本地开关放行，方便回滚，验证稳定后删除。
+   */
+  var STATS_API = '/api/stats';
+  var USE_LEGACY_UPSTASH = false;
   var UPSTASH_URL = 'https://tight-wren-137459.upstash.io';
-  var UPSTASH_TOKEN = 'gQAAAAAAAhjzAAIgcDFlMWQ3MGViMGI3MTQ0ODg4OTQ1ZDAwMzc5NzQzYjRmNg';
+  var UPSTASH_TOKEN = '';   // 已移除，勿再写入
   function initGlobe() {
     var host = document.querySelector('.card-webinfo');
     if (!host || rjGlobeDone) return;
@@ -1825,8 +1832,28 @@
     // —— 云端持久化：/data/visitors.json（GitHub Pages 公开累计基准）∪ 本地增量 ——
     var cloudVisits = null;
     var sessionVisits = {};
-    // 每次访问原子 +1：Upstash INCR 按国家独立计数（并发访客互不覆盖、打开即生效）
+    // 每次访问 +1：优先走 /api/stats 计数（服务端代持密钥），失败回落旧通道
     function incrCloud(cc) {
+      if (!USE_LEGACY_UPSTASH) {
+        fetchStats({ incr: cc })
+          .then(function (d) {
+            if (!d || !d.visits) throw new Error('bad');
+            cloudVisits = pickVisits(d.visits);
+            // 会话内已显示过的值不回退（并发 INCR 下读可能略旧）
+            for (var s in sessionVisits) {
+              if (Object.prototype.hasOwnProperty.call(sessionVisits, s) &&
+                  sessionVisits[s] > (cloudVisits[s] || 0) && /^[A-Za-z]{2}$/.test(s)) {
+                cloudVisits[s] = sessionVisits[s];
+              }
+            }
+            refreshVisits();
+          })
+          .catch(function () {
+            // 统计接口不可用 → 回落 /data/visitors.json 基准，最多补一次会话新增国家
+            if (cloudVisits && !(cc in cloudVisits)) pushCloud();
+          });
+        return;
+      }
       fetch(UPSTASH_URL + '/incr/visits_' + cc, { headers: { 'Authorization': 'Bearer ' + UPSTASH_TOKEN }, cache: 'no-store' })
         .then(function (r) { if (!r.ok) throw new Error('incr'); return r.json(); })
         .then(function (j) {
@@ -1841,6 +1868,17 @@
           // Upstash 不可用 → 回落旧通道：新国家并入 /data/visitors.json 基准
           if (cloudVisits && !(cc in cloudVisits)) pushCloud();
         });
+    }
+    /* 只保留两位国家码的计数，过滤掉服务端可能带出的其他字段 */
+    function pickVisits(o) {
+      var d = {};
+      for (var k in o) {
+        if (Object.prototype.hasOwnProperty.call(o, k) && /^[A-Za-z]{2}$/.test(k)) {
+          var n = parseInt(o[k], 10);
+          if (n > 0) d[k] = n;
+        }
+      }
+      return d;
     }
     function mergeVisits() {
       var m = {};
@@ -1864,6 +1902,28 @@
       renderStats(historyVisits);
     }
     function loadCloudVisits() {
+      if (!USE_LEGACY_UPSTASH) {
+        fetchStats({})
+          .then(function (d) {
+            if (!d || !d.visits) throw new Error('bad');
+            var v = pickVisits(d.visits);
+            // 会话内已计过的值不回退（INCR 是并发的，读可能略旧）
+            if (cloudVisits) {
+              for (var c in cloudVisits) {
+                if (cloudVisits[c] > (v[c] || 0)) v[c] = cloudVisits[c];
+              }
+            }
+            cloudVisits = v;
+            refreshVisits();
+          })
+          .catch(function () {
+            fetch('/data/visitors.json?v=' + Math.floor(Date.now() / 86400000), { cache: 'no-store' })
+              .then(function (r) { if (!r.ok) throw new Error('bad'); return r.json(); })
+              .then(function (d) { cloudVisits = (d && typeof d === 'object') ? d : null; refreshVisits(); })
+              .catch(function () {});
+          });
+        return;
+      }
       var H = { 'Authorization': 'Bearer ' + UPSTASH_TOKEN };
       Promise.all([
         fetch(UPSTASH_URL + '/keys/visits_*', { headers: H, cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return { result: [] }; }),
@@ -1903,7 +1963,9 @@
       });
     }
     // —— 新国家自动并入云端：合并当前云端基准与会话新增，写回 kvdb（跨设备立即生效）——
+    // 旧通道写回：仅 USE_LEGACY_UPSTASH 时启用（新通道由服务端 INCR，无需前端写）
     function pushCloud() {
+      if (!USE_LEGACY_UPSTASH) return;
       if (!cloudVisits) return;
       var m = {};
       for (var k in cloudVisits) if (Object.prototype.hasOwnProperty.call(cloudVisits, k)) m[k] = cloudVisits[k];
@@ -2128,7 +2190,27 @@
 
   // —— 站点统计（Upstash 原子计数，替代失效的不蒜子 busuanzi）——
   var rjPvPath = null;      // 文章阅读量：每次进入该文章（含 pjax 跳转）计一次
+  /* 统一入口：读写都走 /api/stats，前端不接触任何密钥。
+   * incr 有值 -> 服务端对该路径 +1 并返回最新值；无值 -> 只读。 */
+  function fetchStats(params) {
+    var qs = [];
+    if (params && params.incr) qs.push('incr=' + encodeURIComponent(params.incr));
+    if (params && params.pv) qs.push('pv=' + encodeURIComponent(params.pv));
+    return fetch(STATS_API + (qs.length ? '?' + qs.join('&') : ''), { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('stats'); return r.json(); });
+  }
   function rjUpstash(key, isIncr) {
+    if (!USE_LEGACY_UPSTASH) {
+      // key 形如 pv_<encoded path>
+      var p = key.slice(3);
+      try { p = decodeURIComponent(p); } catch (e) {}
+      return fetchStats(isIncr ? { pv: p } : {})
+        .then(function (d) {
+          var n = d && d.pv && parseInt(d.pv[p], 10);
+          if (!(n > 0)) throw new Error('value');
+          return n;
+        });
+    }
     return fetch(UPSTASH_URL + (isIncr ? '/incr/' : '/get/') + key, {
       headers: { 'Authorization': 'Bearer ' + UPSTASH_TOKEN },
       cache: 'no-store'
