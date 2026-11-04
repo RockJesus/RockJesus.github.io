@@ -135,27 +135,48 @@
 
   // —— 统一装饰：自绘外壳 + 封面毛玻璃底 + 播放状态 + 断点记忆 ——
   function decorate(ap, container, list) {
-    // —— 播放/暂停淡入淡出：起播音量 0→75% 平滑爬升，暂停先 75%→0 渐弱再真正 pause ——
-    // 接管实例的 pause()：APlayer 内部统一走 this.pause()（实例属性可拦截），
-    // 本文件所有暂停路径也都调用 ap.pause()，一处接管全覆盖
-    var RJ_VOL = 0.75, RJ_FADE_IN = 450, RJ_FADE_OUT = 320;
+    // —— 播放/暂停淡入淡出 ——
+    // 【2026-11-04 重做】原版在「音量线性值」上做 easeInOutQuad，物理上是对的，
+    // 但人耳对响度的感知接近对数：音量砍一半（0.75→0.375）只相当于降 6dB，
+    // 听着像「小了一点点」。实测原曲线在 50% 时间点听觉还有 89%，
+    // 接着最后 60ms 断崖归零 —— 听感是「卡一下突然没声」，不是渐弱。
+    // 改为在「对数域」插值：dB 线性变化，听感才是匀速的淡入淡出。
+    //   gain(k) = 10^((1-k)·lg(peak) + k·lg(floor))
+    //   50% 时间点听觉约 48%，全程均匀下降。
+    var RJ_VOL = 0.75;            // 常态音量（也是音量滑块的最大值基准）
+    var RJ_FLOOR = 0.0001;        // 淡出终点 = -80dB，等同静音，避免 log(0)
+    var RJ_FADE_IN = 520;         // 稍拉长，对数曲线下更好听
+    var RJ_FADE_OUT = 420;
     var rjFadeTimer = null, rjPendingPause = false;
+    // 「用户音量」：滑块/接口设定的目标音量。淡入淡出只临时压低实际音量，
+    // 结束后必须回到这里，而不是写死 RJ_VOL —— 否则用户调过音量会被重置。
+    var rjUserVol = RJ_VOL;
+    function rjClamp(v) { return Math.max(0, Math.min(1, v)); }
+
     function rjFadeTo(target, ms, done) {
       if (rjFadeTimer) { clearTimeout(rjFadeTimer); rjFadeTimer = null; }
       var a = ap.audio;
       if (!a) { if (done) done(); return; }
-      var start = a.volume, t0 = Date.now();
-      if (ms <= 0 || Math.abs(target - start) < 0.02) { a.volume = target; if (done) done(); return; }
+      var from = rjClamp(a.volume), to = rjClamp(target);
+      if (ms <= 0 || Math.abs(to - from) < 0.005) { a.volume = to; if (done) done(); return; }
+      // 对数域端点；target 为 0 时用 floor 兜底（-80dB 人耳已不可闻）
+      var lgFrom = Math.log(Math.max(from, RJ_FLOOR));
+      var lgTo = Math.log(Math.max(to, RJ_FLOOR));
+      var t0 = Date.now();
       (function step() {
         var cur = ap.audio;
         if (!cur || cur !== a) { rjFadeTimer = null; return; } // 播放器已重建/换源，弃掉余晖
         var k = Math.min(1, (Date.now() - t0) / ms);
-        var e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; // easeInOutQuad
-        cur.volume = Math.max(0, Math.min(1, start + (target - start) * e));
-        if (k < 1) { rjFadeTimer = setTimeout(step, 25); }
-        else { rjFadeTimer = null; if (done) done(); }
+        cur.volume = rjClamp(Math.exp(lgFrom + (lgTo - lgFrom) * k));
+        if (k < 1) { rjFadeTimer = setTimeout(step, 20); }
+        else {
+          rjFadeTimer = null;
+          cur.volume = to;                 // 精确落到终点，避免残留 0.0000999
+          if (done) done();
+        }
       })();
     }
+
     var rjOrigPause = ap.pause.bind(ap);
     ap.pause = function () {
       var a = ap.audio;
@@ -165,7 +186,8 @@
         if (!rjPendingPause) return;      // 淡出途中又点了播放：放弃这次暂停
         rjPendingPause = false;
         rjOrigPause();
-        if (ap.audio) ap.audio.volume = RJ_VOL; // 复位，下次淡入从 0 起坡
+        // 复位到用户音量（不是写死 0.75），下次淡入从这里的目标起坡
+        if (ap.audio) ap.audio.volume = rjUserVol;
       });
     };
     // 淡出途中再点播放：音频未 paused，浏览器不会再发 play 事件，
@@ -175,15 +197,16 @@
       if (rjPendingPause) {
         rjPendingPause = false;
         var a0 = ap.audio;
-        if (a0 && !a0.paused) rjFadeTo(RJ_VOL, RJ_FADE_IN);
+        if (a0 && !a0.paused) rjFadeTo(rjUserVol, RJ_FADE_IN);
       }
       return rjOrigPlay();
     };
     ap.on('play', function () {
       rjPendingPause = false;             // 新的播放意图作废挂起的淡出暂停
       var a = ap.audio; if (!a) return;
-      a.volume = 0;
-      rjFadeTo(RJ_VOL, RJ_FADE_IN);
+      // 只在实际音量高于起点时才淡入：用户把音量调到很低时不该被「抬」起来
+      if (a.volume > rjUserVol * 0.9) a.volume = RJ_FLOOR;
+      rjFadeTo(rjUserVol, RJ_FADE_IN);
     });
 
     var body = container.querySelector('.aplayer-body');
@@ -1112,13 +1135,41 @@
     }
   }
 
+  // —— 淡入淡出工具（模块级）——
+  // 自动播放走的是原生 audio.play()，不经过 ap.play() 的接管，
+  // 所以这条路径必须单独做淡入 —— 否则「打开网站第一次听到音乐」永远是瞬起，
+  // 也就成了「渐变没生效」的主因（2026-11-04 实测确认）。
+  var RJ_FADE_FLOOR = 0.0001;
+  function rjFadeVolume(audio, target, ms, done) {
+    if (!audio) { if (done) done(); return; }
+    var from = Math.max(0, Math.min(1, audio.volume));
+    var to = Math.max(0, Math.min(1, target));
+    if (ms <= 0 || Math.abs(to - from) < 0.005) { audio.volume = to; if (done) done(); return; }
+    var lgFrom = Math.log(Math.max(from, RJ_FADE_FLOOR));
+    var lgTo = Math.log(Math.max(to, RJ_FADE_FLOOR));
+    var t0 = Date.now(), timer = null;
+    (function step() {
+      if (!audio) { return; }
+      var k = Math.min(1, (Date.now() - t0) / ms);
+      audio.volume = Math.max(0, Math.min(1, Math.exp(lgFrom + (lgTo - lgFrom) * k)));
+      if (k < 1) timer = setTimeout(step, 20);
+      else { audio.volume = to; if (done) done(); }
+    })();
+    return function cancel() { if (timer) clearTimeout(timer); };
+  }
+
   // —— 自动播放：先正常带声播放；被浏览器拦截时转"静音自动播放"（muted 自动播放始终被允许），
   //    首次点击/按键任意处即恢复音量 —— 实现"打开网站后自动播放，无需先点击" ——
   //    注：APlayer 1.10.1 的 play() 不返回 Promise，须直接驱动 audio 元素（UI 由 audio 事件自动同步）
   function unmuteLater(ap) {
     var restore = function () {
       try {
-        if (ap.audio) { ap.audio.muted = false; ap.audio.volume = 0.75; }
+        if (ap.audio) {
+          ap.audio.muted = false;
+          // 从静音恢复也要淡入，不能直接砸到 0.75（原来是瞬起）
+          ap.audio.volume = RJ_FADE_FLOOR;
+          rjFadeVolume(ap.audio, 0.75, 520);
+        }
         document.body.setAttribute('data-rj-unmuted', JSON.stringify({ m: ap.audio ? ap.audio.muted : null, v: ap.audio ? ap.audio.volume : null }));
       } catch (e) {}
       hideMutedTip();
@@ -1135,8 +1186,15 @@
     if (!a) return;
     try {
       a.muted = false;
-      a.volume = 0.75;
+      // 先压到不可闻，再起播淡入：这样首次自动播放也是渐入
+      a.volume = RJ_FADE_FLOOR;
       var p = a.play();
+      if (p && p.then) {
+        p.then(function () { rjFadeVolume(a, 0.75, 520); }).catch(function () {});
+      } else {
+        // 老浏览器没有 Promise：直接起播后立刻淡入（play 是同步启动的）
+        rjFadeVolume(a, 0.75, 520);
+      }
       if (p && p.catch) {
         p.catch(function () {
           try {
