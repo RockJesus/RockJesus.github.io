@@ -16,14 +16,14 @@
   </url>
   
   <url>
-    <loc>https://rockjesus.cn/data/countries-110m.json</loc>
+    <loc>https://rockjesus.cn/bing.json</loc>
     
     <lastmod>2026-11-04</lastmod>
     
   </url>
   
   <url>
-    <loc>https://rockjesus.cn/bing.json</loc>
+    <loc>https://rockjesus.cn/data/countries-110m.json</loc>
     
     <lastmod>2026-11-04</lastmod>
     
@@ -44,14 +44,14 @@
   </url>
   
   <url>
-    <loc>https://rockjesus.cn/about/index.html</loc>
+    <loc>https://rockjesus.cn/categories/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
   </url>
   
   <url>
-    <loc>https://rockjesus.cn/categories/index.html</loc>
+    <loc>https://rockjesus.cn/about/index.html</loc>
     
     <lastmod>2022-11-13</lastmod>
     
