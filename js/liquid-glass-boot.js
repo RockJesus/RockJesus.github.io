@@ -57,8 +57,8 @@
   }
 
   /* pjax：局部刷新后侧栏会重建，需要重新挂 */
-  if (window.btf && typeof window.btf.addGlobalFn === 'function') {
-    window.btf.addGlobalFn('rjLiquidGlassBoot', apply);
+  if (typeof btf !== 'undefined' && btf && typeof btf.addGlobalFn === 'function') {
+    btf.addGlobalFn('rjLiquidGlassBoot', apply);
   }
 
   /* 兜底：侧栏内容异步渲染（卡片是以后端接口填的）时补挂一次 */
