@@ -185,8 +185,8 @@
   }
 
   /* 兼容 Butterfly 的 pjax：局部刷新后重新扫描 */
-  if (window.btf && typeof window.btf.addGlobalFn === 'function') {
-    window.btf.addGlobalFn('rjLiquidGlass', scan);
+  if (typeof btf !== 'undefined' && btf && typeof btf.addGlobalFn === 'function') {
+    btf.addGlobalFn('rjLiquidGlass', scan);
   }
 
   /* 兜底：只在侧栏容器内观察，断开不重连，开销可忽略 */
