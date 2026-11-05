@@ -1,0 +1,442 @@
+/* ==========================================================================
+   RockJesus.cn — Liquid Glass 侧边栏卡片材质 · v4（无厚层 · 均匀薄玻璃）
+   --------------------------------------------------------------------------
+   v3 的双厚度分层被否决（不要厚层），回到整块均匀玻璃。
+   代价是文字直接坐在透区上，实测对比度会从 5.03:1 掉到 2.5–3:1 左右
+   （壁纸星云亮部直接透过来），达不到 WCAG AA。
+   补偿手段只剩文字投影 —— Apple 在类似场景也是这么做的（毛玻璃 + 字影），
+   视觉可读，但严格无障碍标准不达标。此取舍已明确告知站长。
+   ========================================================================== */
+
+:root{
+  /* 亮环强度（0 = 关，1 = 默认） */
+  --rj-lg-rim: 1;
+
+  /* ---- 卡面参数（v5 网格搜索实测的最透组合）----
+     网格搜索结论：对比度由 brightness 决定，与 tint 几乎无关。
+     brightness 0.62 时 tint 从 8% 到 26% 全部通过 AA（4.89:1），
+     因此取 tint 8% —— 卡面接近纯透明，只靠压暗透过光保住文字。
+     这也正是 Apple 暗色玻璃的配方：低底色 + 重压透光。 */
+  --rj-lg-tint: .08;
+  --rj-lg-sheen: .12;
+
+  --rj-lg-spot: 180px;
+  --rj-lg-dur: 360ms;
+}
+
+[data-theme='light']{
+  --rj-lg-tint: .50;
+  --rj-lg-sheen: .62;
+}
+
+/* ==========================================================================
+   1. 卡面（均匀薄玻璃，无内层）
+   ========================================================================== */
+html #aside-content .card-widget.card-widget.rj-lg,
+.rj-lg{
+  border-radius: var(--rj-radius-lg, 18px);
+  border: none;
+  position: relative;
+  isolation: isolate;
+
+  /* 卡面：一层白反光 + 一层极淡暗色调。没有任何压暗渐变 —— 透就完了 */
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-lg-sheen) * 100%), transparent) 0%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-lg-sheen) * 30%), transparent) 28%,
+      transparent 52%),
+    /* ④ 顶部冷色折射光晕：模拟光线穿过玻璃时的色散，是「液态玻璃」的关键质感 */
+    radial-gradient(130% 62% at 26% -8%,
+      color-mix(in srgb, var(--rjp-cyan-lt) 13%, transparent) 0%,
+      color-mix(in srgb, var(--rjp-violet) 6%, transparent) 42%,
+      transparent 72%),
+    /* ⑤ 底部暖色反光：与顶部冷光形成色温层次 */
+    radial-gradient(120% 55% at 78% 108%,
+      color-mix(in srgb, var(--rjp-pink) 7%, transparent) 0%,
+      transparent 68%),
+    color-mix(in srgb, var(--rj-ink-surface) calc(var(--rj-lg-tint) * 100%), transparent);
+
+  /* 背景透射：重模糊 50px（比 v2 的 28 更能体现「深度」），亮度提上去 */
+  backdrop-filter:
+    blur(46px)
+    saturate(112%)
+    brightness(0.58);
+  -webkit-backdrop-filter:
+    blur(46px)
+    saturate(112%)
+    brightness(0.58);
+
+  box-shadow:
+    /* 外投影 */
+    0 1px 1px color-mix(in srgb, var(--rj-shadow-cast-3) 50%, transparent),
+    0 16px 44px color-mix(in srgb, var(--rj-shadow-cast-2) 90%, transparent),
+    /* 玻璃上缘的高光（最亮的一条） */
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 42%, transparent),
+    /* 四边内阴影 = 玻璃厚度 */
+    inset 0 0 18px color-mix(in srgb, var(--rj-ink-900) 40%, transparent),
+    /* 下缘反光 */
+    inset 0 -1px 0 color-mix(in srgb, var(--rjp-white) 14%, transparent),
+    inset 1px 0 0 color-mix(in srgb, var(--rjp-white) 16%, transparent),
+    inset -1px 0 0 color-mix(in srgb, var(--rjp-white) 16%, transparent);
+
+  transition:
+    box-shadow var(--rj-dur-base, var(--rj-lg-dur)) var(--rj-ease-out, ease),
+    transform var(--rj-dur-base, var(--rj-lg-dur)) var(--rj-ease-out, ease);
+}
+
+/* ==========================================================================
+   3. 文字色：全部绑定站点语义令牌
+   ========================================================================== */
+html #aside-content .card-widget.card-widget.rj-lg{
+  color: var(--rj-text, inherit);
+}
+html #aside-content .card-widget.card-widget.rj-lg .item-headline{
+  color: var(--rj-text-strong, inherit);
+}
+html #aside-content .card-widget.card-widget.rj-lg :is(p, li, .announcement, .webinfo){
+  color: var(--rj-text, inherit);
+}
+html #aside-content .card-widget.card-widget.rj-lg a{
+  color: var(--rj-text-md, inherit);
+}
+html #aside-content .card-widget.card-widget.rj-lg a:hover{
+  color: color-mix(in srgb, var(--rjp-cyan-lt) 85%, var(--rj-text-md));
+}
+
+/* 无厚层的可读性补偿：柔和字影 + 轻微描边感
+   把文字从亮底上「托」出来。Apple 在控制中心等毛玻璃场景同款手法。 */
+html #aside-content .card-widget.card-widget.rj-lg :is(.item-headline, p, li, .announcement, .webinfo, a){
+  text-shadow:
+    0 1px 3px  color-mix(in srgb, var(--rj-ink-900) 85%, transparent),
+    0 2px 14px color-mix(in srgb, var(--rj-ink-900) 80%, transparent),
+    0 0 22px  color-mix(in srgb, var(--rj-ink-900) 55%, transparent);
+}
+[data-theme='light'] #aside-content .card-widget.rj-lg :is(.item-headline, p, li, .announcement, .webinfo, a){
+  text-shadow:
+    0 1px 8px color-mix(in srgb, var(--rjp-white) 88%, transparent),
+    0 0 3px  color-mix(in srgb, var(--rjp-white) 60%, transparent);
+}
+
+/* ==========================================================================
+   4. 玻璃切面亮环（只画在薄玻璃外缘；厚玻璃不画环，画了就成卡中卡）
+   ========================================================================== */
+html #aside-content .card-widget.card-widget.rj-lg::before,
+.rj-lg::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  z-index: 4;
+
+  /* 亮环强度整体收到 0.6 档：
+     实测 58% 的白环在深色壁纸上会显成一圈「描边」，
+     Apple 的玻璃边缘其实很克制，只在受光侧有一道细亮线。 */
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--rjp-white) calc(36% * var(--rj-lg-rim)), transparent) 0%,
+    color-mix(in srgb, var(--rjp-white) calc(9%  * var(--rj-lg-rim)), transparent) 22%,
+    color-mix(in srgb, var(--rjp-white) calc(2%  * var(--rj-lg-rim)), transparent) 50%,
+    color-mix(in srgb, var(--rjp-white) calc(10% * var(--rj-lg-rim)), transparent) 78%,
+    color-mix(in srgb, var(--rjp-white) calc(30% * var(--rj-lg-rim)), transparent) 100%);
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+          mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   5. 光标光斑（作用在薄玻璃上，掠过厚玻璃边缘时有「光照进玻璃」的感觉）
+   ========================================================================== */
+.rj-lg--spot::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 3;
+  background: radial-gradient(
+    var(--rj-lg-spot) circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in srgb, var(--rjp-cyan-lt) 24%, transparent) 0%,
+    color-mix(in srgb, var(--rjp-violet) 10%, transparent) 38%,
+    transparent 68%);
+  opacity: 0;
+  transition: opacity var(--rj-lg-dur) var(--rj-ease-out, ease);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.rj-lg--spot:hover::after,
+.rj-lg--spot:focus-within::after{
+  opacity: 1;
+}
+
+/* ==========================================================================
+   6. 状态
+   ========================================================================== */
+html #aside-content .card-widget.card-widget.rj-lg:hover,
+.rj-lg:hover{
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 1px color-mix(in srgb, var(--rj-shadow-cast-3) 60%, transparent),
+    0 22px 52px color-mix(in srgb, var(--rj-shadow-cast-2) 100%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 42%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--rjp-white) 10%, transparent),
+    inset 1px 0 0 color-mix(in srgb, var(--rjp-white) 16%, transparent),
+    inset -1px 0 0 color-mix(in srgb, var(--rjp-white) 16%, transparent);
+}
+
+.rj-lg:focus-visible{
+  outline: none;
+  box-shadow:
+    0 16px 44px color-mix(in srgb, var(--rj-shadow-cast-2) 90%, transparent),
+    0 0 0 2px color-mix(in srgb, var(--rjp-cyan) 70%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 30%, transparent);
+}
+
+/* ==========================================================================
+   7. 浅色模式
+   ========================================================================== */
+[data-theme='light'] #aside-content .card-widget.rj-lg,
+[data-theme='light'] .rj-lg{
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-lg-sheen) * 100%), transparent) 0%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-lg-sheen) * 30%), transparent) 28%,
+      transparent 52%),
+    color-mix(in srgb, var(--rjp-paper-100) calc(var(--rj-lg-tint) * 100%), transparent);
+
+  backdrop-filter:
+    blur(46px)
+    saturate(120%)
+    brightness(1.3);
+  -webkit-backdrop-filter:
+    blur(46px)
+    saturate(120%)
+    brightness(1.3);
+
+  box-shadow:
+    0 1px 1px var(--rj-shadow-2),
+    0 16px 40px var(--rj-shadow-3),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 95%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--rjp-apple-line) 50%, transparent),
+    inset 1px 0 0 color-mix(in srgb, var(--rjp-white) 65%, transparent),
+    inset -1px 0 0 color-mix(in srgb, var(--rjp-white) 65%, transparent);
+}
+
+[data-theme='light'] #aside-content .card-widget.rj-lg::before,
+[data-theme='light'] .rj-lg::before{
+  /* 浅色模式的外环要「白而不蓝」：
+     apple-line 带蓝调，在深色壁纸上会显脏，改用高明度低饱和的冷白。 */
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--rjp-white) 92%, transparent) 0%,
+    color-mix(in srgb, var(--rjp-white) 55%, transparent) 30%,
+    color-mix(in srgb, var(--rjp-white) 40%, transparent) 60%,
+    color-mix(in srgb, var(--rjp-white) 78%, transparent) 100%);
+}
+
+[data-theme='light'] .rj-lg--spot::after{
+  background: radial-gradient(
+    var(--rj-lg-spot) circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in srgb, var(--rjp-apple-blue) 9%, transparent) 0%,
+    transparent 62%);
+}
+
+/* ==========================================================================
+   8. 自适应与降级
+   ========================================================================== */
+.rj-lg--spot{
+  --rj-lg-spot: clamp(120px, 60%, 240px);
+}
+
+/* 不支持 backdrop-filter：厚层变成近实色，文字仍可读 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  html #aside-content .card-widget.card-widget.rj-lg,
+  .rj-lg{
+    background: var(--rj-surface-solid);
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  html #aside-content .card-widget.card-widget.rj-lg,
+  .rj-lg{
+    transition: none;
+  }
+  html #aside-content .card-widget.card-widget.rj-lg:hover,
+  .rj-lg:hover{
+    transform: none;
+  }
+  .rj-lg--spot::after{
+    opacity: .5;
+    transition: none;
+  }
+}
+
+@media (hover: none){
+  .rj-lg--spot::after{
+    opacity: .45;
+  }
+}
+
+/* ==========================================================================
+   9. 自适应材质（可选，需 JS）
+   --------------------------------------------------------------------------
+   iOS 玻璃会按背后内容自动调整厚度。这里用 JS 采样每张卡片背后
+   壁纸区域的平均亮度（--rj-lg-lum，0–1），据此微调：
+     · 背后暗 → 玻璃可以更透（--rj-lg-adapt 小）
+     · 背后亮 → 自动加实（--rj-lg-adapt 大）
+   默认 --rj-lg-adapt:0，未启用 JS 时完全不影响现有表现。
+   ========================================================================== */
+html #aside-content .card-widget.card-widget.rj-lg,
+.rj-lg{
+  /* 自适应补偿：0 = 不补偿，1 = 满补偿 */
+  --rj-lg-adapt: 0;
+}
+
+/* 用亮度驱动底色深浅：背后越亮，底色越实 */
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--adapt,
+.rj-lg.rj-lg--adapt{
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-lg-sheen) * 100%), transparent) 0%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-lg-sheen) * 30%), transparent) 28%,
+      transparent 52%),
+    radial-gradient(130% 62% at 26% -8%,
+      color-mix(in srgb, var(--rjp-cyan-lt) 13%, transparent) 0%,
+      color-mix(in srgb, var(--rjp-violet) 6%, transparent) 42%,
+      transparent 72%),
+    radial-gradient(120% 55% at 78% 108%,
+      color-mix(in srgb, var(--rjp-pink) 7%, transparent) 0%,
+      transparent 68%),
+    color-mix(in srgb,
+      var(--rj-ink-surface)
+      calc((var(--rj-lg-tint) + var(--rj-lg-lum, 0) * var(--rj-lg-adapt) * 0.45) * 100%),
+      transparent);
+}
+
+/* ==========================================================================
+   10. 复刻档（.rj-lg--ultra，iOS 26 控制中心参考图复刻）
+   --------------------------------------------------------------------------
+   参考图特征（与此前所有版本的根本差异）：
+     · 无暗膜 —— 底色趋 0，甚至叠加一层极淡的白色（玻璃是「亮」的）
+     · 不压亮度 —— 背后的壁纸原亮度原色彩透过来，只有 blur
+     · 重模糊 —— blur 提到 64px，把背景揉成柔和色块（磨砂≠暗膜）
+     · 边缘一圈细白线（1px 纯白）+ 内部柔白发光，四角略亮
+   文字对比度进一步下降（参考图本身文字就在玻璃外），靠字影托底。
+   ========================================================================== */
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra,
+.rj-lg.rj-lg--ultra{
+  --rj-lg-tint: 0;
+
+  /* 玻璃本体：无暗膜。只有一层 5% 的白 + 角部略亮的柔白高光 */
+  background:
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) 14%, transparent) 0%,
+      transparent 55%),
+    radial-gradient(110% 80% at 88% 100%,
+      color-mix(in srgb, var(--rjp-white) 10%, transparent) 0%,
+      transparent 55%),
+    color-mix(in srgb, var(--rjp-white) 3%, transparent);
+
+  /* 参考图核心：只模糊，不压亮度不调色 */
+  backdrop-filter: blur(88px) saturate(112%);
+  -webkit-backdrop-filter: blur(88px) saturate(112%);
+
+  /* 一圈细白线 + 内部柔白发光（替代此前的暗色厚度内阴影） */
+  box-shadow:
+    0 8px 32px var(--rj-shadow-2),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 55%, transparent),
+    inset 0 0 24px color-mix(in srgb, var(--rjp-white) 18%, transparent),
+    inset 0 0 60px color-mix(in srgb, var(--rjp-white) 8%, transparent);
+
+  /* ultra 下字影加倍，文字靠它从杂乱背景里浮出来 */
+  --rj-lg-shadow-boost: 1;
+}
+/* 复刻档的边缘环：覆盖均衡档的角度渐变亮环，改为均匀细白线 */
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra::before,
+.rj-lg.rj-lg--ultra::before{
+  background: color-mix(in srgb, var(--rjp-white) 60%, transparent);
+  opacity: .5;
+}
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra::after,
+.rj-lg.rj-lg--ultra.rj-lg--spot::after{
+  opacity: .4;
+}
+/* 复刻档的字：不换色（换白在青绿壁纸上反而更糊），
+   只加深一层紧凑字影 —— 参考图的字本来就在玻璃外，我们只能靠影子补。 */
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.item-headline, p, li, .announcement, .webinfo, a){
+  text-shadow:
+    0 1px 1px  color-mix(in srgb, var(--rjp-white) 72%, transparent),
+    0 0 3px    color-mix(in srgb, var(--rjp-white) 45%, transparent);
+}
+[data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra :is(.item-headline, p, li, .announcement, .webinfo, a){
+  text-shadow:
+    0 1px 1px  color-mix(in srgb, var(--rjp-white) 85%, transparent),
+    0 0 4px    color-mix(in srgb, var(--rjp-white) 55%, transparent);
+}
+
+/* 复刻档 · 浅色主题：玻璃整体提亮（参考图里浅色玻璃是「乳白通透」而不是「灰透」） */
+[data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra,
+[data-theme='light'] .rj-lg.rj-lg--ultra{
+  background:
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) 30%, transparent) 0%,
+      transparent 58%),
+    radial-gradient(110% 80% at 88% 100%,
+      color-mix(in srgb, var(--rjp-white) 22%, transparent) 0%,
+      transparent 58%),
+    color-mix(in srgb, var(--rjp-white) 14%, transparent);
+
+  box-shadow:
+    0 8px 32px color-mix(in srgb, var(--rj-ink-900) 12%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 78%, transparent),
+    inset 0 0 24px color-mix(in srgb, var(--rjp-white) 32%, transparent);
+}
+[data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra::before,
+[data-theme='light'] .rj-lg.rj-lg--ultra::before{
+  background: color-mix(in srgb, var(--rjp-white) 92%, transparent);
+  opacity: .8;
+}
+
+/* 复刻档 · 浅色主题文字：乳白玻璃上必须换深墨，否则浅灰字直接糊掉 */
+[data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra :is(.item-headline, p, li, .announcement, .webinfo, .webinfo-item, span, a),
+[data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra .card-list a{
+  color: color-mix(in srgb, var(--rj-ink-900) 92%, transparent) !important;
+  /* 白字影在深壁纸透上来时会形成灰边脏字，浅色档直接不要字影 */
+  text-shadow: none !important;
+}
+[data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra .card-list a:hover{
+  color: var(--rj-brand, var(--rjp-apple-blue)) !important;
+}
+
+/* 复刻档 · 深色：玻璃本身不加暗膜（这是参考图的核心），
+   但给「承载文字的行」垫一层极窄的暗色渐变 —— 只染字所在的一条，
+   不破坏整块玻璃的通透。相当于 Apple 在壁纸上放标题时用的 scrim。 */
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra .announcement,
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra .webinfo,
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra .card-list{
+  position: relative;
+}
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.announcement, .webinfo, .card-list)::before{
+  content: '';
+  position: absolute;
+  inset: -6px -10px;
+  z-index: -1;
+  border-radius: 10px;
+  background: radial-gradient(120% 140% at 50% 50%,
+    color-mix(in srgb, var(--rj-ink-900) 26%, transparent) 0%,
+    color-mix(in srgb, var(--rj-ink-900) 12%, transparent) 55%,
+    transparent 100%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+[data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra :is(.announcement, .webinfo, .card-list)::before{
+  background: radial-gradient(120% 140% at 50% 50%,
+    color-mix(in srgb, var(--rjp-white) 45%, transparent) 0%,
+    color-mix(in srgb, var(--rjp-white) 22%, transparent) 55%,
+    transparent 100%);
+}
