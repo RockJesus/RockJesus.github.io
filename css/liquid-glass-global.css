@@ -1,0 +1,485 @@
+/* ==========================================================================
+   RockJesus.cn — Liquid Glass 全站材质统一
+   version: 1.0.0 · 2026-11-05
+   --------------------------------------------------------------------------
+   把 liquid-glass.css 里验证过的「复刻档」材质，抽象成一组 --rj-glass-*
+   令牌，统一应用到站点所有「浮起来的表面」：
+
+     卡片     #recent-posts > .recent-post-item / #aside-content .card-widget
+     导航     #nav #menus / #nav #blog_name
+     下拉     #nav .menus_item_child（含 .rj-qr-menu）
+     搜索     .search-dialog
+     侧滑     #sidebar #sidebar-menus
+     播放器   .aplayer .aplayer-list
+     其它     .fancybox-button 等
+
+   设计原则（与复刻档一致，不再逐处调参）：
+     · 无暗膜：底色趋 0，只叠极淡白 + 角部柔光
+     · 不压亮度：壁纸原色彩透过来，只做 blur
+     · 一圈细白线 + 内部柔白发光
+     · 文字靠「窄条 scrim」托底，不用整块压暗
+
+   兼容：
+     · 全部规则带 html 前缀 + 双类，特异性足以盖过 custom.css 里
+       历史累积的同名规则（custom.css 有 6 轮卡片样式覆写史）
+     · @supports 降级：不支持 backdrop-filter 时回落为半实色，文字仍可读
+   ========================================================================== */
+
+/* ==========================================================================
+   1. 材质令牌
+   ========================================================================== */
+:root{
+  /* 厚度：0 = 完全透明，1 = 实色。统一取极小值，玻璃是「亮」的 */
+  --rj-glass-white: 9%;
+  --rj-glass-corner: 20%;      /* 角部柔光强度 */
+  --rj-glass-blur: 88px;       /* 主表面的虚化半径 */
+  --rj-glass-blur-sm: 40px;    /* 小面板（下拉/按钮）用轻一档，避免糊成一片 */
+  --rj-glass-line: 55%;        /* 边缘细白线 */
+  --rj-glass-glow: 18%;        /* 内发光 */
+  --rj-glass-sat: 112%;
+
+  /* 文字托底 scrim */
+  --rj-glass-scrim: 26%;
+
+  /* 圆角：与站点既有卡片一致 */
+  --rj-glass-radius: 18px;
+}
+
+/* ==========================================================================
+   2. 材质基类（可手动复用）
+   ========================================================================== */
+.rj-glass{
+  background:
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) var(--rj-glass-corner), transparent) 0%,
+      transparent 55%),
+    radial-gradient(110% 80% at 88% 100%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.72), transparent) 0%,
+      transparent 55%),
+    color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent);
+
+  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat));
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat));
+
+  border: none;
+  box-shadow:
+    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent),
+    inset 0 0 24px color-mix(in srgb, var(--rjp-white) var(--rj-glass-glow), transparent);
+}
+
+/* ==========================================================================
+   3. 卡片（主列 + 侧栏）
+   --------------------------------------------------------------------------
+   主列文章卡片原本是 blur(28px) 的暗玻璃，与侧栏亮玻璃并排差异明显。
+   这里统一到同一材质，并同步给 ::before 亮环 → 改细白线。
+   ========================================================================== */
+html #recent-posts > .recent-post-item,
+html #aside-content .card-widget{
+  background:
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) var(--rj-glass-corner), transparent) 0%,
+      transparent 55%),
+    radial-gradient(110% 80% at 88% 100%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.72), transparent) 0%,
+      transparent 55%),
+    color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) !important;
+
+  box-shadow:
+    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent),
+    inset 0 0 24px color-mix(in srgb, var(--rjp-white) var(--rj-glass-glow), transparent) !important;
+}
+
+/* 主列卡片原有的细渐变亮线 ::before：统一成均匀白线 */
+html #recent-posts > .recent-post-item::before{
+  background: color-mix(in srgb, var(--rjp-white) 60%, transparent) !important;
+  opacity: .5 !important;
+}
+
+/* 主列卡片的暗色遮罩 ::after（浅色模式下是 apple-line）统一提亮 */
+html #recent-posts > .recent-post-item::after{
+  opacity: .25 !important;
+}
+
+/* ==========================================================================
+   4. 导航胶囊 + 品牌名
+   --------------------------------------------------------------------------
+   原本是 #f8f9fc 实色（浅色模式）或深色渐变，这里换成玻璃。
+   注意：导航是 sticky，背后可能是不变的封面图，模糊量给小一点更稳。
+   ========================================================================== */
+html #nav #menus,
+html #nav.hide-menu #menus,
+html #nav #blog_name{
+  background:
+    radial-gradient(120% 120% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 16%, transparent) 0%,
+      transparent 60%),
+    color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
+
+  backdrop-filter: blur(44px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(44px) saturate(140%) !important;
+
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 32%, transparent) !important;
+  box-shadow:
+    0 4px 18px var(--rj-shadow-2, rgba(0, 0, 0, .16)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 26%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 45%, transparent) !important;
+}
+
+/* 导航文字：亮玻璃上原浅色字会糊，统一加深色字影 */
+html #nav #menus .site-page,
+html #nav #blog_name .blog-title{
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--rj-ink-900) 55%, transparent);
+}
+
+/* ==========================================================================
+   5. 下拉菜单
+   --------------------------------------------------------------------------
+   原本是 #f8f9fc 实色板（明显的实心色块），换成玻璃后与卡片同族。
+   下拉面板比卡片小，模糊半径降一档，否则边缘会「吃掉」文字。
+   ========================================================================== */
+html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu),
+html #nav .menus_items .menus_item .menus_item_child.rj-qr-menu{
+  background:
+    radial-gradient(120% 120% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 18%, transparent) 0%,
+      transparent 60%),
+    color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) !important;
+
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 34%, transparent) !important;
+  box-shadow:
+    0 12px 34px var(--rj-shadow-2, rgba(0, 0, 0, .2)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 48%, transparent) !important;
+}
+
+/* 下拉里的每一项：hover 保留站点品牌紫，但改成「白上叠紫」，不再是深色块 */
+html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li{
+  background-color: transparent;
+  border-radius: 13px;
+}
+html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover{
+  background: color-mix(in srgb, var(--rj-brand) 14%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 26%, transparent) !important;
+}
+
+/* 下拉文字的阴影去掉：亮玻璃上深色字本身够，加影子发脏 */
+html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a{
+  text-shadow: none !important;
+}
+
+/* ==========================================================================
+   6. 搜索弹窗
+   ========================================================================== */
+html .search-dialog{
+  background:
+    radial-gradient(120% 100% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 20%, transparent) 0%,
+      transparent 60%),
+    color-mix(in srgb, var(--rjp-white) 9%, transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(150%) !important;
+
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 36%, transparent) !important;
+  border-radius: 24px !important;
+  box-shadow:
+    0 24px 70px var(--rj-shadow-2, rgba(0, 0, 0, .3)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 30%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 50%, transparent) !important;
+}
+
+/* 搜索输入框：玻璃里的玻璃，用半透明白描边区分层级 */
+html .search-dialog .local-search-box input{
+  background: color-mix(in srgb, var(--rjp-white) 14%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 35%, transparent) !important;
+}
+
+/* 搜索结果项 hover */
+html .search-dialog .local-search__hit-item:hover{
+  background: color-mix(in srgb, var(--rjp-white) 12%, transparent);
+  border-radius: 12px;
+}
+
+/* ==========================================================================
+   7. 移动端侧滑菜单
+   ========================================================================== */
+html #sidebar-menus,
+html #sidebar #sidebar-menus{
+  background:
+    radial-gradient(120% 100% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 16%, transparent) 0%,
+      transparent 60%),
+    color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) !important;
+
+  border-left: 1px solid color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
+  box-shadow:
+    -12px 0 40px var(--rj-shadow-2, rgba(0, 0, 0, .25)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 22%, transparent) !important;
+}
+
+/* 遮罩层：玻璃下不需要那么黑，压到 45% 让壁纸透出来 */
+html #sidebar #menu-mask{
+  background: color-mix(in srgb, var(--rj-ink-900) 45%, transparent) !important;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* ==========================================================================
+   8. 音乐播放列表
+   ========================================================================== */
+html .aplayer .aplayer-list{
+  background:
+    radial-gradient(120% 100% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 16%, transparent) 0%,
+      transparent 60%),
+    color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
+
+  backdrop-filter: blur(40px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(140%) !important;
+
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
+  box-shadow:
+    0 12px 34px var(--rj-shadow-2, rgba(0, 0, 0, .22)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 24%, transparent) !important;
+}
+
+/* ==========================================================================
+   9. 其它浮层
+   ========================================================================== */
+html .fancybox-navigation .fancybox-button,
+html .fancybox-toolbar .fancybox-button{
+  background: color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 28%, transparent) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+/* ==========================================================================
+   10. 浅色模式补偿
+   --------------------------------------------------------------------------
+   浅色模式下壁纸仍可能是深色，「白色玻璃」会显得过亮。
+   参考图里的浅色玻璃是「乳白通透」，这里把白度提一档、字改深墨。
+   ========================================================================== */
+[data-theme='light']{
+  --rj-glass-white: 14%;
+  --rj-glass-corner: 30%;
+  --rj-glass-line: 78%;
+  --rj-glass-glow: 30%;
+}
+
+[data-theme='light'] html #nav #menus,
+[data-theme='light'] html #nav #blog_name,
+[data-theme='light'] html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu),
+[data-theme='light'] html #nav .menus_items .menus_item .menus_item_child.rj-qr-menu,
+[data-theme='light'] html .search-dialog,
+[data-theme='light'] html #sidebar-menus,
+[data-theme='light'] html #sidebar #sidebar-menus,
+[data-theme='light'] html .aplayer .aplayer-list{
+  background:
+    radial-gradient(120% 120% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 42%, transparent) 0%,
+      transparent 62%),
+    color-mix(in srgb, var(--rjp-white) 26%, transparent) !important;
+  border-color: color-mix(in srgb, var(--rjp-white) 85%, transparent) !important;
+}
+
+/* 浅色模式下这些浮层上的字改深墨（原先是浅色字，白玻璃上会糊） */
+[data-theme='light'] #nav #menus .site-page,
+[data-theme='light'] #nav .menus_item_child .site-page,
+[data-theme='light'] .search-dialog .search-dialog-title,
+[data-theme='light'] .search-dialog .local-search__hit-item a,
+[data-theme='light'] #sidebar-menus .site-page,
+[data-theme='light'] .aplayer .aplayer-list .aplayer-list-title{
+  color: var(--rj-ink-900) !important;
+  text-shadow: none !important;
+}
+
+/* ==========================================================================
+   11. 降级
+   ========================================================================== */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  html #recent-posts > .recent-post-item,
+  html #aside-content .card-widget,
+  html #nav #menus,
+  html #nav #blog_name,
+  html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu),
+  html .search-dialog,
+  html #sidebar-menus,
+html #sidebar #sidebar-menus{
+    background: var(--rj-surface-solid, #1b1b1f) !important;
+  }
+}
+
+/* 用户要求降低透明度：整体回落实色，不再做玻璃 */
+@media (prefers-reduced-transparency: reduce){
+  html #recent-posts > .recent-post-item,
+  html #aside-content .card-widget,
+  html #nav #menus,
+  html #nav #blog_name,
+  html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu),
+  html .search-dialog,
+  html #sidebar-menus,
+html #sidebar #sidebar-menus{
+    background: var(--rj-surface-solid, #1b1b1f) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ==========================================================================
+   12. 暗背景补偿（关键）
+   --------------------------------------------------------------------------
+   复刻档材质是「白 5% + 88px 模糊」。壁纸本身很暗时（站点首页封面是近黑图），
+   玻璃会几乎完全消失 —— 只剩一圈白线，看起来像「没有材质」。
+   解决：叠一层极淡的白色「自发光」，让玻璃在暗处也能被看见。
+   这层是加法不是减法，不破坏「无暗膜」原则。
+   ========================================================================== */
+html #recent-posts > .recent-post-item,
+html #aside-content .card-widget,
+html #nav #menus,
+html #nav #blog_name,
+html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu),
+html #nav .menus_items .menus_item .menus_item_child.rj-qr-menu,
+html .search-dialog,
+html #sidebar #sidebar-menus,
+html .aplayer .aplayer-list{
+  /* 在已有 background 之上再叠一层径向自发光，中心偏左上，模拟顶光 */
+  background-image:
+    radial-gradient(140% 120% at 22% -10%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.85), transparent) 0%,
+      transparent 62%),
+    radial-gradient(100% 90% at 92% 108%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.55), transparent) 0%,
+      transparent 58%) !important;
+}
+
+/* ==========================================================================
+   13. 主列卡片文字托底
+   --------------------------------------------------------------------------
+   侧栏已用「窄条 scrim」托底文字，主列卡片此前没做 —— 标题压在亮玻璃上
+   在壁纸亮区会糊。这里对齐同一套做法，只染文字块，不污染整块玻璃。
+   ========================================================================== */
+html #recent-posts > .recent-post-item .post-info,
+html #recent-posts > .recent-post-item .content{
+  position: relative;
+}
+html #recent-posts > .recent-post-item .post-info::before,
+html #recent-posts > .recent-post-item .content::before{
+  content: '';
+  position: absolute;
+  inset: -10px -14px;
+  z-index: -1;
+  border-radius: 12px;
+  background: radial-gradient(120% 140% at 50% 50%,
+    color-mix(in srgb, var(--rj-ink-900) var(--rj-glass-scrim), transparent) 0%,
+    color-mix(in srgb, var(--rj-ink-900) calc(var(--rj-glass-scrim) * 0.45), transparent) 55%,
+    transparent 100%);
+  filter: blur(8px);
+  pointer-events: none;
+}
+[data-theme='light'] html #recent-posts > .recent-post-item .post-info::before,
+[data-theme='light'] html #recent-posts > .recent-post-item .content::before{
+  background: radial-gradient(120% 140% at 50% 50%,
+    color-mix(in srgb, var(--rjp-white) 55%, transparent) 0%,
+    color-mix(in srgb, var(--rjp-white) 28%, transparent) 55%,
+    transparent 100%);
+}
+
+/* 移动端侧滑菜单：背后常是纯黑封面，单独再加一层自发光，否则玻璃等于消失 */
+html #sidebar-menus,
+html #sidebar #sidebar-menus{
+  background-image:
+    radial-gradient(120% 90% at 25% 0%,
+      color-mix(in srgb, var(--rjp-white) 26%, transparent) 0%,
+      transparent 62%),
+    radial-gradient(90% 70% at 90% 110%,
+      color-mix(in srgb, var(--rjp-white) 16%, transparent) 0%,
+      transparent 60%) !important;
+  background-color: color-mix(in srgb, var(--rjp-white) 11%, transparent) !important;
+}
+
+/* ==========================================================================
+   14. 404 卡片
+   --------------------------------------------------------------------------
+   .error-content 是站点自带的深色实心块（rgba(19,23,40,.62)），
+   .error-img 是一个紫色占位块（插画未加载时露出 rgba(120,47,216,.7)）。
+   一并换成玻璃，紫色占位改成透明玻璃格。
+   ========================================================================== */
+html #error-wrap .error-content{
+  background:
+    radial-gradient(120% 100% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 18%, transparent) 0%,
+      transparent 62%),
+    color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
+  backdrop-filter: blur(48px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(140%) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 32%, transparent) !important;
+  border-radius: 20px !important;
+  box-shadow:
+    0 12px 34px var(--rj-shadow-2, rgba(0, 0, 0, .2)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 26%, transparent) !important;
+  overflow: hidden;
+}
+html #error-wrap .error-content .error-img,
+html #error-wrap .error-content .error-img > div{
+  background: color-mix(in srgb, var(--rjp-white) 8%, transparent) !important;
+}
+
+/* .error-img 的紫色来自其内层 .loading 占位动画，一并透明化 */
+html #error-wrap .error-content .error-img.loading,
+html #error-wrap .error-content .error-img > .loading,
+html #error-wrap .error-content .error-img[class*="loading"]{
+  background: color-mix(in srgb, var(--rjp-white) 8%, transparent) !important;
+  box-shadow: none !important;
+}
+html #error-wrap .error-content .error-img::before,
+html #error-wrap .error-content .error-img::after{
+  background: none !important;
+}
+
+/* ==========================================================================
+   15. 正文容器（长文阅读，需要更实的底）
+   --------------------------------------------------------------------------
+   亮玻璃适合「小面积、短信息」的卡片；正文是几千字的连续阅读，
+   背景太透会让文字不断跟壁纸星点争夺注意力（实测观感明显变差）。
+   这里单独把正文容器压回「薄玻璃」：降低白度、加大虚化、加一层淡底。
+   这不是风格不统一，而是同一材质在不同信息密度下的合理厚度差 ——
+   iOS 的 Thick/Regular/Thin 三档就是这个逻辑。
+   ========================================================================== */
+html #recent-posts > .recent-post-item > .post-content,
+html .layout_post #article-container,
+html #article-container.post-content{
+  position: relative;
+}
+html .layout_post #article-container::before,
+html #article-container.post-content::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--rj-ink-900) 22%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+[data-theme='light'] html .layout_post #article-container::before,
+[data-theme='light'] html #article-container.post-content::before{
+  background: color-mix(in srgb, var(--rjp-white) 55%, transparent);
+}
+
+/* 正文排版：亮底上加点字重和行高，长文更耐读 */
+html .layout_post #article-container{
+  line-height: 1.85;
+}
