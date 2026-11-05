@@ -452,3 +452,26 @@ html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.announcemen
     color-mix(in srgb, var(--rjp-white) 22%, transparent) 55%,
     transparent 100%);
 }
+
+/* ==========================================================================
+   11. 复刻档内的「内嵌小面板」适配
+   --------------------------------------------------------------------------
+   亮玻璃上再压深色实心块，观感像脏了。按参考图的做法，
+   内嵌面板改成半透明白 + 细白边（控制中心里的按钮就是这个逻辑）。
+   目前站内受影响的是 .rj-qe-item（快捷入口按钮）。
+   ========================================================================== */
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.rj-qe-item){
+  background: color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 26%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 30%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background .2s ease;
+}
+html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.rj-qe-item):hover{
+  background: color-mix(in srgb, var(--rjp-white) 20%, transparent) !important;
+}
+[data-theme='light'] html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.rj-qe-item){
+  background: color-mix(in srgb, var(--rjp-white) 45%, transparent) !important;
+  border-color: color-mix(in srgb, var(--rj-ink-900) 12%, transparent);
+}
