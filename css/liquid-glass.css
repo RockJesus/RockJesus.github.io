@@ -1,6 +1,6 @@
 /* ==========================================================================
    RockJesus.cn — Liquid Glass 侧边栏卡片材质
-   version: 1.0.0 · 2026-11-05
+   version: 1.1.0 · 2026-11-06
    --------------------------------------------------------------------------
    首版定型。两个档位：
      · 默认（.rj-lg）        均衡档 —— 暗玻璃、通过 WCAG AA
@@ -474,4 +474,31 @@ html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.rj-qe-item)
 [data-theme='light'] html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.rj-qe-item){
   background: color-mix(in srgb, var(--rjp-white) 45%, transparent) !important;
   border-color: color-mix(in srgb, var(--rj-ink-900) 12%, transparent);
+}
+
+/* ==========================================================================
+   v1.1.0 · 主列文章卡片光斑（注入覆盖层）
+   --------------------------------------------------------------------------
+   主列卡片的 ::before/::after 已被 global.css 占用（亮线/暗补偿），
+   光斑改由 JS 注入的 .rj-lg-spot-host 承载：absolute 铺满卡片、
+   pointer-events:none，本体带 .rj-lg--spot，光斑画在它自己的 ::after 上。
+   显隐由「卡片 hover」驱动（host 自身永远收不到 hover）。 */
+.rj-lg-spot-host{
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+  display: block;
+}
+#recent-posts > .recent-post-item:hover > .rj-lg-spot-host::after,
+#recent-posts > .recent-post-item:focus-within > .rj-lg-spot-host::after{
+  opacity: 1;
+}
+@media (hover: none){
+  /* 触屏没有悬停：与侧栏同策略，光斑常驻但压暗，避免「永远不出现」 */
+  #recent-posts > .recent-post-item > .rj-lg-spot-host::after{
+    opacity: .35;
+  }
 }

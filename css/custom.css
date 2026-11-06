@@ -6867,3 +6867,81 @@ hr.hr-line-dashed,
   background: rgba(255, 255, 255, 0.55);
   border-color: rgba(255, 255, 255, 0.7);
 }
+
+/* ============================================================
+   21. 微交互层 · 弹性入场与触感反馈（2026-11-06）
+   思路：全站「浮起来的东西」统一一套 spring 入场 ——
+        轻微缩小 + 下坠 8px 起步，回弹曲线收尾，
+        替换主题原生的 ease 上移（观感差异：起手快、落点带一点惯性）。
+   全部走 transform/opacity，动画属性不触发布局；
+   prefers-reduced-motion 下整段失效（见文件末尾统一降级）。
+   ============================================================ */
+@keyframes rj-spring-in {
+  /* 透明度早于位移收敛（60% 处已不透明），否则回弹段看起来像「卡住不动」；
+     位移在 100% 轻微过冲再落位，是「高级感」的来源，但不能过冲太多，
+     否则文字会在落位瞬间轻微抖动。 */
+  0%   { opacity: 0; transform: translateY(8px) scale(.965); }
+  45%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* ① 导航下拉面板（覆盖主题 sub_menus 的 ease 上移） */
+#nav .menus_items .menus_item .menus_item_child,
+#nav .menus_items .menus_item .menus_item_child.rj-qr-menu{
+  animation: rj-spring-in .34s cubic-bezier(.34, 1.4, .64, 1) both;
+  transform-origin: top center;
+  will-change: transform, opacity;
+}
+/* 扫码菜单另有一条 `:hover ... .menus_item_child.rj-qr-menu { animation: rjQrIn }`
+   （第 2763 行，带 :hover、特异性更高），必须同特异性才压得住 —— 实测不加就仍走旧动画。 */
+#nav .menus_items .menus_item:hover .menus_item_child.rj-qr-menu,
+#sidebar-menus .menus_items .menus_item:hover .menus_item_child.rj-qr-menu{
+  animation: rj-spring-in .34s cubic-bezier(.34, 1.4, .64, 1) both;
+}
+
+/* ② 搜索弹窗（display 切换时 animation 自动重放） */
+.search-dialog{
+  animation: rj-spring-in .38s cubic-bezier(.34, 1.4, .64, 1) both;
+}
+
+/* ③ 打赏弹层（站点自定义的 .rj-reward / 主题 reward 容器） */
+#post #reward .reward-main,
+.rj-qr-menu .menus_item_child{
+  animation: rj-spring-in .34s cubic-bezier(.34, 1.4, .64, 1) both;
+  transform-origin: top center;
+}
+
+/* ④ 玻璃语言的联动细节：卡片悬停时，边缘细白线与内发光同步增亮，
+   让「光斑扫过」时玻璃的受光面是一体的，而不是光斑单打独斗 */
+#recent-posts > .recent-post-item,
+#aside-content .card-widget{
+  transition:
+    transform .3s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .45s ease,
+    border-color .3s ease;
+}
+#recent-posts > .recent-post-item:hover,
+#aside-content .card-widget:hover{
+  box-shadow:
+    0 12px 36px var(--rj-shadow-2, rgba(0, 0, 0, .2)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 72%, transparent),
+    inset 0 0 32px color-mix(in srgb, var(--rjp-white) 24%, transparent);
+}
+
+/* ⑤ 可按压的玻璃元素统一「按下去」的手感（右下按钮列已有，补齐其余） */
+#card-info-btn:active,
+.btn-beautify a:active,
+.buttons a:active,
+#pagination .page-number:active{
+  transform: scale(.94);
+  transition-duration: .08s;
+}
+
+@media (prefers-reduced-motion: reduce){
+  #nav .menus_items .menus_item .menus_item_child,
+  .search-dialog,
+  #post #reward .reward-main,
+  .rj-qr-menu .menus_item_child{
+    animation: none;
+  }
+}

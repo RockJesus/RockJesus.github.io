@@ -1,6 +1,6 @@
 /* ==========================================================================
    RockJesus.cn — Liquid Glass
-   version: 1.0.0 · 2026-11-05
+   version: 1.1.0 · 2026-11-06
    --------------------------------------------------------------------------
    职责单一：给 .rj-lg--spot 写入 --mx/--my，驱动跟随光标的高光斑；
    可选地给 .rj-lg--adapt 采样壁纸亮度（默认关闭）。
@@ -163,7 +163,59 @@
 
   /* ---------- 入口 ---------- */
 
+  /* ---------- 4. 主列文章卡片光斑（v1.1.0） ----------
+   * 侧栏卡的光斑直接挂在卡片上（.rj-lg--spot 的 ::after），
+   * 但主列卡片的 ::before/::after 已被 liquid-glass-global.css 占用
+   * （::before 亮线 / ::after 暗补偿），不能再走伪元素。
+   * 做法：往卡片里注入一层 .rj-lg-spot-host（absolute 铺满卡片、
+   * pointer-events:none），它自己带 .rj-lg--spot，光斑写在它的 ::after 上；
+   * 坐标事件仍挂在卡片上（手指在卡片任何位置都算），写入 host 的 --mx/--my。
+   * hover 显隐不能靠 host 自己的 :hover（它 pointer-events:none 永远不 hover），
+   * 由 CSS 的「卡片:hover → host::after 显示」规则完成，见 liquid-glass.css。
+   * pjax 后由 scan() 重新注入（幂等：已有 host 就跳过）。 */
+  var MAIN_CARD = '#recent-posts > .recent-post-item';
+
+  function armMainSpots() {
+    if (!finePointer) return;
+    var cards = document.querySelectorAll(MAIN_CARD);
+    for (var i = 0; i < cards.length; i++) (function (card) {
+      if (card.querySelector(':scope > .rj-lg-spot-host')) return;
+      var host = document.createElement('span');
+      host.className = 'rj-lg-spot-host rj-lg--spot';
+      host.setAttribute('aria-hidden', 'true');
+      card.appendChild(host);
+
+      var rect = null, pending = false, lx = 0, ly = 0;
+      function apply() {
+        pending = false;
+        if (!rect) return;
+        var x = ((lx - rect.left) / rect.width) * 100;
+        var y = ((ly - rect.top) / rect.height) * 100;
+        x = x < 0 ? 0 : x > 100 ? 100 : x;
+        y = y < 0 ? 0 : y > 100 ? 100 : y;
+        host.style.setProperty('--mx', x.toFixed(2) + '%');
+        host.style.setProperty('--my', y.toFixed(2) + '%');
+      }
+      card.addEventListener('pointerenter', function () {
+        rect = card.getBoundingClientRect();
+      }, { passive: true });
+      card.addEventListener('pointermove', function (e) {
+        lx = e.clientX; ly = e.clientY;
+        if (!rect) rect = card.getBoundingClientRect();
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(apply);
+      }, { passive: true });
+      card.addEventListener('pointerleave', function () {
+        rect = null;
+        host.style.removeProperty('--mx');
+        host.style.removeProperty('--my');
+      }, { passive: true });
+    })(cards[i]);
+  }
+
   function scan() {
+    armMainSpots();
     if (finePointer) {
       var spots = document.querySelectorAll(SPOT);
       for (var j = 0; j < spots.length; j++) initSpot(spots[j]);
