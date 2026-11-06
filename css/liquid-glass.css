@@ -85,7 +85,7 @@ html #aside-content .card-widget.card-widget.rj-lg,
     /* 玻璃上缘的高光（最亮的一条） */
     inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 42%, transparent),
     /* 四边内阴影 = 玻璃厚度 */
-    inset 0 0 18px color-mix(in srgb, var(--rj-ink-900) 40%, transparent),
+    inset 0 0 18px color-mix(in srgb, var(--rjp-ink-900) 40%, transparent),
     /* 下缘反光 */
     inset 0 -1px 0 color-mix(in srgb, var(--rjp-white) 14%, transparent),
     inset 1px 0 0 color-mix(in srgb, var(--rjp-white) 16%, transparent),
@@ -119,9 +119,9 @@ html #aside-content .card-widget.card-widget.rj-lg a:hover{
    把文字从亮底上「托」出来。Apple 在控制中心等毛玻璃场景同款手法。 */
 html #aside-content .card-widget.card-widget.rj-lg :is(.item-headline, p, li, .announcement, .webinfo, a){
   text-shadow:
-    0 1px 3px  color-mix(in srgb, var(--rj-ink-900) 85%, transparent),
-    0 2px 14px color-mix(in srgb, var(--rj-ink-900) 80%, transparent),
-    0 0 22px  color-mix(in srgb, var(--rj-ink-900) 55%, transparent);
+    0 1px 3px  color-mix(in srgb, var(--rjp-ink-900) 85%, transparent),
+    0 2px 14px color-mix(in srgb, var(--rjp-ink-900) 80%, transparent),
+    0 0 22px  color-mix(in srgb, var(--rjp-ink-900) 55%, transparent);
 }
 [data-theme='light'] #aside-content .card-widget.rj-lg :is(.item-headline, p, li, .announcement, .webinfo, a){
   text-shadow:
@@ -404,7 +404,7 @@ html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.item-headli
     color-mix(in srgb, var(--rjp-white) 14%, transparent);
 
   box-shadow:
-    0 8px 32px color-mix(in srgb, var(--rj-ink-900) 12%, transparent),
+    0 8px 32px color-mix(in srgb, var(--rjp-ink-900) 12%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 78%, transparent),
     inset 0 0 24px color-mix(in srgb, var(--rjp-white) 32%, transparent);
 }
@@ -417,7 +417,7 @@ html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.item-headli
 /* 复刻档 · 浅色主题文字：乳白玻璃上必须换深墨，否则浅灰字直接糊掉 */
 [data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra :is(.item-headline, p, li, .announcement, .webinfo, .webinfo-item, span, a),
 [data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra .card-list a{
-  color: color-mix(in srgb, var(--rj-ink-900) 92%, transparent) !important;
+  color: color-mix(in srgb, var(--rjp-ink-900) 92%, transparent) !important;
   /* 白字影在深壁纸透上来时会形成灰边脏字，浅色档直接不要字影 */
   text-shadow: none !important;
 }
@@ -440,8 +440,8 @@ html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.announcemen
   z-index: -1;
   border-radius: 10px;
   background: radial-gradient(120% 140% at 50% 50%,
-    color-mix(in srgb, var(--rj-ink-900) 26%, transparent) 0%,
-    color-mix(in srgb, var(--rj-ink-900) 12%, transparent) 55%,
+    color-mix(in srgb, var(--rjp-ink-900) 26%, transparent) 0%,
+    color-mix(in srgb, var(--rjp-ink-900) 12%, transparent) 55%,
     transparent 100%);
   filter: blur(6px);
   pointer-events: none;
@@ -473,7 +473,7 @@ html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.rj-qe-item)
 }
 [data-theme='light'] html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.rj-qe-item){
   background: color-mix(in srgb, var(--rjp-white) 45%, transparent) !important;
-  border-color: color-mix(in srgb, var(--rj-ink-900) 12%, transparent);
+  border-color: color-mix(in srgb, var(--rjp-ink-900) 12%, transparent);
 }
 
 /* ==========================================================================
