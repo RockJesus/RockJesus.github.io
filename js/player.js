@@ -7,7 +7,7 @@
   // 仍返回旧歌单，而它恰恰响应最快（~250ms）——只要前一个源慢一点，它就会
   // 抢先返回旧数据，表现成「列表又变回 30 首」。宁可少一个兜底，也不要错数据。
   var PLAYLIST_URLS = [
-    '/data/playlist.json?v=1.7.0',                                            // 本站构建产物（主，已剔除无直链曲目）
+    '/data/playlist.json?v=1.7.1',                                            // 本站构建产物（主，已剔除无直链曲目）
     'https://raw.githubusercontent.com/rockjesus/rockjesus/main/music/playlist.json'  // 素材仓直连（兜底）
   ];
   var SEED = {
@@ -1698,7 +1698,11 @@
    * 现在前端不再持有 token，改为请求同域 /api/stats，由 Cloudflare Worker 代持密钥。
    * 旧实现（本地增量 + 直接写 Upstash）用本地开关放行，方便回滚，验证稳定后删除。
    */
-  var STATS_API = '/api/stats';
+  // 2026-11-07 统计代理改由 Deno Deploy 托管（rockjesus.cn 是 GitHub Pages，无法自带 /api/stats）。
+  // 本地 hexo s / 静态预览仍走同域（stats-api 的 ALLOWED_ORIGINS 默认只含线上域名）。
+  var STATS_API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? '/api/stats'
+    : 'https://hot-emu-9529.rockjesus.deno.net/api/stats';
   var USE_LEGACY_UPSTASH = false;
   var UPSTASH_URL = 'https://tight-wren-137459.upstash.io';
   var UPSTASH_TOKEN = '';   // 已移除，勿再写入
