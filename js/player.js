@@ -2302,21 +2302,37 @@
   function rjStats() {
     ensurePagePv();
     var failed = function (id) { rjFill(id, '—'); };
-    // 文章阅读量：按路径 +1（卡片内旧的本站访客数/总访问量已下线，仅保留地球分布）
+    // 文章阅读量：同一会话内每篇只计一次，之后只读。
+    // 原来只靠 rjPvPath 做「同一页不重复计」，但刷新一次、从目录再点进来一次
+    // 都会重新 +1（pjax 会重置 rjPvPath），阅读量涨得比真实读者快。
+    // 用 sessionStorage 按路径记已计过的，刷新/站内往返都不再写。
     if (document.getElementById('rj-page-pv')) {
       var path = location.pathname;
-      var pkey = 'pv_' + encodeURIComponent(path);
-      if (rjPvPath !== path) {
-        rjPvPath = path;
-        rjUpstash(pkey, true)
-          .then(function (n) { rjFill('rj-page-pv', rjFmt(n)); })
-          .catch(function () { failed('rj-page-pv'); });
-      } else {
-        rjUpstash(pkey, false)
-          .then(function (n) { rjFill('rj-page-pv', rjFmt(n)); })
-          .catch(function () { failed('rj-page-pv'); });
+      var counted = false;
+      try { counted = sessionStorage.getItem('rj_pv_' + path) === '1'; } catch (e) {}
+      var needIncr = !counted;
+      if (needIncr) {
+        try { sessionStorage.setItem('rj_pv_' + path, '1'); } catch (e) {}
       }
+      // 计数模式：首次进入本页 → 服务端 +1 并返回最新值；
+      // 之后进入 → 只读，避免重复计数。
+      rjPvPath = path;
+      readPagePv(path, needIncr)
+        .then(function (n) { rjFill('rj-page-pv', rjFmt(n)); })
+        .catch(function () { failed('rj-page-pv'); });
     }
+  }
+  /* 单一入口：incr 时带 pv=<path>，只读时带 pv=<path>&only=1。
+   * 返回 { pv: { "<path>": n } }，取 d.pv[path]。 */
+  function readPagePv(path, incr) {
+    var qs = 'pv=' + encodeURIComponent(path) + (incr ? '' : '&only=1');
+    return fetch(STATS_API + '?' + qs, { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('stats'); return r.json(); })
+      .then(function (d) {
+        var n = d && d.pv && parseInt(d.pv[path], 10);
+        if (!(n >= 0)) throw new Error('value');
+        return n;
+      });
   }
 
   // —— 组装执行 ——

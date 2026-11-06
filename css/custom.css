@@ -1166,6 +1166,8 @@ img {
     left: 16px !important;
     right: auto !important;
     bottom: 16px !important;
+    /* 折叠态容器与圆盘同为 58×58，展开态才占满 calc(100vw - 32px)。
+       宽度不能按折叠态写死，详见本块末尾「移动端播放器遮挡」。 */
     width: calc(100vw - 32px) !important;   /* AA.css 把容器钉成 left/right:0，这里改回留边（左右各 16） */
     max-width: none;
     /* 移动端看板娘固定在左下（z-index 99999），会把播放器整块盖住；AA.css 后加载需要 !important */
@@ -1218,6 +1220,50 @@ img {
   }
   .aplayer .aplayer-list {
     border-radius: 0 0 16px 16px;
+  }
+
+  /* ---------- 移动端播放器遮挡（2026-11-06） ----------
+     现象：折叠态圆盘只有 58px（容器同为 58×58），但 .aplayer-lrc 歌词条是
+     left:0/right:0 横贯整个屏宽的一条（实测 390×30，紧贴在圆盘下方、底部 10px 处）。
+     它只有半透明背景、看不见边界，却实实在在地压在正文上：滚动到任意位置，
+     都有一段正文文字被这条歌词盖住，手机上还会跟着音乐反复横跳。
+
+     修法两层：
+     ① 命中区跟着视觉走：折叠态容器与歌词条 pointer-events:none，
+        只把事件还给圆盘本体 —— 圆盘外的空白恢复为可点选、可长按选中正文。
+     ② 歌词条降噪：折叠态压到 55% 不透明度；展开态恢复不透明并重新可交互。
+        它本来是给「展开态」配的，折叠态下那行滚动歌词属于视觉噪音而非信息。 */
+  .aplayer.aplayer-fixed.rj-pl-collapsed,
+  .aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-lrc {
+    pointer-events: none !important;
+  }
+  .aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-body {
+    pointer-events: auto !important;
+    opacity: .82;
+    transition: opacity .25s ease, transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-lrc {
+    opacity: .55;
+    transition: opacity .3s ease;
+  }
+  /* 静止时让路、触摸/聚焦时归位：手机上正文左右只有 21px 内边距，
+     容纳不下 58px 的圆盘，靠透明度把「谁该退让」的主动权交回读者 */
+  .aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-body:hover,
+  .aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-body:active,
+  .aplayer.aplayer-fixed.rj-pl-collapsed .aplayer-body:focus-within {
+    opacity: 1;
+  }
+  /* 贴边停靠：left 16 → 8，圆盘左缘几乎贴住屏沿 */
+  .aplayer.aplayer-fixed.rj-pl-collapsed {
+    left: 8px !important;
+  }
+  /* 展开态完整可交互，歌词条恢复信息职责 */
+  .aplayer.aplayer-fixed:not(.rj-pl-collapsed),
+  .aplayer.aplayer-fixed:not(.rj-pl-collapsed) .aplayer-lrc {
+    pointer-events: auto !important;
+  }
+  .aplayer.aplayer-fixed:not(.rj-pl-collapsed) .aplayer-lrc {
+    opacity: 1;
   }
 }
 
@@ -1547,6 +1593,77 @@ img {
 }
 #article-container table tbody tr:hover td {
   background: color-mix(in srgb, var(--rj-brand) 10%, transparent);
+}
+
+/* ---------- 6b. 移动端长内容溢出（2026-11-06） ----------
+   现象：手机上 /qa/ 页面横向可滚动 350px，整页被撑宽、右侧露出一条空白。
+   根因有三处，都发生在「内容比容器宽，但没有可滚动的边界」：
+     ① 表格单元格里的 <pre>（EDID 那串几百位十六进制）实测撑出 2124px，
+        表格宽度 100% 也压不住 —— 有 min-width:auto 的内容会把列顶开；
+     ② 正文里 bash 长命令的 <code> 是不可断行的行内盒，宽 701px；
+     ③ 表格本身在窄屏下没有横向滚动区。
+   处理原则：让「宽」留在组件内部消化（自己滚），不要把整页撑破。
+   —— 表格外层包一层滚动、单元格内的 pre 自己滚、长字符串允许断行。 */
+@media screen and (max-width: 768px) {
+  /* ③ 表格：整表可横向滚动，而不是顶破页面。
+     注意用 block 后 thead/tbody 仍是表格盒，单元格里的超长 <pre>
+     依然会把 tbody 计算宽度撑到 2000px+（overflow 只在 table 这一层生效，
+     但 tbody 的宽度是由内容算出来的，滚动区能跟着走）。
+     为稳妥起见，tbody 也允许独立横向滚动。 */
+  #article-container table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #article-container table thead,
+  #article-container table tbody {
+    display: table;
+    width: 100%;
+    table-layout: auto;
+  }
+  #article-container table tbody {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  #article-container table thead th,
+  #article-container table tbody td {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+  /* ① 单元格里的 <pre>：限制成「父级可见宽度」，不参与撑开列宽 */
+  #article-container table td pre {
+    width: 100%;
+    max-width: min(100%, 70vw);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #article-container table td pre code {
+    white-space: pre;
+    word-break: normal;
+    display: inline-block;
+  }
+  /* ② 行内 code：长命令/长路径允许在任意位置断行，避免整段被推出屏外 */
+  #article-container p code,
+  #article-container li code,
+  #article-container blockquote code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+  /* 代码块本体保持可横向滚动（部分长行无法断） */
+  #article-container figure.highlight,
+  #article-container pre {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* 正文卡片与外层容器：兜一层，任何漏网的长内容都不会把整页撑宽 */
+  #post, #article-container, #content-inner, #recent-posts {
+    max-width: 100%;
+    overflow-x: clip;
+  }
 }
 
 /* ---------- 7. 引用块：玻璃提示卡（老文章大量用它当段落） ---------- */
