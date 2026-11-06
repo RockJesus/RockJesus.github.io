@@ -6945,3 +6945,35 @@ hr.hr-line-dashed,
     animation: none;
   }
 }
+
+/* ============================================================
+   22. 排印精修（2026-11-06）
+   前两项在 Windows / 移动端差异最明显，属于「说不出哪里变了但就是更顺」的级别。
+   ============================================================ */
+
+/* ① 光学校正 + 合成禁用
+   font-optical-sizing 让 SF/Segoe 在标题字号下自动换用 Display 光学尺寸（笔画更细腻）；
+   font-synthesis:none 禁止浏览器「伪造」粗体/斜体 —— 中文字体没有真粗体时，
+   Chrome 会用描边伪加粗，边缘发虚，这是「文字看起来不够锐」的常见元凶。 */
+html body{
+  font-optical-sizing: auto;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ② 标题断行：balance 让多行标题各行长度接近，避免最后一行只剩一两个字
+   （中文标题尤其明显，「外星人黑苹果」单独掉到第二行很难看） */
+#article-container h1,
+#article-container h2,
+#article-container h3,
+#post-info .post-title,
+#recent-posts .recent-post-info > .article-title{
+  text-wrap: balance;
+}
+
+/* ③ 引用块与列表：中英混排时给数字/标点留一点呼吸 */
+#article-container blockquote p:last-child,
+#article-container li p:last-child{
+  margin-bottom: 0;
+}
