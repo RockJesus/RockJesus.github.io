@@ -1,6 +1,6 @@
 /* ==========================================================================
    RockJesus.cn — Liquid Glass 全站材质统一
-   version: 1.2.1 · 2026-11-06
+   version: 1.3.0 · 2026-11-07（页脚 + 正文内元素 + 令牌名修复）
    --------------------------------------------------------------------------
    把 liquid-glass.css 里验证过的「复刻档」材质，抽象成一组 --rj-glass-*
    令牌，统一应用到站点所有「浮起来的表面」：
@@ -133,7 +133,7 @@ html #nav #blog_name{
 /* 导航文字：亮玻璃上原浅色字会糊，统一加深色字影 */
 html #nav #menus .site-page,
 html #nav #blog_name .blog-title{
-  text-shadow: 0 1px 2px color-mix(in srgb, var(--rj-ink-900) 55%, transparent);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--rjp-ink-900) 55%, transparent);
 }
 
 /* ==========================================================================
@@ -231,7 +231,7 @@ html #sidebar #sidebar-menus{
 
 /* 遮罩层：玻璃下不需要那么黑，压到 45% 让壁纸透出来 */
 html #sidebar #menu-mask{
-  background: color-mix(in srgb, var(--rj-ink-900) 45%, transparent) !important;
+  background: color-mix(in srgb, var(--rjp-ink-900) 45%, transparent) !important;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
@@ -302,7 +302,7 @@ html .fancybox-toolbar .fancybox-button{
 [data-theme='light'] .search-dialog .local-search__hit-item a,
 [data-theme='light'] #sidebar-menus .site-page,
 [data-theme='light'] .aplayer .aplayer-list .aplayer-list-title{
-  color: var(--rj-ink-900) !important;
+  color: var(--rjp-ink-900) !important;
   text-shadow: none !important;
 }
 
@@ -383,8 +383,8 @@ html #recent-posts > .recent-post-item .content::before{
   z-index: -1;
   border-radius: 12px;
   background: radial-gradient(120% 140% at 50% 50%,
-    color-mix(in srgb, var(--rj-ink-900) var(--rj-glass-scrim), transparent) 0%,
-    color-mix(in srgb, var(--rj-ink-900) calc(var(--rj-glass-scrim) * 0.45), transparent) 55%,
+    color-mix(in srgb, var(--rjp-ink-900) var(--rj-glass-scrim), transparent) 0%,
+    color-mix(in srgb, var(--rjp-ink-900) calc(var(--rj-glass-scrim) * 0.45), transparent) 55%,
     transparent 100%);
   filter: blur(8px);
   pointer-events: none;
@@ -469,7 +469,7 @@ html #article-container.post-content::before{
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: color-mix(in srgb, var(--rj-ink-900) 22%, transparent);
+  background: color-mix(in srgb, var(--rjp-ink-900) 22%, transparent);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   pointer-events: none;
@@ -660,7 +660,7 @@ html #post-comment .comment-wrap{
 /* 输入区本身要比容器更「实」一点，否则光标与占位符在星点背景上难读 */
 html #post-comment .vwrap input,
 html #post-comment .vwrap textarea{
-  background: color-mix(in srgb, var(--rj-ink-900) 20%, transparent) !important;
+  background: color-mix(in srgb, var(--rjp-ink-900) 20%, transparent) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -699,4 +699,151 @@ html .pagination .page-number.current{
   box-shadow:
     0 6px 22px color-mix(in srgb, var(--rj-brand) 40%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 40%, transparent) !important;
+}
+
+/* ==========================================================================
+   16. 页脚（v1.3.0 · 2026-11-07）
+   --------------------------------------------------------------------------
+   站脚此前是 rgb(6,8,11) 近黑实底 + blur(12)，与全站亮玻璃断崖式割裂。
+   换成同族玻璃，但底比正文容器更薄 —— 页脚是「收尾」，不该抢视觉重量。
+
+   注意：页脚背后常是页面最底部的壁纸，可能很暗。沿用 §12 的暗背景补偿思路，
+   额外叠一层自发光，否则玻璃等于消失。
+   ========================================================================== */
+html #footer{
+  background:
+    radial-gradient(130% 120% at 22% -20%,
+      color-mix(in srgb, var(--rjp-white) 16%, transparent) 0%,
+      transparent 62%),
+    radial-gradient(100% 90% at 88% 120%,
+      color-mix(in srgb, var(--rjp-white) 10%, transparent) 0%,
+      transparent 58%),
+    color-mix(in srgb, var(--rjp-ink-900) 30%, transparent) !important;
+
+  backdrop-filter: blur(56px) saturate(125%) brightness(0.92) !important;
+  -webkit-backdrop-filter: blur(56px) saturate(125%) brightness(0.92) !important;
+
+  border: none !important;
+  border-top: 1px solid color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
+  box-shadow:
+    0 -1px 0 color-mix(in srgb, var(--rjp-white) 18%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 26%, transparent) !important;
+}
+
+/* 页脚内的分隔线与文字：亮底上原浅色字会糊，加深色字影 */
+html #footer .footer-links,
+html #footer .framework-info,
+html #footer .copyright,
+html #footer a{
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--rjp-ink-900) 55%, transparent);
+}
+html #footer .footer-links a{
+  color: color-mix(in srgb, var(--rjp-white) 90%, transparent) !important;
+}
+html #footer .footer-links a:hover{
+  color: var(--rjp-white) !important;
+}
+
+/* 页脚上方的分隔阴影（部分主题版本有）去掉，玻璃不需要造假的「台上台下」 */
+html #footer::before{
+  display: none !important;
+}
+
+/* 浅色模式：页脚改乳白，字改深墨 */
+[data-theme='light'] html #footer{
+  background:
+    radial-gradient(130% 120% at 22% -20%,
+      color-mix(in srgb, var(--rjp-white) 46%, transparent) 0%,
+      transparent 62%),
+    color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
+  border-top-color: color-mix(in srgb, var(--rjp-white) 88%, transparent) !important;
+}
+[data-theme='light'] html #footer .footer-links,
+[data-theme='light'] html #footer .framework-info,
+[data-theme='light'] html #footer .copyright,
+[data-theme='light'] html #footer a{
+  color: var(--rjp-ink-900) !important;
+  text-shadow: none !important;
+}
+
+/* 降级 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  html #footer{ background: var(--rj-surface-solid, #1b1b1f) !important; }
+}
+@media (prefers-reduced-transparency: reduce){
+  html #footer{
+    background: var(--rj-surface-solid, #1b1b1f) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ==========================================================================
+   17. 正文内元素（v1.3.0）
+   --------------------------------------------------------------------------
+   正文容器已经是亮玻璃，但内嵌的表格/代码/引用/标签页还是深色块，
+   看起来像「亮纸上贴了黑胶带」。统一改成「玻璃中的玻璃」：
+   半透明白底 + 细白边，层级比容器高半档。
+   ========================================================================== */
+/* 表格：文字是白字（站点默认），浅底会直接看不见 —— 实测 1.3:1。
+   与代码块同策略：给实一点的深底，保证结构化数据可读。 */
+html #article-container table{
+  background: color-mix(in srgb, var(--rjp-ink-900) 45%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 16%, transparent) !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+html #article-container table th,
+html #article-container table thead{
+  background: color-mix(in srgb, var(--rjp-ink-900) 30%, transparent) !important;
+}
+html #article-container table tr:hover,
+html #article-container table tbody tr:nth-child(2n){
+  background: color-mix(in srgb, var(--rjp-ink-900) 22%, transparent) !important;
+}
+
+/* 标签页：外壳用浅玻璃（里面装的是普通正文） */
+html #article-container .tabs > .nav-tabs,
+html #article-container .tabs > .tabs-content{
+  background: color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 18%, transparent) !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 标签页当前项：品牌紫保持，但改成半透明，不再是实心块 */
+html #article-container .tabs > .nav-tabs > .tab.active button{
+  background: color-mix(in srgb, var(--rj-brand) 18%, transparent) !important;
+  border-radius: 9px;
+}
+
+/* 引用块：左侧保留品牌竖线，底换成半透明白 */
+html #article-container blockquote{
+  background: color-mix(in srgb, var(--rjp-white) 5%, transparent) !important;
+  border-left: 3px solid color-mix(in srgb, var(--rj-brand) 55%, transparent) !important;
+  border-radius: 0 12px 12px 0;
+}
+
+/* 代码块与行内代码：代码需要「稳」的底，给一层比正文更实的深色（不做玻璃，
+   因为代码块里全是等宽字符，透光会让锯齿感和壁纸纹理互相干扰） */
+html #article-container pre,
+html #article-container .highlight{
+  background: color-mix(in srgb, var(--rjp-ink-900) 55%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 14%, transparent) !important;
+  border-radius: 12px;
+}
+
+/* 浅色模式 */
+[data-theme='light'] html #article-container table{
+  background: color-mix(in srgb, var(--rjp-ink-900) 12%, transparent) !important;
+}
+[data-theme='light'] html #article-container table td,
+[data-theme='light'] html #article-container table th{
+  color: var(--rjp-ink-900) !important;
+}
+[data-theme='light'] html #article-container .tabs > .nav-tabs,
+[data-theme='light'] html #article-container .tabs > .tabs-content,
+[data-theme='light'] html #article-container blockquote{
+  background: color-mix(in srgb, var(--rjp-white) 55%, transparent) !important;
+  border-color: color-mix(in srgb, var(--rjp-ink-900) 10%, transparent) !important;
 }
