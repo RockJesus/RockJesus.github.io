@@ -1,6 +1,6 @@
 /* ==========================================================================
    RockJesus.cn — Liquid Glass 全站材质统一
-   version: 1.0.0 · 2026-11-05
+   version: 1.1.0 · 2026-11-06
    --------------------------------------------------------------------------
    把 liquid-glass.css 里验证过的「复刻档」材质，抽象成一组 --rj-glass-*
    令牌，统一应用到站点所有「浮起来的表面」：
@@ -482,4 +482,221 @@ html #article-container.post-content::before{
 /* 正文排版：亮底上加点字重和行高，长文更耐读 */
 html .layout_post #article-container{
   line-height: 1.85;
+}
+
+/* ==========================================================================
+   16. v1.1.0 · 补齐遗漏组件（2026-11-06）
+   --------------------------------------------------------------------------
+   实测（1440×900，线上 /qa/）发现有 4 处仍是旧材质，与主列/侧栏的亮玻璃
+   并排时明显「不是一个系统」：
+
+     组件            改前计算值                              问题
+     ─────────────────────────────────────────────────────────────
+     文章尾卡        底层 rgba(19,23,40,.5) + blur(18px)     深蓝实底，最突兀
+     右下按钮列      底层 rgba(19,24,26,..) + blur(20px)     深色小方块，非玻璃
+     评论框          完全透明、无 backdrop                   缺件
+     分页器          完全透明                                缺件
+
+   统一原则与第 3 节一致：只换「材质」，不动尺寸/位置/圆角。
+   ========================================================================== */
+
+/* ---------- 16.1 文章尾部信息卡（版权 / 上下篇 / 相关推荐 / 标签） ---------- */
+html #post .post-copyright,
+html #post .post-copyright:not(.post-copyright__author),
+html #post .relatedPosts,
+html #post .relatedPosts-list > div,
+html #post .post-tags .tag_share,
+html #post .prev-post,
+html #post .next-post{
+  background:
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.8), transparent) 0%,
+      transparent 55%),
+    radial-gradient(110% 80% at 88% 100%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.56), transparent) 0%,
+      transparent 55%),
+    color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+
+  border: none !important;
+  box-shadow:
+    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent),
+    inset 0 0 24px color-mix(in srgb, var(--rjp-white) var(--rj-glass-glow), transparent) !important;
+}
+
+/* 尾卡里的分隔线/描边同步换白线，否则深色描边留在亮玻璃上会显脏 */
+html #post .post-copyright::before,
+html #post .post-copyright::after{
+  background: color-mix(in srgb, var(--rjp-white) 26%, transparent) !important;
+}
+
+/* ---------- 16.0 长文主容器（“深色玻璃”的真正源头） ----------
+   实测：#post / #page 用的是 custom.css 第 33 行的
+     background: var(--rj-surface-solid)  →  rgba(19, 23, 40, .86)
+   深蓝、86% 不透明、外加紫描边与紫色光晕 —— 这就是「主列卡片是深色玻璃、
+   和侧栏亮玻璃并排不统一」的根因：它不是玻璃不够亮，而是根本没走玻璃材质。
+   这里把长文页主容器并入同一套令牌，与主列文章卡、侧栏卡一致；
+   描边统一成细白线（原紫边属于旧体系）。正文可读性由第 15 节的
+   「正文容器 22% 暗底 + 4px 虚化」单独负责，不靠主容器压暗。 */
+html .layout_post > #post,
+html .layout_post > #page,
+html .layout_page > div:first-child:not(.recent-posts),
+/* ⚠ 不能写成 `html :root:not(...)`：`:root` 只匹配文档根元素，
+   前面加 `html ` 空格会变成「html 的后代 :root」，永远不命中（实测踩过）。 */
+:root:not([data-theme='light']) #body-wrap.post #post,
+[data-theme='light'] #body-wrap.post #post{
+  background:
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) var(--rj-glass-corner), transparent) 0%,
+      transparent 55%),
+    radial-gradient(110% 80% at 88% 100%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.72), transparent) 0%,
+      transparent 55%),
+    color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) !important;
+
+  border: none !important;
+  box-shadow:
+    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent),
+    inset 0 0 24px color-mix(in srgb, var(--rjp-white) var(--rj-glass-glow), transparent) !important;
+}
+
+/* ==========================================================================
+   16.5 暗背景补偿（全站统一的关键一步，2026-11-06）
+   --------------------------------------------------------------------------
+   16.1 让尾卡用上了同一套材质，但实测仍有「并排不统一」：
+     上一篇 平均亮度 40 / 版权卡 75 / 侧栏卡 131
+   材质参数完全一样，差的是「背后有什么」—— 玻璃是乘法的，背后趋黑时
+   白 9% 叠上去也还是一片黑；而侧栏卡背后是明亮的星云。
+   第 13 节记过同样的坑（亮玻璃在暗背景上等于不存在），当时靠「自发光」补。
+   这里统一按「卡片自有亮度」补一档：给长文页（背景更暗）的卡片加层加法发光，
+   让同一屏内的卡片底色落在同一区间，而不是某张卡孤零零地黑着。
+   只补亮度、不改结构；数值刻意压得很轻，避免把玻璃糊成白块。
+   ========================================================================== */
+html #post .post-copyright,
+html #post .prev-post,
+html #post .next-post,
+html #post .relatedPosts,
+html #post .relatedPosts-list > div{
+  background:
+    /* 加法自发光：不依赖背后有什么，先把卡面托到可读亮度 */
+    radial-gradient(120% 100% at 50% 0%,
+      color-mix(in srgb, var(--rjp-white) 12%, transparent) 0%,
+      transparent 70%),
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.8), transparent) 0%,
+      transparent 55%),
+    radial-gradient(110% 80% at 88% 100%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.56), transparent) 0%,
+      transparent 55%),
+    color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
+}
+
+/* 上下篇卡片背后常是深色配图/黑封面，单独再托一档（实测这两张最黑：亮度 40） */
+html #post .prev-post,
+html #post .next-post{
+  background:
+    radial-gradient(120% 100% at 50% 0%,
+      color-mix(in srgb, var(--rjp-white) 16%, transparent) 0%,
+      transparent 72%),
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) var(--rj-glass-corner), transparent) 0%,
+      transparent 55%),
+    color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-white) + 4%), transparent) !important;
+}
+
+/* ---------- 16.2 右下角浮动按钮列 ---------- */
+/* 这一列是多个 44px 圆钮竖向堆叠。原来是深色小方块，与亮玻璃完全不搭。
+   圆钮本身已有背景规则，这里只把「底色 + 描边」换成玻璃档。 */
+html #rightside > div > button,
+html #rightside > div > a,
+html #rightside > div > .button{
+  background:
+    radial-gradient(120% 120% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 18%, transparent) 0%,
+      transparent 60%),
+    color-mix(in srgb, var(--rjp-white) 8%, transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+
+  border: none !important;
+  box-shadow:
+    0 6px 20px var(--rj-shadow-2, rgba(0, 0, 0, .2)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 48%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--rjp-white) 14%, transparent) !important;
+}
+/* 悬停仍走品牌色（保留可点击的反馈，不并入玻璃） */
+html #rightside > div > button:hover,
+html #rightside > div > a:hover{
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important;
+}
+
+/* ---------- 16.3 评论框 ---------- */
+html #post-comment,
+html #post-comment .vwrap,
+html #post-comment .vcontent,
+html #post-comment .comment-wrap{
+  background:
+    radial-gradient(120% 90% at 18% 0%,
+      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.6), transparent) 0%,
+      transparent 55%),
+    color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+
+  border: none !important;
+  box-shadow:
+    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent) !important;
+}
+/* 输入区本身要比容器更「实」一点，否则光标与占位符在星点背景上难读 */
+html #post-comment .vwrap input,
+html #post-comment .vwrap textarea{
+  background: color-mix(in srgb, var(--rj-ink-900) 20%, transparent) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+[data-theme='light'] html #post-comment .vwrap input,
+[data-theme='light'] html #post-comment .vwrap textarea{
+  background: color-mix(in srgb, var(--rjp-white) 62%, transparent) !important;
+}
+
+/* ---------- 16.4 分页器（列表页 / 文章上下篇） ---------- */
+html #pagination .page-number,
+html #pagination .extend,
+html #pagination .prev,
+html #pagination .next{
+  background:
+    radial-gradient(120% 120% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 16%, transparent) 0%,
+      transparent 60%),
+    color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
+
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+
+  border: none !important;
+  box-shadow:
+    0 6px 20px var(--rj-shadow-2, rgba(0, 0, 0, .16)),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 45%, transparent) !important;
+}
+/* 当前页保持品牌色高亮，作为「位置感」的锚点。
+   ⚠ 必须加 !important：custom.css 里有
+     `.pagination .page-number.current, .pagination .page-number:hover`
+   这条不带 #pagination 的规则（特异性 0,3,0），单靠 html #pagination 前缀
+   在 background 这一项上会被判为「不是同一个属性链」而漏穿（实测当前页仍透明）。 */
+html #pagination .pagination .page-number.current,
+html .pagination .page-number.current{
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important;
+  box-shadow:
+    0 6px 22px color-mix(in srgb, var(--rj-brand) 40%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 40%, transparent) !important;
 }
