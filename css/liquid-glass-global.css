@@ -30,12 +30,12 @@
    ========================================================================== */
 :root{
   /* 厚度：0 = 完全透明，1 = 实色。统一取极小值，玻璃是「亮」的 */
-  --rj-glass-white: 9%;
-  --rj-glass-corner: 20%;      /* 角部柔光强度 */
-  --rj-glass-blur: 88px;       /* 主表面的虚化半径 */
-  --rj-glass-blur-sm: 40px;    /* 小面板（下拉/按钮）用轻一档，避免糊成一片 */
-  --rj-glass-line: 55%;        /* 边缘细白线 */
-  --rj-glass-glow: 18%;        /* 内发光 */
+  --rj-glass-white: 3%;
+  --rj-glass-corner: 9%;      /* 角部柔光强度 */
+  --rj-glass-blur: 40px;       /* 主表面的虚化半径 */
+  --rj-glass-blur-sm: 20px;    /* 小面板（下拉/按钮）用轻一档，避免糊成一片 */
+  --rj-glass-line: 42%;        /* 边缘细白线 */
+  --rj-glass-glow: 10%;        /* 内发光 */
   --rj-glass-sat: 112%;
 
   /* 文字托底 scrim */
@@ -58,8 +58,8 @@
       transparent 55%),
     color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent);
 
-  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat));
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat));
+  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.92);
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.92);
 
   border: none;
   box-shadow:
@@ -85,8 +85,8 @@ html #aside-content .card-widget{
       transparent 55%),
     color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) !important;
+  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
 
   box-shadow:
     0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
@@ -120,8 +120,8 @@ html #nav #blog_name{
       transparent 60%),
     color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
 
-  backdrop-filter: blur(44px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(44px) saturate(140%) !important;
+  backdrop-filter: blur(44px) saturate(140%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(44px) saturate(140%) brightness(.94) !important;
 
   border: 1px solid color-mix(in srgb, var(--rjp-white) 32%, transparent) !important;
   box-shadow:
@@ -150,8 +150,8 @@ html #nav .menus_items .menus_item .menus_item_child.rj-qr-menu{
       transparent 60%),
     color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) !important;
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) brightness(.94) !important;
 
   border: 1px solid color-mix(in srgb, var(--rjp-white) 34%, transparent) !important;
   box-shadow:
@@ -185,8 +185,8 @@ html .search-dialog{
       transparent 60%),
     color-mix(in srgb, var(--rjp-white) 9%, transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(150%) !important;
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(150%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(150%) brightness(.94) !important;
 
   border: 1px solid color-mix(in srgb, var(--rjp-white) 36%, transparent) !important;
   border-radius: 24px !important;
@@ -220,8 +220,8 @@ html #sidebar #sidebar-menus{
       transparent 60%),
     color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) !important;
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) brightness(.94) !important;
 
   border-left: 1px solid color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
   box-shadow:
@@ -246,8 +246,8 @@ html .aplayer .aplayer-list{
       transparent 60%),
     color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
 
-  backdrop-filter: blur(40px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(140%) !important;
+  backdrop-filter: blur(40px) saturate(140%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(140%) brightness(.94) !important;
 
   border: 1px solid color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
   box-shadow:
@@ -262,8 +262,8 @@ html .fancybox-navigation .fancybox-button,
 html .fancybox-toolbar .fancybox-button{
   background: color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
   border: 1px solid color-mix(in srgb, var(--rjp-white) 28%, transparent) !important;
-  backdrop-filter: blur(16px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+  backdrop-filter: blur(16px) saturate(140%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) brightness(.94) !important;
 }
 
 /* ==========================================================================
@@ -427,8 +427,8 @@ html #error-wrap .error-content{
       color-mix(in srgb, var(--rjp-white) 18%, transparent) 0%,
       transparent 62%),
     color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
-  backdrop-filter: blur(48px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(48px) saturate(140%) !important;
+  backdrop-filter: blur(48px) saturate(140%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(140%) brightness(.94) !important;
   border: 1px solid color-mix(in srgb, var(--rjp-white) 32%, transparent) !important;
   border-radius: 20px !important;
   box-shadow:
@@ -519,8 +519,8 @@ html #post .next-post{
       transparent 55%),
     color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
 
   border: none !important;
   box-shadow:
@@ -559,8 +559,8 @@ html .layout_page > div:first-child:not(.recent-posts),
       transparent 55%),
     color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) !important;
+  backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
 
   border: none !important;
   box-shadow:
@@ -625,8 +625,8 @@ html #rightside > div > .button{
       transparent 60%),
     color-mix(in srgb, var(--rjp-white) 8%, transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
 
   border: none !important;
   box-shadow:
@@ -651,8 +651,8 @@ html #post-comment .comment-wrap{
       transparent 55%),
     color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
 
   border: none !important;
   box-shadow:
@@ -682,8 +682,8 @@ html #pagination .next{
       transparent 60%),
     color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
 
-  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) !important;
+  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
+  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
 
   border: none !important;
   box-shadow:

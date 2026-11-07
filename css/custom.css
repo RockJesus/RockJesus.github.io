@@ -5586,13 +5586,14 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
   border: 1px solid var(--rj-hairline-4);
   background:
     linear-gradient(158deg,
-      color-mix(in srgb, var(--rjp-white) 5%, transparent) 0%,
+      color-mix(in srgb, var(--rjp-white) 2%, transparent) 0%,
       transparent 46%),
     linear-gradient(145deg,
-      color-mix(in srgb, var(--rj-ink-surface) 86%, transparent),
-      color-mix(in srgb, var(--rj-ink-surface-2) 72%, transparent));
-  backdrop-filter: blur(28px) saturate(112%);
-  -webkit-backdrop-filter: blur(28px) saturate(112%);
+      color-mix(in srgb, var(--rj-ink-surface) 52%, transparent),
+      color-mix(in srgb, var(--rj-ink-surface-2) 38%, transparent));
+  /* 更透：虚化半径减半 + 背后压暗，壁纸光斑能透出来，但不会白蒙蒙 */
+  backdrop-filter: blur(16px) saturate(135%) brightness(.9);
+  -webkit-backdrop-filter: blur(16px) saturate(135%) brightness(.9);
   box-shadow: var(--rj-elev-2);
   transition: transform var(--rj-dur-base) var(--rj-ease-out),
               box-shadow var(--rj-dur-base) var(--rj-ease-out),
