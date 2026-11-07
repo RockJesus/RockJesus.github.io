@@ -10,12 +10,15 @@
  *
  * 行为：
  *   - 只插一次，位置在 body 最前，fixed 铺满、object-fit:cover（与原来的 center/cover 同一种裁切）
- *   - 懒加载（2026-11-07）：2.44 MB 的视频不再和首屏头图视频抢同一条窄带。
+ *   - 懒加载（v1.8.5）：2.44 MB 的视频不再和首屏头图视频抢同一条窄带。
  *     插入时只挂 poster、不设 src，等到下列任一条件才真正拉流：
  *       1) 首屏（#page-header）滚出视口 —— 用户已经看不到首屏，壁纸这时才需要；
  *       2) 页面 load 完成后再空闲 3 秒 —— 首屏的 CSS/JS/头图视频先拿到带宽；
  *       3) 兜底：load 完成 8 秒后。
- *     saveData 或 2G/slow-2G 网络下永不拉流，只保留静态 poster（省流量优先）。
+ *   - 让路（v1.8.6）：即使触发条件满足，也要等头图视频（.rj-hero-video）readyState≥3
+ *     或加载失败后才开拉。头图是首屏主角，AV1 只有 393 KB；壁纸 2.44 MB 且被首屏挡着
+ *     看不见，抢带宽只会两败俱伤。头图 20 秒仍未就绪则不再等。
+ *   - saveData 或 2G/slow-2G 网络下永不拉流，只保留静态 poster（省流量优先）。
  *   - muted + playsinline 才允许静音自动播放；被拦时保持 poster，不做任何重试动画
  *   - 页面不可见时暂停，回来再播（省电、省解码）
  *   - prefers-reduced-motion: reduce 时不插入，回落到静态壁纸
@@ -28,6 +31,7 @@
   var POSTER = '/img/oc-blink-poster.webp';
   var ID = 'rj-oc-video';
   var started = false;
+  var waiting = false;
 
   function reduceMotion() {
     return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -46,14 +50,44 @@
     if (p && typeof p.catch === 'function') p.catch(function () { /* 被自动播放策略拦住：留在 poster */ });
   }
 
-  function loadAndPlay() {
+  function doLoad() {
     if (started) return;
     var v = document.getElementById(ID);
     if (!v) return;
-    if (!streamAllowed()) return;   /* 保持 poster，不再重试 */
     started = true;
     v.src = SRC;
     playVideo(v);
+  }
+
+  /* 让路：等头图视频可播后再拉壁纸流。头图 video 是 DOMContentLoaded 之后才由
+     rj-enhance.js 插入的，所以先给 2 秒时间让它出现；等不到（非首页 / 被省流禁用）
+     就不阻塞。头图 20 秒仍未就绪也不再等。 */
+  function whenHeroIdle(fn) {
+    var deadline = Date.now() + 2000;
+    var check = function () {
+      var h = document.querySelector('.rj-hero-video');
+      if (!h) {
+        if (Date.now() < deadline) return setTimeout(check, 250);
+        return fn();
+      }
+      if (h.readyState >= 3) return fn();
+      var fired = false;
+      var go = function () { if (fired) return; fired = true; fn(); };
+      h.addEventListener('canplay', go, { once: true });
+      h.addEventListener('error', go, { once: true });
+      setTimeout(go, 20000);
+    };
+    check();
+  }
+
+  function tryStart() {
+    if (started || waiting) return;
+    if (!streamAllowed()) return;   /* 保持 poster，不再重试 */
+    waiting = true;
+    whenHeroIdle(function () {
+      waiting = false;
+      doLoad();
+    });
   }
 
   /* 触发条件 1：首屏页头离开视口 */
@@ -64,7 +98,7 @@
       entries.forEach(function (e) {
         if (!e.isIntersecting) {
           io.disconnect();
-          loadAndPlay();
+          tryStart();
         }
       });
     }, { threshold: 0.05 });
@@ -104,7 +138,7 @@
     watchHeader();
 
     whenPageLoaded(function () {
-      var idle = function () { loadAndPlay(); };
+      var idle = function () { tryStart(); };
       setTimeout(function () {
         if (window.requestIdleCallback) window.requestIdleCallback(idle, { timeout: 5000 });
         else idle();

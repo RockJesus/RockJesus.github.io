@@ -168,7 +168,9 @@
     var c = navigator.connection;
     if (!c) return true;
     if (c.saveData) return false;
-    return !/^(slow-2g|2g|3g)$/.test(c.effectiveType || '');
+    /* v1.8.6：门槛从「≥4g」放宽到「≥3g」。原来 3g 直接退回静帧，而实测机被判 3g，
+       首屏就永远是死画面。只有真省流的 slow-2g / 2g 与 Save-Data 仍不挂载。 */
+    return !/^(slow-2g|2g)$/.test(c.effectiveType || '');
   }
 
   var heroTimer = null;
@@ -252,16 +254,20 @@
       heroSync();
     };
     if (window.requestIdleCallback) {
-      heroTimer = requestIdleCallback(run, { timeout: 1800 });
+      heroTimer = requestIdleCallback(run, { timeout: 1200 });
     } else {
-      heroTimer = setTimeout(run, 700);
+      heroTimer = setTimeout(run, 400);
     }
   }
 
-  if (doc.readyState === 'complete') {
-    heroStart();
+  /* v1.8.6：挂载时机从「load 后」提前到「DOMContentLoaded 后」。
+     load 要等全部图片/外部脚本，窄带下 40s 才到 —— 视频那之后才开始下，
+     用户整个首屏停留期都是死的。CSS 在 head 已拿到（阻塞渲染、优先级高），
+     这里 DOM 解析完再拉视频，不会抢首屏文字与样式的带宽。 */
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', heroStart, { once: true });
   } else {
-    window.addEventListener('load', heroStart, { once: true });
+    heroStart();
   }
 
   doc.addEventListener('pjax:complete', function () {
