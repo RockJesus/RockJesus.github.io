@@ -1195,3 +1195,32 @@ html #post-comment .vcount{
   background-size: 100% 1px !important;
   background-position: 0 0 !important;
 }
+
+
+/* ==========================================================================
+   20. 首页卡片封面：动图视频（替代 1~4MB 的 GIF 首帧静态图）
+   --------------------------------------------------------------------------
+   封面从 <img> 换成 <video poster=首帧 muted loop playsinline preload=none>：
+     · 首帧 webp 只几 KB，立刻可见
+     · 视频 10~130KB，进视口才由 cover-video.js 设 src 拉流
+     · 离开视口暂停，切标签页全部暂停，滚动时只有看得见的在动
+   ========================================================================== */
+#recent-posts > .recent-post-item > .post_cover video.post_bg{
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(102%) contrast(101%);
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), filter 0.45s ease;
+  background: var(--rj-ink-surface);   /* 视频还没拉流时不留白闪 */
+}
+#recent-posts > .recent-post-item:hover > .post_cover video.post_bg{
+  transform: scale(1.04);
+}
+@media (prefers-reduced-motion: reduce){
+  #recent-posts > .recent-post-item > .post_cover video.post_bg{ transition: none; }
+}
+/* 移动端首屏同时加载多个视频会抢带宽，缩小预载触发范围由 JS 的 rootMargin 控制，
+   这里只保证不因 video 默认行内基线留出底部空隙 */
+#recent-posts > .recent-post-item > .post_cover{ line-height: 0; }
