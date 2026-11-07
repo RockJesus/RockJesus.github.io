@@ -849,3 +849,305 @@ html #article-container .highlight{
   background: color-mix(in srgb, var(--rjp-white) 55%, transparent) !important;
   border-color: color-mix(in srgb, var(--rjp-ink-900) 10%, transparent) !important;
 }
+
+
+/* ==========================================================================
+   19. 评论区皮肤（V12.6）
+   --------------------------------------------------------------------------
+   Valine 1.5.3 的默认样式是灰底 + 硬边细框，压在亮玻璃上像一块脏灰板：
+   输入框和容器同色、没有层次，按钮还是个方角小方块，评论条目直接裸排。
+   这一节只动评论区的观感，不改布局（三格并排、Ctrl 徽章位置保持原样）：
+     · 输入区 = 玻璃中的玻璃（细白边 + 内高光 + 聚焦紫晕）
+     · 提交 = 紫色渐变胶囊，悬停抬起发光
+     · 评论列表每条一张小玻璃卡，头像带紫光环
+     · 评论数标题、Powered By 统一到站内字阶
+   ========================================================================== */
+
+/* —— 19.1 标题行与 Valine/Gitalk 切换胶囊 —— */
+html #post-comment .comment-head{
+  margin-bottom: 18px !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid transparent !important;
+  border-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--rjp-white) 22%, transparent),
+    color-mix(in srgb, var(--rj-brand) 30%, transparent),
+    transparent) 1 !important;
+}
+html #post-comment .comment-headline{
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  color: var(--rj-text-strong) !important;
+}
+html #post-comment .comment-headline i{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-right: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--rj-brand-3) !important;
+  background: color-mix(in srgb, var(--rj-brand) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 34%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--rj-brand) 26%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 26%, transparent);
+}
+html #post-comment #comment-switch{
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--rjp-ink-900) 34%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 14%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 18%, transparent) !important;
+  backdrop-filter: blur(14px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+}
+html #post-comment #comment-switch .first-comment,
+html #post-comment #comment-switch .second-comment{
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+html #post-comment #comment-switch .first-comment{
+  color: var(--rj-brand-4) !important;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 45%, transparent);
+}
+html #post-comment #comment-switch .second-comment{
+  color: color-mix(in srgb, var(--rj-text-mute) 78%, transparent) !important;
+}
+html #post-comment #comment-switch .switch-btn{
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent)) !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 55%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 40%, transparent) !important;
+  border: none !important;
+}
+
+/* —— 19.2 输入区：容器抬一档 + 三格输入框 —— */
+html #post-comment .vwrap{
+  padding: 16px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(158deg,
+    color-mix(in srgb, var(--rjp-white) 7%, transparent),
+    color-mix(in srgb, var(--rjp-white) 2%, transparent)) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 13%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 22%, transparent),
+              0 10px 30px color-mix(in srgb, var(--rj-ink-shadow) 30%, transparent) !important;
+  backdrop-filter: blur(20px) saturate(135%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(135%) brightness(.94) !important;
+}
+html #post-comment .vwrap .vheader input,
+html #post-comment .vwrap .vheader .vinput,
+html #post-comment .vwrap input.vinput{
+  height: 40px !important;
+  padding: 0 12px !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--rjp-ink-900) 15%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  color: var(--rj-text-strong) !important;
+  font-size: 13.5px !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 9%, transparent) !important;
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease !important;
+}
+html #post-comment .vwrap input::placeholder,
+html #post-comment .vwrap textarea::placeholder{
+  color: color-mix(in srgb, var(--rj-text-mute) 76%, transparent) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.01em;
+}
+/* 大编辑框 */
+html #post-comment .vwrap textarea,
+html #post-comment .veditor{
+  height: 150px !important;
+  min-height: 150px !important;
+  padding: 14px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--rjp-ink-900) 15%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  color: var(--rj-text-strong) !important;
+  font-size: 14.5px !important;
+  line-height: 1.8 !important;
+  resize: vertical;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 9%, transparent) !important;
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease !important;
+}
+/* 聚焦：紫色描边 + 3px 光晕 */
+html #post-comment .vwrap input:focus,
+html #post-comment .vwrap textarea:focus,
+html #post-comment .veditor:focus{
+  outline: none !important;
+  border-color: color-mix(in srgb, var(--rj-brand) 62%, transparent) !important;
+  background: color-mix(in srgb, var(--rjp-ink-900) 24%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rj-brand) 22%, transparent),
+              0 0 18px color-mix(in srgb, var(--rj-brand) 28%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+}
+
+/* —— 19.3 工具条（表情 / 图片 / Ctrl 徽章）—— */
+html #post-comment .vctrl{
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px !important;
+  padding: 0 !important;
+}
+html #post-comment .vctrl > span{
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  margin: 0 !important;
+  padding: 0 8px !important;
+  border-radius: 9px !important;
+  background: color-mix(in srgb, var(--rjp-white) 8%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 13%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 16%, transparent) !important;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease !important;
+  cursor: pointer;
+}
+html #post-comment .vctrl > span:hover{
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--rj-brand) 24%, transparent) !important;
+  border-color: color-mix(in srgb, var(--rj-brand) 50%, transparent) !important;
+}
+html #post-comment .vctrl span svg,
+html #post-comment .vctrl span svg path{
+  fill: var(--rj-brand-3) !important;
+  color: var(--rj-brand-3) !important;
+}
+html #post-comment .vctrl span i{ color: var(--rj-brand-3) !important; font-size: 13px; }
+
+/* —— 19.4 提交按钮：紫色渐变胶囊 —— */
+html #post-comment .vbtn{
+  height: 38px !important;
+  min-width: 96px;
+  padding: 0 26px !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 22%, transparent) !important;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent)) !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--rj-brand) 38%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 36%, transparent) !important;
+  transition: transform .22s ease, box-shadow .22s ease, filter .22s ease !important;
+}
+html #post-comment .vbtn:hover{
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--rj-brand) 52%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 44%, transparent) !important;
+}
+
+/* —— 19.5 评论数标题 —— */
+html #post-comment .vcount{
+  margin: 24px 0 14px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid color-mix(in srgb, var(--rjp-white) 11%, transparent) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  color: var(--rj-text-strong) !important;
+}
+html #post-comment .vcount::before{
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  margin-right: 7px;
+  border-radius: 2px;
+  vertical-align: -1px;
+  background: linear-gradient(180deg, var(--rj-brand-3), var(--rj-accent));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 50%, transparent);
+}
+
+/* —— 19.6 每条评论：一张小玻璃卡 —— */
+html #post-comment .vcard{
+  margin: 0 0 12px !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--rjp-white) 4%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 11%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 15%, transparent) !important;
+  transition: border-color .2s ease, background .2s ease !important;
+}
+html #post-comment .vcard:hover{
+  border-color: color-mix(in srgb, var(--rj-brand) 38%, transparent) !important;
+  background: color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
+}
+html #post-comment .vcard .vhead .vimg{
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 55%, transparent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--rj-brand) 14%, transparent),
+              0 4px 14px color-mix(in srgb, var(--rj-brand) 26%, transparent) !important;
+  object-fit: cover;
+}
+html #post-comment .vcard .vhead .vnick{
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  color: var(--rj-brand-4) !important;
+}
+html #post-comment .vcard .vhead .vtag{
+  font-size: 10.5px !important;
+  padding: 1px 7px !important;
+  border-radius: 999px !important;
+  color: color-mix(in srgb, var(--rj-brand-4) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--rj-brand) 14%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rj-brand) 26%, transparent) !important;
+}
+html #post-comment .vcard .vmeta,
+html #post-comment .vcard .vhead time{
+  font-size: 11.5px !important;
+  color: color-mix(in srgb, var(--rj-text-mute) 88%, transparent) !important;
+  letter-spacing: 0.02em;
+  margin-top: 3px;
+}
+/* 抵消 §16.3 给 .vcontent 的那层玻璃底，避免「卡中卡」 */
+html #post-comment .vcard .vcontent{
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html #post-comment .vcard .vcontent{
+  margin-top: 10px !important;
+  font-size: 14.5px !important;
+  line-height: 1.78 !important;
+  letter-spacing: 0.004em;
+  color: color-mix(in srgb, var(--rj-text) 92%, transparent) !important;
+}
+html #post-comment .vcard .vcontent p{
+  margin: 0 0 10px;
+}
+html #post-comment .vcard .vcontent p:last-child{ margin-bottom: 0; }
+
+/* —— 19.7 空状态 / Powered By —— */
+html #post-comment .vempty{
+  font-size: 13px !important;
+  color: color-mix(in srgb, var(--rj-text-mute) 82%, transparent) !important;
+  text-align: center;
+  padding: 18px 0 !important;
+}
+html #post-comment .vpower{
+  margin-top: 18px !important;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--rjp-white) 9%, transparent);
+  text-align: right !important;
+  font-size: 11px !important;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--rj-text-mute) 58%, transparent) !important;
+}
+html #post-comment .vpower a{
+  color: color-mix(in srgb, var(--rj-brand-6) 72%, transparent) !important;
+}
