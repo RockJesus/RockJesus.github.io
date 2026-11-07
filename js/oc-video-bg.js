@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var SRC = '/img/oc-blink.mp4';
+  var SRC = '/img/oc-blink.mp4?v=4';  /* v4 = AI 10s 版，带版本参数绕开老片缓存的 mp4 */
   var POSTER = '/img/oc-blink-poster.webp';
   var ID = 'rj-oc-video';
 
