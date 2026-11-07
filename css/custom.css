@@ -2541,7 +2541,6 @@ a:hover { color: var(--rj-brand-2); }
 ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--rj-brand-3), var(--rj-brand)); }
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon path { fill: var(--rj-brand); }
 .aplayer .aplayer-info .aplayer-controller .aplayer-icon:hover path { fill: var(--rj-brand-2); }
-#article-container blockquote { border-image: linear-gradient(180deg, var(--rj-brand), var(--rj-brand-2)) 1; }
 #article-container pre { box-shadow: 0 6px 24px var(--rj-shadow-5), 0 0 18px color-mix(in srgb, var(--rj-brand) 22%, transparent); }
 #article-container p code, #article-container li code, #article-container td code {
   border-color: color-mix(in srgb, var(--rj-brand) 40%, transparent);
@@ -3641,8 +3640,6 @@ a:hover { color: var(--rj-brand-2); }
 #article-container ol li::marker { color: var(--rj-accent); font-weight: 700; }
 /* —— 引用块：渐变底 + 霓虹侧边 —— */
 #article-container blockquote {
-  border-left: 4px solid transparent;
-  border-image: linear-gradient(180deg, var(--rj-brand), var(--rj-accent)) 1;
   border-radius: 10px;
   background: linear-gradient(135deg, color-mix(in srgb, var(--rj-brand) 12%, transparent), color-mix(in srgb, var(--rj-accent) 6%, transparent));
   padding: 14px 18px;
@@ -6977,4 +6974,47 @@ html body{
 #article-container blockquote p:last-child,
 #article-container li p:last-child{
   margin-bottom: 0;
+}
+
+
+/* ==========================================================================
+   22. 引用块：去掉紫色四边框（文章页）
+   --------------------------------------------------------------------------
+   老文章把整段正文写在 `>` 引用里（如「Mac 下修改键盘背景灯」的步骤），
+   于是之前三层规则轮流给引用块的四条边刷紫渐变：
+     1670 玻璃提示卡  —— 1px 紫描边 + 左侧紫竖条
+     2544 border-image —— 紫 → 靛 渐变
+     3643 border-image —— 紫 → 青 渐变（最后生效，四边全紫）
+   结果就是截图里那种把正文圈起来的紫色方框。
+   这里统一收成「不画框」：只留一条中性竖线 + 极淡的玻璃底，
+   引用语义靠竖线，视觉上不再有边框感。
+   ========================================================================== */
+html #article-container blockquote{
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--rj-text-strong) 5%, transparent),
+    color-mix(in srgb, var(--rj-text-strong) 2%, transparent)) !important;
+  box-shadow: inset 0 1px 0 var(--rj-hairline-2) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+html #article-container blockquote::before{
+  width: 3px !important;
+  border-radius: 0 3px 3px 0 !important;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--rj-text-strong) 32%, transparent),
+    color-mix(in srgb, var(--rj-text-strong) 6%, transparent)) !important;
+}
+[data-theme='light'] html #article-container blockquote{
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--rjp-apple-ink) 4%, transparent),
+    color-mix(in srgb, var(--rjp-apple-ink) 1%, transparent)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+[data-theme='light'] html #article-container blockquote::before{
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--rjp-apple-ink) 26%, transparent),
+    color-mix(in srgb, var(--rjp-apple-ink) 6%, transparent)) !important;
 }
