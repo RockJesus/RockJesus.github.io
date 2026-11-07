@@ -382,19 +382,23 @@ html #recent-posts > .recent-post-item .content::before{
   inset: -10px -14px;
   z-index: -1;
   border-radius: 12px;
-  background: radial-gradient(120% 140% at 50% 50%,
-    color-mix(in srgb, var(--rjp-ink-900) var(--rj-glass-scrim), transparent) 0%,
-    color-mix(in srgb, var(--rjp-ink-900) calc(var(--rj-glass-scrim) * 0.45), transparent) 55%,
-    transparent 100%);
-  filter: blur(8px);
+  /* V12.5：按要求移除文字后的深色托底板（可读性交由细字影） */
+  background: none;
   pointer-events: none;
 }
 [data-theme='light'] html #recent-posts > .recent-post-item .post-info::before,
 [data-theme='light'] html #recent-posts > .recent-post-item .content::before{
-  background: radial-gradient(120% 140% at 50% 50%,
-    color-mix(in srgb, var(--rjp-white) 55%, transparent) 0%,
-    color-mix(in srgb, var(--rjp-white) 28%, transparent) 55%,
-    transparent 100%);
+  background: none;
+}
+
+/* 托底板撤掉后，深色主题用细字影把文字从玻璃上「拎起来」；
+   浅色主题不加 —— 白字影在浅底上会形成脏灰边。 */
+html:not([data-theme='light']) #recent-posts > .recent-post-item .article-title,
+html:not([data-theme='light']) #recent-posts > .recent-post-item .content,
+html:not([data-theme='light']) #aside-content .card-widget.rj-lg.rj-lg--ultra :is(.announcement, .webinfo, .card-list),
+html:not([data-theme='light']) .layout_post #article-container,
+html:not([data-theme='light']) #article-container.post-content {
+  text-shadow: 0 1px 3px rgba(3, 6, 16, .42);
 }
 
 /* 移动端侧滑菜单：背后常是纯黑封面，单独再加一层自发光，否则玻璃等于消失 */
@@ -469,14 +473,12 @@ html #article-container.post-content::before{
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: color-mix(in srgb, var(--rjp-ink-900) 22%, transparent);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: none;
   pointer-events: none;
 }
 [data-theme='light'] html .layout_post #article-container::before,
 [data-theme='light'] html #article-container.post-content::before{
-  background: color-mix(in srgb, var(--rjp-white) 55%, transparent);
+  background: none;
 }
 
 /* 正文排版：亮底上加点字重和行高，长文更耐读 */

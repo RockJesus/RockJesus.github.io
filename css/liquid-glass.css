@@ -439,18 +439,12 @@ html #aside-content .card-widget.card-widget.rj-lg.rj-lg--ultra :is(.announcemen
   inset: -6px -10px;
   z-index: -1;
   border-radius: 10px;
-  background: radial-gradient(120% 140% at 50% 50%,
-    color-mix(in srgb, var(--rjp-ink-900) 26%, transparent) 0%,
-    color-mix(in srgb, var(--rjp-ink-900) 12%, transparent) 55%,
-    transparent 100%);
-  filter: blur(6px);
+  /* V12.5：同上，侧栏文字后的深色托底板一并移除 */
+  background: none;
   pointer-events: none;
 }
 [data-theme='light'] #aside-content .card-widget.rj-lg.rj-lg--ultra :is(.announcement, .webinfo, .card-list)::before{
-  background: radial-gradient(120% 140% at 50% 50%,
-    color-mix(in srgb, var(--rjp-white) 45%, transparent) 0%,
-    color-mix(in srgb, var(--rjp-white) 22%, transparent) 55%,
-    transparent 100%);
+  background: none;
 }
 
 /* ==========================================================================
