@@ -922,7 +922,7 @@ html #post-comment #comment-switch .second-comment{
   color: color-mix(in srgb, var(--rj-text-mute) 78%, transparent) !important;
 }
 html #post-comment #comment-switch .switch-btn{
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent)) !important;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important;
   box-shadow: 0 0 12px color-mix(in srgb, var(--rj-brand) 55%, transparent),
               inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 40%, transparent) !important;
   border: none !important;
@@ -1030,7 +1030,7 @@ html #post-comment .vbtn{
   padding: 0 26px !important;
   border-radius: 999px !important;
   border: 1px solid color-mix(in srgb, var(--rjp-white) 22%, transparent) !important;
-  background: linear-gradient(135deg, var(--rj-brand), var(--rj-accent)) !important;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important;
   color: #fff !important;
   font-size: 13px !important;
   font-weight: 600 !important;
@@ -1064,7 +1064,7 @@ html #post-comment .vcount::before{
   margin-right: 7px;
   border-radius: 2px;
   vertical-align: -1px;
-  background: linear-gradient(180deg, var(--rj-brand-3), var(--rj-accent));
+  background: linear-gradient(180deg, var(--rj-brand-3), var(--rj-brand-2));
   box-shadow: 0 0 10px color-mix(in srgb, var(--rj-brand) 50%, transparent);
 }
 
@@ -1150,4 +1150,48 @@ html #post-comment .vpower{
 }
 html #post-comment .vpower a{
   color: color-mix(in srgb, var(--rj-brand-6) 72%, transparent) !important;
+}
+
+
+/* —— 19.8 圆角收口 + 主题色收尾 ——
+   #post-comment 之前只有玻璃底和白描边、**没有圆角**，那一圈直角白框是
+   整片评论区里最刺眼的边；comment-wrap 同理。这里统一收到 20/18px。 */
+html #post-comment{
+  border-radius: 20px !important;
+  overflow: hidden !important;
+}
+html #post-comment .comment-wrap{
+  border-radius: 18px !important;
+}
+/* Valine 三格输入框是 32% 并排浮动的：两格圆角贴在一起时，中间会拼出一对
+   直角缝。给左、中两格补 8px 内边距，让 input 自己缩出间隙。 */
+html #post-comment .vwrap .vnick,
+html #post-comment .vwrap .vmail{
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+}
+html #post-comment .vwrap .vlink{
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}
+html #post-comment .vwrap .vheader input{
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+/* 右下角的直角拖拽柄会把圆角咬掉一块，直接关掉拉伸 */
+html #post-comment .veditor,
+html #post-comment .vwrap textarea{
+  resize: none !important;
+}
+/* 评论数标题与 Powered By 的直角分割线统一成细白线（不再用 border-image，
+   它在某些浏览器里会强行把圆角压成直角） */
+html #post-comment .vcount{
+  border-top: none !important;
+  background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--rj-brand) 34%, transparent),
+    color-mix(in srgb, var(--rjp-white) 10%, transparent) 58%,
+    transparent) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 1px !important;
+  background-position: 0 0 !important;
 }
