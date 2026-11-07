@@ -6470,39 +6470,62 @@ hr.hr-line-dashed,
 }
 
 /* ============================================================
-   批次 D · 首屏动态背景：已删除（2026-11-07）
+   批次 D · 首屏动态背景（2026-11-01）
    ---------------------------------------------------------------------------
-   这一段原本给 `#page-header` 挂一个 13.6s 静音循环视频（`.rj-hero-video`，
-   桌面 1344×756 / 465KB，移动 672×378 / 150KB）。素材是「黑 → 主体浮现 →
-   极亮 → 淡出到黑」的深色头图，配合 `index_img` 的 hero-poster 静帧一起，
-   把 100vh 的首屏整块盖成暗场：下面的 #web_bg 壁纸与 #rj-oc-video（10s 眨眼
-   循环片）根本透不出来。
+   首屏原本是 /img/header_home.webp 一张静帧。现在让同一段素材动起来：
+   13.6s 静音循环视频（桌面 1344×756 / 465KB，移动 672×378 / 150KB），
+   源 GIF 是 47MB —— 直接当背景会让首屏彻底废掉，所以走视频压缩。
 
-   现在首屏直接让给壁纸 —— 不再注入 video、不再需要这套层级与静帧海报。
-   只保留 `::before` / `::after` 的档位，让 HUD 状态条与滚动箭头仍在压暗层之上：
-     ① #page-header    透明（见文件末尾「首屏深色蒙版：删掉」）
-     ② ::before  z:1   —— 极轻的径向聚光
-     ③ ::after   z:2   —— 底部 180px 淡出
-     ④ 正文/箭头 z:3
+   两个关键决定：
+   1) 循环起点对齐静帧。素材原序列是「黑 → 主体浮现 → 极亮 → 淡出到黑」，
+      这里把第 26 帧（≈现有静帧画面）转成第 0 帧，末尾接回原开头 ——
+      首帧与静帧同画面、循环点两端都是全黑，两头都看不出接缝。
+   2) 视频不写 poster。首屏的静帧还留在 #page-header 的内联背景上，
+      它本身就是海报，省一次请求；视频 canplay 后才淡入，此时画面已经
+      和静帧一致，切换过程不可见。
+   ---------------------------------------------------------------------------
+   层级（自下而上）：
+     ① #page-header 内联背景图   —— 兜底 / 无 JS / 省流时唯一可见的画面
+     ② .rj-hero-video  z-index:0 —— 视频层
+     ③ ::before        z-index:1 —— 压暗 + 径向聚光
+     ④ ::after         z-index:2 —— HUD 扫描线
+     ⑤ 正文/箭头       z-index:3
+   主题的 `#page-header:not(.not-top-img):before` 没设 z-index，视频是它的
+   子元素、会盖在压暗层上面 —— 不显式抬高档位，首屏会整体变亮、文字发飘。
    ============================================================ */
+.rj-hero-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 与静帧的 `background-position: center center` 对齐，
+     手机竖屏裁两侧后主体仍在正中 */
+  object-position: center center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 900ms var(--rj-ease-out);
+}
+.rj-hero-video.is-ready {
+  opacity: 1;
+}
+
+#page-header.full_page::before {
+  z-index: 1;
+}
+#page-header.full_page::after {
+  z-index: 2;
+}
 #page-header.full_page #site-info,
 #page-header.full_page #scroll-down {
   z-index: 3;
 }
 
-/* 首屏深色蒙版：删掉。
-   这一层原本是 `background-color: var(--rj-ink-surface)` 一块不透明深底，再叠
-   `index_img` 给的 `hero-poster.webp`（1280×720、平均亮度 2/255，基本纯黑）。
-   两块一起把 100vh 的首屏糊死，下面 #web_bg 的壁纸与视频层根本透不出来 ——
-   用户看到的就是「一片黑 + 隐约一只手」。
-   现在整块让给壁纸：`background: none !important` 同时清掉内联的 hero-poster
-   与深色底（内联写法只能被样式表的 !important 压住）。标题已由 #site-title 隐藏、
-   副标题自带柔光，不需要靠压暗层托字。
-
-   两个主题都清：亮色首屏原先也是靠这段深色视频成立的，蒙版一撤，
-   主题自己的兜底头图（chrome 蛋）就会顶上来 —— 那不是壁纸。 */
-#page-header.full_page {
-  background: none !important;
+/* 视频接管画面后，首屏底部那条「图→黑」的过渡可以收短：
+   原来是为了压住静帧边缘的色阶，现在画面本身在动，压太重会闷。 */
+:root:not([data-theme='light']) #page-header.full_page {
+  background-color: var(--rj-ink-surface);
 }
 
 /* ---------- v1.9.32 首屏去掉大标题 ----------
@@ -6538,28 +6561,6 @@ hr.hr-line-dashed,
    否则贴着 42px 的大字会像标签贴错了位置 */
 #page-header.full_page #site-info::after {
   margin-top: 26px;
-}
-
-/* ---------- 首屏无蒙版后的文字可读性（2026-11-07） ----------
-   深色蒙版删掉之后，底部这组文字的底从「近黑」变成了「亮星云 / 亮紫云」，
-   原来靠半透明灰和白字自己撑的做法立刻失效：小字只有 2:1 上下。
-   做法不回头加压暗层（那正是用户要删的东西），改成给文字自己补一层黑基柔光：
-   标题保持亮白 + 两层黑投影，注脚行从 mute 灰提到浅蓝白 + 单层软影。 */
-:root:not([data-theme='light']) #page-header.full_page #site-subtitle,
-:root:not([data-theme='light']) #page-header.full_page #site-subtitle #subtitle {
-  color: rgba(255, 255, 255, 0.97);
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.82),
-    0 2px 10px rgba(0, 0, 0, 0.72),
-    0 12px 46px rgba(0, 0, 0, 0.55);
-}
-#page-header.full_page #site-info::after,
-:root:not([data-theme='light']) #page-header.full_page #site-info::after,
-[data-theme='light'] #page-header.full_page #site-info::after {
-  color: rgba(228, 234, 255, 0.88);
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.80),
-    0 2px 12px rgba(0, 0, 0, 0.66);
 }
 
 /* ---------- v1.9.33 文字组下移到向下箭头上面 ----------

@@ -152,10 +152,133 @@
     });
   }
 
-  /* ---------- 6) 首屏动态背景：已删除 ----------
-     这里原本往 #page-header 里插一个 13.6s 的 `.rj-hero-video`（/img/hero-bg*.mp4，
-     配 hero-poster.webp 作为静帧兜底）。它不是蒙版层，但效果等同：一张 100vh 的暗色
-     素材把 #web_bg 与 #rj-oc-video 的壁纸动效整块盖住，首屏只剩「一片黑 + 隐约一只手」。
-     现在首屏让给壁纸：不注入、不预载、不占带宽，也不再需要省流/减弱动效的分支。
-     壁纸动效由 oc-video-bg.js 提供的 #rj-oc-video 负责，它自带 reduced-motion 回退。 */
+  /* ---------- 6) 首屏动态背景 ----------
+     首页背景从静帧换成 13.6s 静音循环视频（详见 custom.css 批次 D）。
+     视频首帧与静帧同画面，所以淡入时看不到切换。
+
+     三条不做：
+       · 不做首屏阻塞 —— 等 load + 空闲才挂载，视频不跟标题抢带宽；
+       · 不做省流用户 —— Save-Data / 2G·3G 直接退回静帧，150KB 也是流量；
+       · 不做减弱动效 —— prefers-reduced-motion 下完全不挂载。
+     （原第四条「不做亮色主题」已取消：亮色首屏不再压白蒙层，
+       两个主题共用同一张深色视频，文字已换成媒体安全色，见 custom.css 批次 E）
+     进程内还会在离开首页时主动卸载，别让它在后台继续解码耗电。 */
+  function heroEligible() {
+    if (reduce) return false;
+    var c = navigator.connection;
+    if (!c) return true;
+    if (c.saveData) return false;
+    return !/^(slow-2g|2g|3g)$/.test(c.effectiveType || '');
+  }
+
+  var heroTimer = null;
+
+  function heroSync() {
+    var header = doc.getElementById('page-header');
+    var onHome = !!(header && /(^|\s)full_page(\s|$)/.test(header.className));
+    var video = header && header.querySelector('.rj-hero-video');
+
+    /* 不在首页、或者是省流/减弱动效 ——
+       两个方向都收干净，别留一个看不见的 video 在后台解码 */
+    if (!onHome || !heroEligible()) {
+      if (video) {
+        video.pause();
+        video.remove();
+      }
+      return;
+    }
+    if (video) {
+      if (video.paused) {
+        var again = video.play();
+        if (again && again.catch) again.catch(function () {});
+      }
+      return;
+    }
+
+    var v = doc.createElement('video');
+    v.className = 'rj-hero-video';
+    v.muted = true;
+    v.defaultMuted = true;
+    v.loop = true;
+    v.playsInline = true;
+    v.autoplay = true;
+    v.preload = 'auto';
+    v.setAttribute('muted', '');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('aria-hidden', 'true');
+    v.setAttribute('tabindex', '-1');
+    /* 手机竖屏按 cover 裁完只剩中间一条，672 宽够用；
+       桌面全屏铺开才需要 1344 那一档。
+       AV1 优先：同画质体积比 H.264 省 ~53%（桌面 372→173KB），
+       canPlayType('av01') 能探测 —— Chrome/Edge(含 dav1d 软解)、iOS 17+、
+       新安卓返回 'probably'；不支持的（旧 Safari/老安卓）返回 ''，自动落回 H.264。
+       即使探测误判，下面 error 监听仍会撤层兜底，不会白屏。 */
+    var av1 = !!v.canPlayType('video/mp4; codecs="av01.0.05M.08"');
+    v.src = window.innerWidth < 820
+      ? (av1 ? '/img/hero-bg-sm.av1.mp4' : '/img/hero-bg-sm.mp4')
+      : (av1 ? '/img/hero-bg.av1.mp4' : '/img/hero-bg.mp4');
+
+    v.addEventListener(
+      'canplay',
+      function () {
+        v.classList.add('is-ready');
+        var p = v.play();
+        if (p && p.catch) p.catch(function () {});
+      },
+      { once: true }
+    );
+    /* 解码失败：AV1 探测误判（个别 Safari 会对 av01 乐观返回 'maybe'，
+       真解码却失败）→ 原地换回 H.264 重试一次；H.264 也失败才撤层。
+       静帧海报一直垫在下面，任何一步失败都不会白屏。 */
+    v.addEventListener('error', function () {
+      var cur = v.getAttribute('src') || '';
+      if (/\.av1\.mp4$/.test(cur)) {
+        v.setAttribute('src', cur.replace('.av1.mp4', '.mp4'));
+        v.load();
+        var p = v.play();
+        if (p && p.catch) p.catch(function () {});
+        return;
+      }
+      v.remove();
+    });
+
+    header.insertBefore(v, header.firstChild);
+  }
+
+  function heroStart() {
+    if (heroTimer) return;
+    var run = function () {
+      heroTimer = null;
+      heroSync();
+    };
+    if (window.requestIdleCallback) {
+      heroTimer = requestIdleCallback(run, { timeout: 1800 });
+    } else {
+      heroTimer = setTimeout(run, 700);
+    }
+  }
+
+  if (doc.readyState === 'complete') {
+    heroStart();
+  } else {
+    window.addEventListener('load', heroStart, { once: true });
+  }
+
+  doc.addEventListener('pjax:complete', function () {
+    var header = doc.getElementById('page-header');
+    if (header && /(^|\s)full_page(\s|$)/.test(header.className)) {
+      heroStart();
+    } else {
+      heroSync();
+    }
+  });
+
+  /* 主题切换时同步一次：两个主题现在都用同一张视频（亮色首屏已是深色底），
+     这里只负责在省流/减弱动效条件变化时收放。只在页面 load 完之后响应，
+     避免初始化阶段的 data-theme 写入把视频提前拉起来、跟首屏抢带宽。 */
+  if (window.MutationObserver) {
+    new MutationObserver(function () {
+      if (doc.readyState === 'complete') heroSync();
+    }).observe(de, { attributes: true, attributeFilter: ['data-theme'] });
+  }
 })();
