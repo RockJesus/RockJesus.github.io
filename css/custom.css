@@ -26,6 +26,25 @@
    此处不再重复声明，避免同一规则被写三遍（同一 URL 只下载一次，重复只是写法冗余）。
    背景之上无任何装饰层（v1.8.9 删除径向光斑）。 */
 
+/* ---------- 壁纸视频层（方案 C：会眨眼的循环短片） ----------
+   oc-blink.mp4：1920×1080 / 24fps / 10s 无缝循环（首末帧星云同为青绿、双眼全睁），
+   内容＝AI 图生视频 v4：原图两头贴边构图不变、右眼青绿透镜由下眼睑眨眼、
+   星云在青绿与紫红之间各停留约 5 秒。
+   静态兜底用 oc-blink-poster.webp（视频第 0 帧），与视频开头一致，不会跳画面。
+   视频叠在壁纸之上（-998）、页面内容之下；纯装饰，不接收指针事件。 */
+#rj-oc-video {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  z-index: -998;
+  pointer-events: none;
+  border: 0;
+}
+
 /* ---------- 卡片：暗色玻璃拟态（文章/列表卡对齐右侧卡片风格，更实玻璃+紫边+光晕） ---------- */
 #recent-posts > .recent-post-item,
 .layout_page > div:first-child:not(.recent-posts),
