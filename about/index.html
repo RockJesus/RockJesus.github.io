@@ -11,7 +11,7 @@
 <meta property="article:author" content="RockJesus">
 <meta property="article:tag" content="Alienware,Hackintosh,RockJesus,外星人,黑苹果,苹果系统,macOS,OS,双系统,核显,独显,双显卡,笔记本,hexo,butterfly,apple">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://rockjesus.cn/img/header_post.webp"><link rel="shortcut icon" href="/img/apple.png"><link rel="canonical" href="https://rockjesus.cn/about/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><meta name="google-site-verification" content="wcu3_1CqmZW-eiZzYE1VkXQ83NfhxXYyUYjqofL2s98"/><meta name="baidu-site-verification" content="a9e08ec56eb07a3e283226ce7db68098"/><link rel="stylesheet" href="/css/index.css?v=be4190faaa"><link rel="stylesheet" href="/css/fa-subset.css?v=6b6f9abe55" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+<meta name="twitter:image" content="https://rockjesus.cn/img/header_post.webp"><link rel="shortcut icon" href="/img/apple.png"><link rel="canonical" href="https://rockjesus.cn/about/"><link rel="preconnect" href="//hm.baidu.com"/><meta name="google-site-verification" content="wcu3_1CqmZW-eiZzYE1VkXQ83NfhxXYyUYjqofL2s98"/><meta name="baidu-site-verification" content="a9e08ec56eb07a3e283226ce7db68098"/><link rel="stylesheet" href="/css/index.css?v=be4190faaa"><link rel="stylesheet" href="/css/fa-subset.css?v=6b6f9abe55" media="print" onload="this.media='all'"><link rel="stylesheet" href="/css/vendor/fancybox.min.css?v=bce20e8bdb" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "https://hm.baidu.com/hm.js?a9e08ec56eb07a3e283226ce7db68098";
@@ -47,8 +47,8 @@
   Snackbar: undefined,
   source: {
     justifiedGallery: {
-      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
-      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+      js: '/js/vendor/fjGallery.min.js',
+      css: '/css/vendor/fjGallery.min.css'
     }
   },
   isPhotoFigcaption: false,
@@ -191,7 +191,7 @@
   window.Fancybox = { bind: function (s, o) { q.push([s, o]); } };
   function go () {
     var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js';
+    s.src = '/js/vendor/fancybox.umd.min.js';
     s.onload = function () {
       q.forEach(function (a) { try { Fancybox.bind(a[0], a[1]); } catch (e) {} });
       q.length = 0;
@@ -202,7 +202,7 @@
     window.requestIdleCallback ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 2000);
   });
 })();
-</script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"><script>function loadValine () {
+</script><script src="/js/vendor/lazyload.iife.min.js?v=0b539eec0a"></script><div class="js-pjax"><script>function loadValine () {
   function initValine () {
     const valine = new Valine(Object.assign({
       el: '#vcomment',
@@ -270,7 +270,7 @@ if ('Valine' === 'Gitalk' || !true) {
   function loadOtherComment () {
     loadGitalk()
   }
-}</script></div><div id="site-player"></div><meta name="google-site-verification" content="wcu3_1CqmZW-eiZzYE1VkXQ83NfhxXYyUYjqofL2s98" /><script src="/js/live2d-guard.js?v=3fa197d4bc" defer></script><link rel="stylesheet" href="/css/AA.css?v=94137b2ab3" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+}</script></div><div id="site-player"></div><meta name="google-site-verification" content="wcu3_1CqmZW-eiZzYE1VkXQ83NfhxXYyUYjqofL2s98" /><script src="/js/live2d-guard.js?v=3fa197d4bc" defer></script><link rel="stylesheet" href="/css/AA.css?v=94137b2ab3" media="print" onload="this.media='all'"><script src="/js/vendor/aplayer.min.js?v=22caa28ff6"></script><script src="/js/vendor/meting.min.js?v=ca253a806f"></script><script src="/js/vendor/pjax.min.js?v=3d796e5be9"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
 
 var pjax = new Pjax({
   elements: 'a:not([target="_blank"])',
