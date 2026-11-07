@@ -1591,6 +1591,8 @@
   function rjPatchBrokenImgs() {
     document.querySelectorAll('img').forEach(function (img) {
       if (!img || img.dataset.rjFallback) return;
+      /* 打赏/加群二维码是「按需加载」：还没交互前故意没有 src，不适用破图兜底 */
+      if (img.hasAttribute('data-rj-qr')) return;
       var src = img.getAttribute('src') || img.getAttribute('data-lazy-src') || '';
       if (rjIsExtUnreliable(src)) { rjHideBroken(img); return; }
       img.dataset.rjFallback = '1';
@@ -1655,15 +1657,33 @@
         link.target = '_blank';
         link.rel = 'noopener';
         var img = document.createElement('img');
-        img.src = href;
+        /* 二维码是 100–200 KB 的大图，只在首屏下拉菜单里挂着，用户不悬停根本看不到。
+           2026-11-07：不再立刻 set src（下拉菜单在视口内会让 loading=lazy 失效，
+           实测首屏白拉 qq/wx/zfb 共 372 KB），改为首次交互时再取。 */
+        img.setAttribute('data-rj-qr', href);
         img.alt = p[0];
         img.loading = 'lazy';
+        img.decoding = 'async';
         var span = document.createElement('span');
         span.textContent = p[0];
         link.appendChild(img);
         link.appendChild(span);
         li.appendChild(link);
         ul.appendChild(li);
+      });
+      /* 悬停就预取、点击必定取；touch 先取；侧栏菜单点开也算 */
+      var hydrate = function () {
+        ul.querySelectorAll('img[data-rj-qr]').forEach(function (im) {
+          if (!im.getAttribute('src')) {
+            im.removeAttribute('data-rj-fallback');   /* 解除破图标记，允许正常显示 */
+            im.classList.remove('rj-hidden');
+            im.style.display = '';
+            im.setAttribute('src', im.getAttribute('data-rj-qr'));
+          }
+        });
+      };
+      ['mouseenter', 'focusin', 'touchstart', 'pointerdown'].forEach(function (ev) {
+        item.addEventListener(ev, hydrate, { passive: true });
       });
     });
   }
