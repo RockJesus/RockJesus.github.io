@@ -1153,7 +1153,7 @@ img {
 .rj-tip.rj-tip-hide {
   opacity: 0;
 }
-/* —— 静音自动播放的常驻提示（点击任意处开启声音前一直停留，贴合播放器正上方） —— */
+/* —— 静音自动播放的常驻提示：由 player.js 定位到播放器右侧、垂直居中（8 秒后自动收起） —— */
 .rj-muted-tip {
   position: fixed;
   left: 16px;
@@ -6676,7 +6676,7 @@ hr.hr-line-dashed,
   margin-left: 0;
 }
 
-/* ---------- v1.9.36 播放器圆盘封面统一 ----------
+/* ---------- v1.8.8 播放器圆盘封面统一 ----------
    问题：圆盘是正圆、且 16s 一圈持续旋转，但封面来源有两种形态 ——
    903 首是 QQ 音乐的 300×300 方图（铺满、正常），2161 首没有封面，
    原来统一回落到 header_oc.webp（400×225 深底横幅，中间一块白卡片）。
@@ -7036,4 +7036,16 @@ html #article-container blockquote::before{
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--rjp-apple-ink) 26%, transparent),
     color-mix(in srgb, var(--rjp-apple-ink) 6%, transparent)) !important;
+}
+
+/* ---------- v1.8.8 音乐提示条定位权移交 player.js ----------
+   v1.9.33 曾把它钉在顶部居中（left:50% + translateX(-50%) + width:max-content）。
+   现在 JS 改成贴播放器右侧：内联 left 能盖住 CSS 的 left，但 transform 与
+   width:max-content 仍来自上面那条旧规则，实测整条被推出半个身位
+   （1600 宽时 x=-66，已经跑到屏幕外）。这里统一收口，位置全部交给 place()。 */
+.rj-muted-tip {
+  transform: none;
+  animation: rjTipIn 0.4s ease;
+  width: auto;
+  max-width: none;
 }

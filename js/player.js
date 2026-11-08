@@ -1101,26 +1101,51 @@
     document.body.appendChild(t);
     // 8 秒自动收起。原来是「一直停留直到点击」，等于每个访客都被它压住半屏。
     t.__rjTimer = setTimeout(hideMutedTip, 8000);
-    // v1.9.33 起改贴导航栏下方。
-    // 原来跟着播放器顶边走（bottom = 视口高 - 播放器顶 + 8），而播放器在左下、
-    // 首屏文字居中偏下 —— 一条常驻 8 秒的横条正好横穿那行主文字。
-    // 提示本该只对首访者出现，被挡的恰好是最该看清标题的人。
-    // 换成顶部之后：桌面/手机都不压首屏文字，也不碰播放器、看板娘和右下浮标。
+    // v1.8.8 起改贴播放器右侧、垂直居中：原来在导航栏下方，首屏看像一条孤立横幅，
+    // 不像在解释「声音是从哪来的」；贴回播放器旁才看得出归属。
+    // 播放器展开成列表或换位时跟随，右侧空间不够就自动缩宽，不越出视口。
     var place = function () {
       if (!t.parentNode) return;
-      var nav = document.getElementById('nav');
-      var navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
-      t.style.top = Math.round(Math.max(navBottom, 56) + 14) + 'px';
+      var pl = document.querySelector('.aplayer.aplayer-fixed') || document.querySelector('.aplayer');
+      if (!pl) {
+        // 播放器还没建出来：先落左下角，建好由下面的观察器重算
+        t.style.left = '16px';
+        t.style.top = 'auto';
+        t.style.bottom = '100px';
+        return;
+      }
+      var r = pl.getBoundingClientRect();
+      var gap = 10;
+      t.style.transform = 'none';   // 旧规则带 translateX(-50%)，光改 left 会被它再推半个身位
+      var h = t.offsetHeight || 34;
+      // 右侧放得下就贴右侧；放不下（手机展开态占满一行）改到播放器正上方
+      var avail = window.innerWidth - (r.right + gap) - 16;
+      if (avail >= 180) {
+        t.style.width = Math.round(Math.min(328, avail)) + 'px';
+        t.style.left = Math.round(r.right + gap) + 'px';
+        t.style.top = Math.round(r.top + (r.height - h) / 2) + 'px';
+      } else {
+        t.style.width = Math.round(Math.min(328, window.innerWidth - r.left - 16)) + 'px';
+        t.style.left = Math.round(r.left) + 'px';
+        t.style.top = Math.round(r.top - h - gap) + 'px';
+      }
       t.style.bottom = 'auto';
     };
     place();
     t.__rjPlace = place;
-    if (window.ResizeObserver) {
+    (function () {
+      if (!window.ResizeObserver) return;
       var ro = new ResizeObserver(place);
-      var host = document.getElementById('nav');
+      var host = document.querySelector('.aplayer.aplayer-fixed') || document.querySelector('.aplayer');
       if (host) ro.observe(host);
       t.__rjRO = ro;
-    }
+      // 展开/收拢只改 class，rect 要等尺寸动画走完才稳，这里再兜两次
+      if (window.MutationObserver && host) {
+        var mo = new MutationObserver(function () { setTimeout(place, 60); setTimeout(place, 320); });
+        mo.observe(host, { attributes: true, attributeFilter: ['class'] });
+        t.__rjMO = mo;
+      }
+    })();
     window.addEventListener('resize', place);
     setTimeout(place, 400);
     setTimeout(place, 1500);
@@ -1130,6 +1155,7 @@
     if (t) {
       if (t.__rjTimer) clearTimeout(t.__rjTimer);
       if (t.__rjRO) { try { t.__rjRO.disconnect(); } catch (e) {} }
+      if (t.__rjMO) { try { t.__rjMO.disconnect(); } catch (e) {} }
       if (t.__rjPlace) window.removeEventListener('resize', t.__rjPlace);
       if (t.parentNode) t.parentNode.removeChild(t);
     }
