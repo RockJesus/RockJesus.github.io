@@ -669,10 +669,10 @@
       }
 
       // ============================================================
-      //  折叠态律动 V1.6.6
-      //  真实频谱优先：音乐源（QQ CDN / jsDelivr）都返回 Access-Control-Allow-Origin: *，
-      //  audio 声明匿名跨域后即可接进 Web Audio 读 FFT；拿不到（AudioContext 没解锁 /
-      //  个别源缺 CORS）就退回合成节拍，任何情况下都不影响播放与出声。
+      //  折叠态律动（V1.9.10 修正）
+      //  只有同源音频才接 Web Audio 读 FFT。网易云外链没有 CORS，接进去会被浏览器
+      //  把输出置零（进度照走、音量 100%、完全没有声音），所以这类源一律不接。
+      //  拿不到真实频谱就退回合成节拍 —— 出声永远优先于律动。
       // ============================================================
       var EQ_N = 36;                 // 环上柱子数
       var VIZ = 104;                 // 画布逻辑尺寸（CSS 侧同值，圆盘 66 → 环在圆盘外 1~15px）
@@ -683,15 +683,29 @@
       var viz = { tried: false, actx: null, an: null, data: null, raf: 0, fix: false, smooth: [] };
       for (var vi = 0; vi < EQ_N; vi++) viz.smooth.push(0);
 
+      // 只有「同源」或 data:/blob: 的音频才拿得到未污染的采样。
+      // 歌单音源是网易云外链（music.163.com → CDN），响应没有 Access-Control-Allow-Origin；
+      // 只要把它接进 createMediaElementSource，浏览器就按 CORS 规则把音频输出全部置零，
+      // 控制台报 “MediaElementAudioSource outputs zeroes due to CORS access restrictions”，
+      // 现象正是「进度在走、音量 100%、未静音，但完全没有声音」。
+      // 而且一个 audio 元素只能接一次、接上后无法回退，所以必须先判断再决定接不接。
+      function canTapAudio(u) {
+        if (!u) return false;
+        if (/^data:|^blob:/.test(u)) return true;
+        try { return new URL(u, location.href).origin === location.origin; }
+        catch (e) { return false; }
+      }
+
       function initViz() {
         if (viz.tried) return;
         viz.tried = true;
         var AC = window.AudioContext || window.webkitAudioContext;
         var au = ap.audio;
         if (!AC || !au || !eq2d) return;
+        // 拿不到 CORS 的源一律不接：宁可只有合成节拍，也不能让整首歌哑掉
+        if (!canTapAudio(au.src || '')) { viz.an = null; return; }
         try {
-          // crossOrigin 已在 APlayer 创建后立刻设好（见上），这里只在极端情况下补一次
-          if (!au.crossOrigin && !/music\.163\.com/.test(au.src || '')) au.crossOrigin = 'anonymous';
+          if (!au.crossOrigin) au.crossOrigin = 'anonymous';
           var actx = new AC();
           var srcNode = actx.createMediaElementSource(au);
           var an = actx.createAnalyser();
@@ -1441,7 +1455,8 @@
       try {
         // 网易云外链（music.163.com/song/media/outer）不返回 Access-Control-Allow-Origin，
         // 强设 anonymous 会让浏览器直接 ERR_FAILED、整首播不出声。凡是这类源一律不设，
-        // 代价是折叠态频谱律动失效（MediaElementAudioSource 只能读到 0），但歌能正常播。
+        // 并且 initViz 里也不会把它接进 AudioContext（接了会被浏览器置零成静音），
+        // 代价只是折叠态威力律动从「真实频谱」退回「合成节拍」，歌照常出声。
         var firstUrl = (list[0] && list[0].url) || '';
         if (!/music\.163\.com/.test(firstUrl) && !ap.audio.crossOrigin) {
           ap.audio.crossOrigin = 'anonymous';
