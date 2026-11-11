@@ -1716,6 +1716,28 @@
     });
   }
 
+  /* 打赏弹层：主题的 lazyload 只在滚动时把 data-lazy-src 写进 src，而弹层是从
+     display:none 变为可见、不产生滚动事件 —— 展开后三张二维码一直是 1×1 占位
+     gif（线上实测为三个空白方框）。这里在点击展开的同时手动替换 src。 */
+  function hydrateRewardPanel() {
+    document.querySelectorAll('#post .post-reward').forEach(function (rw) {
+      var btn = rw.querySelector('.reward-button');
+      if (!btn || btn.dataset.rjQr) return;
+      btn.dataset.rjQr = '1';
+      btn.addEventListener('click', function () {
+        rw.querySelectorAll('img[data-lazy-src]').forEach(function (im) {
+          var cur = im.getAttribute('src') || '';
+          if (!cur || cur.indexOf('data:image') === 0) {
+            im.removeAttribute('data-rj-fallback');
+            im.classList.remove('rj-hidden');
+            im.style.display = '';
+            im.setAttribute('src', im.getAttribute('data-lazy-src'));
+          }
+        });
+      }, { passive: true });
+    });
+  }
+
   // —— 公告卡 → 人生信条 ——
   function upgradeAnnouncement() {
     document.querySelectorAll('.card-announcement').forEach(function (card) {
@@ -2391,6 +2413,7 @@
   function rjV12Run() {
     fixErrorImgRefs();
     upgradeRewardMenus();
+    hydrateRewardPanel();
     upgradeAnnouncement();
     initLogo();
     initGlobe();
@@ -2409,6 +2432,7 @@
   document.addEventListener('pjax:complete', function () {
     fixErrorImgRefs();
     upgradeRewardMenus();
+    hydrateRewardPanel();
     upgradeAnnouncement();
     rjGlobeDone = false;
     initLogo();
