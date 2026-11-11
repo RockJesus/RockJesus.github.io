@@ -7049,3 +7049,130 @@ html #article-container blockquote::before{
   width: auto;
   max-width: none;
 }
+
+/* ============================================================
+   27. 打赏弹层精修（2026-11-11）
+   原状：面板宽度被撑到与 .post-reward 等宽（753px），三张 112px 二维码
+   之间留出大片空隙，扫码时视线要横跨半个屏幕；三张原图风格不一（微信自
+   带绿框、支付宝纯白、赞赏码深色艺术底），直接铺在深色玻璃上边界不清；
+   二维码没有独立承托面，贴在玻璃上显得轻飘。
+   做法：面板收成 fit-content 并居中于按钮；每张二维码装进同规格白卡
+   （padding 9px + 圆角 14 + 内描边），三张图视觉等权；面板保留液态玻璃，
+   补一道顶部内高光与底部投影，与全站语言一致。
+   ============================================================ */
+#post .post-reward{ position: relative; }
+
+#post .post-reward .reward-main{
+  position: absolute;
+  right: auto;
+  bottom: 100%;
+  left: 50%;
+  translate: -50% 0;            /* 用 translate 而非 transform：入场动画会占用 transform */
+  width: fit-content;
+  max-width: calc(100vw - 28px);
+  margin: 0 0 16px;
+  padding: 16px 16px 14px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, #fff 20%, var(--rj-brand-8));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 46%),
+    color-mix(in srgb, var(--rj-surface-solid) 94%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  box-shadow:
+    0 18px 44px var(--rj-shadow-6),
+    inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent);
+}
+
+#post .post-reward .reward-all{
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#post .post-reward .reward-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;           /* 主题带了 0 8px，会把三列挤出面板 */
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+/* 白卡承托：三张风格各异的原图共用同一张底 */
+#post .post-reward .reward-item > a{
+  display: block;
+  padding: 7px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, .18),
+    inset 0 0 0 1px rgba(0, 0, 0, .04);
+  transition:
+    transform .26s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .26s ease;
+}
+#post .post-reward .reward-item > a:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, .24);
+}
+
+#post .post-reward img.post-qr-code-img{
+  display: block;
+  width: 124px;
+  height: 124px;
+  margin: 0;
+  border: none;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: none;
+  object-fit: contain;
+}
+
+#post .post-reward .post-qr-code-desc{
+  margin-top: 9px;
+  color: var(--rj-text-dim);
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: .06em;
+}
+
+/* 按钮：改为描边玻璃胶囊，悬停才上渐变，避免未展开时抢视线 */
+#post .post-reward .reward-button{
+  margin: 0 auto;
+  padding: 9px 22px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--rj-brand-8) 44%, transparent);
+  background: color-mix(in srgb, var(--rj-surface-solid) 66%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  color: var(--rj-brand-6);
+  font-size: 13px;
+  letter-spacing: .08em;
+  box-shadow: 0 6px 18px var(--rj-shadow-4);
+}
+
+@media (max-width: 768px){
+  /* 小屏容器比 fit-content 窄，居中会溢出到视口外：改为铺满容器宽度 */
+  #post .post-reward .reward-main{
+    left: 0;
+    translate: none;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 8px 9px;
+    border-radius: 16px;
+    margin-bottom: 13px;
+  }
+  #post .post-reward .reward-all{ gap: 6px; }
+  /* 面板此时是定宽，用均分代替内容驱动，保证三列永远不溢出 */
+  #post .post-reward .reward-item{ flex: 1 1 0; width: 0; min-width: 0; }
+  #post .post-reward .reward-item > a{ padding: 5px; border-radius: 10px; }
+  #post .post-reward img.post-qr-code-img{ width: 78px; height: 78px; border-radius: 6px; }
+  #post .post-reward .post-qr-code-desc{ margin-top: 7px; font-size: 10.5px; letter-spacing: .03em; }
+}
