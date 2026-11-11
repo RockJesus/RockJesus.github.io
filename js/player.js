@@ -1232,11 +1232,6 @@
       document.removeEventListener('keydown', restore);
       document.removeEventListener('touchstart', restore);
     };
-      hideMutedTip();
-      document.removeEventListener('pointerdown', restore);
-      document.removeEventListener('keydown', restore);
-      document.removeEventListener('touchstart', restore);
-    };
     document.addEventListener('pointerdown', restore);
     document.addEventListener('keydown', restore);
     document.addEventListener('touchstart', restore);
