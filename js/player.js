@@ -9,13 +9,13 @@
   var PLAYLIST_URLS = [
     // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
     // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
-    '/data/playlist.json?v=2.1.0',
+    '/data/playlist.json?v=2.1.1',
     // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
     // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
     // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.0'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.1'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -852,7 +852,10 @@
           var raw = bars[k];
           var d = Math.abs(k - halfN + 0.5) / halfN;   // 0=低频 1=高频
           // 绝对分量：全局归一化，保留低频鼓点的真实起伏
-          var abs = Math.min(0.95, raw / gEnv);
+          // 上限 0.95 → 0.60：raw/gEnv 对峰值频段常年贴 1，0.95 的封顶会把 mix 抬到 0.7~0.98，
+          // 36 根柱全部顶在 44~49px（量程 2.2~16.7px），视觉上就是一圈等长的静态辐条。
+          // 压到 0.60 后绝对分量只负责托底，起伏交给下面的 AGC 相对分量。
+          var abs = Math.min(0.60, raw / gEnv);
           // 相对分量：raw ÷ 自身近期均值。1.0 = 刚好在平均水平，
           // 1.9 以上算强拍（映射到满格），0.45 以下算静音谷。
           var m0 = vizMean[k] || (raw > 0 ? raw : 0.02);
@@ -872,11 +875,10 @@
           // 12 点方向跳幅只有 0.19~1.26px，而 6 点方向有 0.44~4.31px，
           // 这就是"上半圈看着不动、下半圈在跳"的全部原因。
           // 曲线不从 0.2 线性拉到 0.82，而是 0.55 → 0.82：高频端保持用户认可的原值不动。
-          var w = 0.55 + 0.27 * d;
+          var w = 0.72 + 0.22 * d;
           var mix = abs * (1 - w) + ag * w;
-          // 补偿：abs 常年 0.95、ag 均值只有 0.38，AGC 占主导后整体会掉 2px 左右。
-          // 按 d 反向补回，让上半柱的绝对长度不变、只是跳起来。
-          var gain = 1 + 0.3 * (1 - d);
+          // 补偿：abs 封顶下调后整体会掉 5px 左右，按 d 反向补回，保持两端绝对长度大致不变。
+          var gain = 1.35 + 0.42 * (1 - d);
           // 中心柱叠加全局节拍脉冲（见 shape 开头的说明）。
           // 权重 t（1=12点 0=6点，与配色同一定义）取平方：12 点=1、±45°≈0.37、±60°≈0.11、
           // 6 点=0 —— 脉冲集中在 12 点一带，又不至于和两侧自由区之间留一圈死环。
