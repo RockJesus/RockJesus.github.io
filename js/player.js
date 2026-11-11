@@ -7,13 +7,15 @@
   // 仍返回旧歌单，而它恰恰响应最快（~250ms）——只要前一个源慢一点，它就会
   // 抢先返回旧数据，表现成「列表又变回 30 首」。宁可少一个兜底，也不要错数据。
   var PLAYLIST_URLS = [
-    // 首选 jsDelivr：带 CORS 头，浏览器能直接 fetch；实测 3s 级。
+    // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
+    // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
+    '/data/playlist.json?v=1.9.7',
+    // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
+    // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
+    // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    // ?v= 让每次发版都取新内容，绕开 jsDelivr 对 @main 的 12 小时缓存。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.7',
-    // 兜底本站构建产物：内容与上面同源一致；jsDelivr 不通时回落（要过 Envoy，慢）
-    '/data/playlist.json?v=1.9.7'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.7'
   ];
   var SEED = {
     name: 'RockJesus Station',
