@@ -9,13 +9,13 @@
   var PLAYLIST_URLS = [
     // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
     // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
-    '/data/playlist.json?v=1.9.7',
+    '/data/playlist.json?v=1.9.8',
     // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
     // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
     // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.7'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.8'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -1094,20 +1094,32 @@
     if (document.getElementById('rj-muted-tip')) return;
     // 同一访客只提示一次：这条常驻在播放器上方的提示会压住左下角卡片，
     // 每次进站都弹一遍纯属打扰。第一次看过后记在 localStorage 里。
+    // 每次会话只需提示一次：用 sessionStorage 而不是 localStorage。
+    // 用 localStorage 时「同一访客永远只看到一次」，第二次进站连提示都没有，
+    // 播放器呈暂停态却以为在播 —— 正是「已播放但没声音」的主要成因。
     var SEEN = 'rj-muted-tip-seen';
     try {
-      if (localStorage.getItem(SEEN)) return;
-      localStorage.setItem(SEEN, '1');
-    } catch (e) { /* 隐私模式下拿不到 localStorage，就每次显示 */ }
+      if (sessionStorage.getItem(SEEN)) return;
+      sessionStorage.setItem(SEEN, '1');
+    } catch (e) { /* 隐私模式下拿不到 Storage，就每次显示 */ }
     var t = document.createElement('div');
     t.id = 'rj-muted-tip';
     t.className = 'rj-muted-tip';
     t.setAttribute('role', 'status');
     t.setAttribute('aria-live', 'polite');
-    t.textContent = '🔇 音乐已自动播放 · 点击任意处开启声音';
+    // 不能写「已自动播放」：实测浏览器把静音起播也拒掉时 audio.paused 仍为 true，
+    // 文案谎称在播会让用户一直等声音。
+    t.textContent = '🔇 浏览器不允许自动出声 · 点这里开始播放';
+    t.style.cursor = 'pointer';
     document.body.appendChild(t);
-    // 8 秒自动收起。原来是「一直停留直到点击」，等于每个访客都被它压住半屏。
-    t.__rjTimer = setTimeout(hideMutedTip, 8000);
+    // 点提示条本身就是一次明确交互，直接起播（比「点任意处」更不容易被忽略）
+    t.addEventListener('click', function (e) {
+      e.stopPropagation();
+      rjKickSound();
+      hideMutedTip();
+    });
+    // 12 秒自动收起
+    t.__rjTimer = setTimeout(hideMutedTip, 12000);
     // v1.8.8 起改贴播放器右侧、垂直居中：原来在导航栏下方，首屏看像一条孤立横幅，
     // 不像在解释「声音是从哪来的」；贴回播放器旁才看得出归属。
     // 播放器展开成列表或换位时跟随，右侧空间不够就自动缩宽，不越出视口。
@@ -1194,17 +1206,32 @@
   // —— 自动播放：先正常带声播放；被浏览器拦截时转"静音自动播放"（muted 自动播放始终被允许），
   //    首次点击/按键任意处即恢复音量 —— 实现"打开网站后自动播放，无需先点击" ——
   //    注：APlayer 1.10.1 的 play() 不返回 Promise，须直接驱动 audio 元素（UI 由 audio 事件自动同步）
+  // —— 一次「解除静音并确保真的在播」的动作 ——
+  // 静音态下往往连静音起播都被浏览器拒（audio.paused 仍为 true），
+  // 只解静音会出现「点了页面却还是没声音」，所以这里解静音 + 必要时补一次 play。
+  function rjKickSound() {
+    try {
+      var cur = (typeof liveAp !== 'undefined' && liveAp) ? liveAp : (window.aplayers || [])[0];
+      var a = cur && cur.audio;
+      if (!a) return;
+      a.muted = false;
+      a.volume = RJ_FADE_FLOOR;
+      rjFadeVolume(a, 0.75, 520);
+      if (a.paused) {
+        try { if (cur.play) cur.play(); else a.play(); } catch (e) {}
+      }
+      document.body.setAttribute('data-rj-unmuted', JSON.stringify({ m: a.muted, v: a.volume }));
+    } catch (e) {}
+  }
   function unmuteLater(ap) {
     var restore = function () {
-      try {
-        if (ap.audio) {
-          ap.audio.muted = false;
-          // 从静音恢复也要淡入，不能直接砸到 0.75（原来是瞬起）
-          ap.audio.volume = RJ_FADE_FLOOR;
-          rjFadeVolume(ap.audio, 0.75, 520);
-        }
-        document.body.setAttribute('data-rj-unmuted', JSON.stringify({ m: ap.audio ? ap.audio.muted : null, v: ap.audio ? ap.audio.volume : null }));
-      } catch (e) {}
+      var cur = (typeof liveAp !== 'undefined' && liveAp) ? liveAp : ap;
+      rjKickSound();
+      hideMutedTip();
+      document.removeEventListener('pointerdown', restore);
+      document.removeEventListener('keydown', restore);
+      document.removeEventListener('touchstart', restore);
+    };
       hideMutedTip();
       document.removeEventListener('pointerdown', restore);
       document.removeEventListener('keydown', restore);
