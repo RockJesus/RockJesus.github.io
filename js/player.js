@@ -10,7 +10,7 @@
     // 只信任本站构建产物。素材仓那份是 3067 首 QQ 直链，vkey 已全面失效
     // （CDN 直接返回 error -1011），回落到它等于把 3000 条死链塞进列表，
     // 比只有一首种子曲更糟。整份歌单为空时下面会退回 [SEED]。
-    '/data/playlist.json?v=1.9.4'
+    '/data/playlist.json?v=1.9.5'
   ];
   var SEED = {
     name: 'RockJesus Station',
