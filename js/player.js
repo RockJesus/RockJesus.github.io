@@ -7,11 +7,13 @@
   // 仍返回旧歌单，而它恰恰响应最快（~250ms）——只要前一个源慢一点，它就会
   // 抢先返回旧数据，表现成「列表又变回 30 首」。宁可少一个兜底，也不要错数据。
   var PLAYLIST_URLS = [
-    // 首选 GitHub 直连：走 raw 约 0.5s，而本站要过一次 Envoy 回源 GitPage（实测 14~30s）。
-    // 两者内容完全同源（都是仓库里的 source/data/playlist.json），不会出现数据分叉。
-    'https://raw.githubusercontent.com/RockJesus/rockjesus-blog/main/source/data/playlist.json',
-    // 兜底本站构建产物：raw 在部分网络下不通时回落，内容与上面一致。
-    '/data/playlist.json?v=1.9.5'
+    // 首选 jsDelivr：带 CORS 头，浏览器能直接 fetch；实测 3s 级。
+    // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
+    // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
+    // ?v= 让每次发版都取新内容，绕开 jsDelivr 对 @main 的 12 小时缓存。
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.6',
+    // 兜底本站构建产物：内容与上面同源一致；jsDelivr 不通时回落（要过 Envoy，慢）
+    '/data/playlist.json?v=1.9.6'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -620,7 +622,7 @@
         if (!AC || !au || !eq2d) return;
         try {
           // crossOrigin 已在 APlayer 创建后立刻设好（见上），这里只在极端情况下补一次
-          if (!au.crossOrigin) au.crossOrigin = 'anonymous';
+          if (!au.crossOrigin && !/music\.163\.com/.test(au.src || '')) au.crossOrigin = 'anonymous';
           var actx = new AC();
           var srcNode = actx.createMediaElementSource(au);
           var an = actx.createAnalyser();
@@ -650,7 +652,7 @@
           if (!au || !au.crossOrigin) return;
           viz.fix = true;
           viz.an = null;
-          try { au.crossOrigin = null; au.load(); } catch (e) {}
+          try { au.removeAttribute('crossOrigin'); au.load(); } catch (e) {}
         });
       }
 
@@ -1337,7 +1339,13 @@
     //    此时音频还没播，重新 load 一次不会打断任何播放。
     if (ap.audio) {
       try {
-        if (!ap.audio.crossOrigin) ap.audio.crossOrigin = 'anonymous';
+        // 网易云外链（music.163.com/song/media/outer）不返回 Access-Control-Allow-Origin，
+        // 强设 anonymous 会让浏览器直接 ERR_FAILED、整首播不出声。凡是这类源一律不设，
+        // 代价是折叠态频谱律动失效（MediaElementAudioSource 只能读到 0），但歌能正常播。
+        var firstUrl = (list[0] && list[0].url) || '';
+        if (!/music\.163\.com/.test(firstUrl) && !ap.audio.crossOrigin) {
+          ap.audio.crossOrigin = 'anonymous';
+        }
         if (ap.audio.src && ap.audio.paused) ap.audio.load();
       } catch (e) {}
     }
