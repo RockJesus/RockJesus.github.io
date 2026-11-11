@@ -1724,6 +1724,12 @@
       var btn = rw.querySelector('.reward-button');
       if (!btn || btn.dataset.rjQr) return;
       btn.dataset.rjQr = '1';
+      /* 预热：页面一打开就开始请求三张二维码，用户点开时直接命中缓存，
+         避免弹层展开后还要现下 90KB 而出现的空白方框 */
+      rw.querySelectorAll('img[data-lazy-src]').forEach(function (im) {
+        var u = im.getAttribute('data-lazy-src');
+        if (u) { var pre = new Image(); pre.decoding = 'async'; pre.src = u; }
+      });
       btn.addEventListener('click', function () {
         rw.querySelectorAll('img[data-lazy-src]').forEach(function (im) {
           var cur = im.getAttribute('src') || '';
