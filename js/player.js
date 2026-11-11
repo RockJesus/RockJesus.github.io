@@ -9,13 +9,13 @@
   var PLAYLIST_URLS = [
     // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
     // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
-    '/data/playlist.json?v=1.9.8',
+    '/data/playlist.json?v=1.9.9',
     // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
     // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
     // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.8'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.9'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -150,14 +150,14 @@
     // 改为在「对数域」插值：dB 线性变化，听感才是匀速的淡入淡出。
     //   gain(k) = 10^((1-k)·lg(peak) + k·lg(floor))
     //   50% 时间点听觉约 48%，全程均匀下降。
-    var RJ_VOL = 0.75;            // 常态音量（也是音量滑块的最大值基准）
+    var RJ_VOL = 1;               // 默认音量拉满（用户可在音量滑块上自行调低）
     var RJ_FLOOR = 0.0001;        // 淡出终点 = -80dB，等同静音，避免 log(0)
     var RJ_FADE_IN = 520;         // 稍拉长，对数曲线下更好听
     var RJ_FADE_OUT = 420;
     var rjFadeTimer = null, rjPendingPause = false;
     // 「用户音量」：滑块/接口设定的目标音量。淡入淡出只临时压低实际音量，
     // 结束后必须回到这里，而不是写死 RJ_VOL —— 否则用户调过音量会被重置。
-    var rjUserVol = RJ_VOL;
+    var rjUserVol = (typeof rjGV === 'number' && isFinite(rjGV)) ? rjGV : RJ_VOL;
     function rjClamp(v) { return Math.max(0, Math.min(1, v)); }
 
     function rjFadeTo(target, ms, done) {
@@ -211,6 +211,9 @@
     ap.on('play', function () {
       rjPendingPause = false;             // 新的播放意图作废挂起的淡出暂停
       var a = ap.audio; if (!a) return;
+      // 「进度在走却没声音」最常见就是 muted 残留：只要用户确实按了播放，
+      // 就保证没被静音卡住（用户主动拖到 0 时尊重其静音意图）
+      if (a.muted && rjUserVol > 0) a.muted = false;
       // 只在实际音量高于起点时才淡入：用户把音量调到很低时不该被「抬」起来
       if (a.volume > rjUserVol * 0.9) a.volume = RJ_FLOOR;
       rjFadeTo(rjUserVol, RJ_FADE_IN);
@@ -588,6 +591,10 @@
           '<button type="button" data-a="toggle" class="rj-pl-main" title="播放 / 暂停">' + svg(P.play) + '</button>' +
           '<button type="button" data-a="next" title="下一首">' + svg(P.next) + '</button>' +
           '<button type="button" data-a="list" title="播放列表">' + svg(P.list) + '</button>' +
+          '<div class="rj-pl-vol" title="音量 · 拖动调节" role="slider" tabindex="0" ' +
+               'aria-label="音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">' +
+            '<span class="rj-pl-vol-fill"></span>' +
+          '</div>' +
         '</div>';
       body.insertBefore(root, body.firstChild);
       row = root;
@@ -600,6 +607,66 @@
       var elFill = root.querySelector('.rj-pl-fill');
       var elBar = root.querySelector('.rj-pl-bar');
       var mainBtn = root.querySelector('.rj-pl-main');
+
+      // ============================================================
+      //  音量滑块 V1.9.9
+      //  默认拉满（RJ_VOL = 1），可拖动；拖动值同时写进 rjUserVol（本函数）
+      //  和 rjGV（模块级），起播/淡入/切歌才会回到用户设定的音量而不是旧默认值。
+      // ============================================================
+      var elVol = root.querySelector('.rj-pl-vol');
+      var volApply = function (v, persist) {
+        v = Math.max(0, Math.min(1, v));
+        rjUserVol = v;
+        rjGV = v;
+        var a = ap.audio;
+        if (a) {
+          a.muted = v <= 0.001;      // 只有真拖到 0 才静音
+          a.volume = v;
+        }
+        if (elVol) {
+          var f = elVol.querySelector('.rj-pl-vol-fill');
+          if (f) f.style.width = (v * 100) + '%';
+          elVol.setAttribute('aria-valuenow', String(Math.round(v * 100)));
+        }
+        if (persist) { try { localStorage.setItem('rjVol', String(v)); } catch (e) {} }
+      };
+      if (elVol) {
+        volApply(rjGV, false);
+        var volDrag = false;
+        var volAt = function (e) {
+          var r = elVol.getBoundingClientRect();
+          return r.width ? (e.clientX - r.left) / r.width : 0;
+        };
+        elVol.addEventListener('pointerdown', function (e) {
+          // 必须阻止冒泡：document 上的 pointerdown 是「解静音并起播」，
+          // 它会把音量写回 rjGV，正在拖的滑块会被立刻拉回去
+          e.stopPropagation();
+          volDrag = true;
+          try { elVol.setPointerCapture(e.pointerId); } catch (err) {}
+          volApply(volAt(e), true);
+        });
+        elVol.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+        elVol.addEventListener('pointermove', function (e) {
+          if (!volDrag) return;
+          e.stopPropagation();
+          volApply(volAt(e), false);
+        });
+        elVol.addEventListener('pointerup', function (e) {
+          if (!volDrag) return;
+          volDrag = false;
+          volApply(volAt(e), true);
+        });
+        elVol.addEventListener('pointercancel', function () {
+          if (volDrag) { volDrag = false; volApply(rjGV, true); }
+        });
+        elVol.addEventListener('keydown', function (e) {
+          var step = (e.key === 'ArrowRight' || e.key === 'ArrowUp') ? 0.05 :
+                     (e.key === 'ArrowLeft' || e.key === 'ArrowDown') ? -0.05 : 0;
+          if (!step) return;
+          e.preventDefault();
+          volApply(rjGV + step, true);
+        });
+      }
 
       // ============================================================
       //  折叠态律动 V1.6.6
@@ -1203,6 +1270,15 @@
     return function cancel() { if (timer) clearTimeout(timer); };
   }
 
+  // —— 全局用户音量（模块级）——
+  // decorate() 里的 rjUserVol 只活在那个函数的作用域里，而 rjKickSound / autoPlay
+  // 是模块级函数，必须有一个双方都能读到的音量值，否则「点一下起播」永远淡入到旧默认值。
+  var rjGV = 1;
+  try {
+    var gv0 = parseFloat(localStorage.getItem('rjVol'));
+    if (isFinite(gv0) && gv0 >= 0 && gv0 <= 1) rjGV = gv0;
+  } catch (e) {}
+
   // —— 自动播放：先正常带声播放；被浏览器拦截时转"静音自动播放"（muted 自动播放始终被允许），
   //    首次点击/按键任意处即恢复音量 —— 实现"打开网站后自动播放，无需先点击" ——
   //    注：APlayer 1.10.1 的 play() 不返回 Promise，须直接驱动 audio 元素（UI 由 audio 事件自动同步）
@@ -1215,8 +1291,8 @@
       var a = cur && cur.audio;
       if (!a) return;
       a.muted = false;
-      a.volume = RJ_FADE_FLOOR;
-      rjFadeVolume(a, 0.75, 520);
+      a.volume = Math.min(RJ_FADE_FLOOR, rjGV) || RJ_FADE_FLOOR;
+      rjFadeVolume(a, rjGV, 520);
       if (a.paused) {
         try { if (cur.play) cur.play(); else a.play(); } catch (e) {}
       }
@@ -1245,10 +1321,10 @@
       a.volume = RJ_FADE_FLOOR;
       var p = a.play();
       if (p && p.then) {
-        p.then(function () { rjFadeVolume(a, 0.75, 520); }).catch(function () {});
+        p.then(function () { rjFadeVolume(a, rjGV, 520); }).catch(function () {});
       } else {
         // 老浏览器没有 Promise：直接起播后立刻淡入（play 是同步启动的）
-        rjFadeVolume(a, 0.75, 520);
+        rjFadeVolume(a, rjGV, 520);
       }
       if (p && p.catch) {
         p.catch(function () {
@@ -1347,7 +1423,7 @@
       loop: 'all',
       order: 'random',
       preload: 'none',
-      volume: 0.75,
+      volume: 1,
       mutex: true,
       listFolded: true,
       listMaxHeight: 260,
@@ -1453,7 +1529,7 @@
         loop: 'all',
         order: 'random',
         preload: 'none',
-        volume: 0.75,
+        volume: 1,
         mutex: true,
         listFolded: true,
         listMaxHeight: 260,

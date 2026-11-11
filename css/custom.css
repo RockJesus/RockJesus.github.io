@@ -923,6 +923,59 @@ img {
   height: 19px;
   filter: drop-shadow(0 0 7px rgba(139, 92, 246, 0.7));
 }
+/* —— 音量滑块 V1.9.9 ——
+   细长矩形轨道 + 直角指示条：不引入任何圆形元素（封面区不允许被圆形控件占用）。 */
+.rj-pl-vol {
+  flex: none;
+  position: relative;
+  width: 54px;
+  height: 18px;
+  margin-left: 5px;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+}
+.rj-pl-vol::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 2px;
+  background: rgba(232, 238, 252, 0.2);
+}
+.rj-pl-vol-fill {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  width: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--rj-brand), var(--rj-brand-2));
+  transition: width 0.08s linear;
+}
+.rj-pl-vol-fill::after {
+  content: '';
+  position: absolute;
+  right: -1.5px;
+  top: -5px;
+  width: 3px;
+  height: 14px;
+  border-radius: 1px;
+  background: #fff;
+  opacity: 0.92;
+}
+.rj-pl-vol:hover .rj-pl-vol-fill,
+.rj-pl-vol:focus-visible .rj-pl-vol-fill {
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}
+/* 窄屏放不下控件区：隐藏滑块，播放器仍按默认满音量出声 */
+@media (max-width: 560px) {
+  .rj-pl-vol { display: none; }
+}
 .rj-pl-btns .rj-pl-main:hover {
   background: rgba(139, 92, 246, 0.18);   /* hover 只给一层很淡的底，不遮任何内容 */
   color: #fff;
