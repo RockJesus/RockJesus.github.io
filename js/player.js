@@ -11,9 +11,9 @@
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
     // ?v= 让每次发版都取新内容，绕开 jsDelivr 对 @main 的 12 小时缓存。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.6',
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=1.9.7',
     // 兜底本站构建产物：内容与上面同源一致；jsDelivr 不通时回落（要过 Envoy，慢）
-    '/data/playlist.json?v=1.9.6'
+    '/data/playlist.json?v=1.9.7'
   ];
   var SEED = {
     name: 'RockJesus Station',
