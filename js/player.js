@@ -7,9 +7,10 @@
   // 仍返回旧歌单，而它恰恰响应最快（~250ms）——只要前一个源慢一点，它就会
   // 抢先返回旧数据，表现成「列表又变回 30 首」。宁可少一个兜底，也不要错数据。
   var PLAYLIST_URLS = [
-    // 只信任本站构建产物。素材仓那份是 3067 首 QQ 直链，vkey 已全面失效
-    // （CDN 直接返回 error -1011），回落到它等于把 3000 条死链塞进列表，
-    // 比只有一首种子曲更糟。整份歌单为空时下面会退回 [SEED]。
+    // 首选 GitHub 直连：走 raw 约 0.5s，而本站要过一次 Envoy 回源 GitPage（实测 14~30s）。
+    // 两者内容完全同源（都是仓库里的 source/data/playlist.json），不会出现数据分叉。
+    'https://raw.githubusercontent.com/RockJesus/rockjesus-blog/main/source/data/playlist.json',
+    // 兜底本站构建产物：raw 在部分网络下不通时回落，内容与上面一致。
     '/data/playlist.json?v=1.9.5'
   ];
   var SEED = {
