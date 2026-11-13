@@ -9,13 +9,13 @@
   var PLAYLIST_URLS = [
     // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
     // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
-    '/data/playlist.json?v=2.1.3',
+    '/data/playlist.json?v=2.1.4',
     // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
     // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
     // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.3'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.4'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -587,7 +587,15 @@
                   '<path d="M16.4 13.4 19 16.1 21.6 13.4" stroke="currentColor" fill="none"/>',
         single: '<circle cx="12" cy="12" r="8.2" stroke="currentColor" fill="none"/>' +
                 '<path d="M10.6 9.3 12.6 7.9v8.3" stroke="currentColor" fill="none"/>' +
-                '<path d="M10.1 16.2h4.9" stroke="currentColor" fill="none"/>'
+                '<path d="M10.1 16.2h4.9" stroke="currentColor" fill="none"/>',
+        /* —— 音量图标（V2.1.4）——
+           实心喇叭 + 弧线声波；弧线用 stroke，CSS 对 path[stroke] 单独豁免 fill，
+           否则开放弧线会被刷成实心块。mute 版把两条声波换成一把叉。 */
+        volume: '<path d="M4.4 9.4h2.6l3.4-2.6a0.85 0.85 0 0 1 1.4 0.7v9a0.85 0.85 0 0 1-1.4 0.7L7 14.6H4.4a0.9 0.9 0 0 1-0.9-0.9v-3.4a0.9 0.9 0 0 1 0.9-0.9z"/>' +
+                '<path d="M16.2 8.5a5.2 5.2 0 0 1 0 7" stroke="currentColor" fill="none"/>' +
+                '<path d="M18.8 6.1a8.9 8.9 0 0 1 0 11.8" stroke="currentColor" fill="none"/>',
+        mute: '<path d="M4.4 9.4h2.6l3.4-2.6a0.85 0.85 0 0 1 1.4 0.7v9a0.85 0.85 0 0 1-1.4 0.7L7 14.6H4.4a0.9 0.9 0 0 1-0.9-0.9v-3.4a0.9 0.9 0 0 1 0.9-0.9z"/>' +
+              '<path d="M15.7 9.2 21.1 14.6M21.1 9.2 15.7 14.6" stroke="currentColor" fill="none"/>'
       };
       // d 以 '<' 开头时按原始图形插入（圆角矩形等），否则当作单条 path
       var svg = function (d) {
@@ -611,16 +619,24 @@
           '</div>' +
           '<div class="rj-pl-bar"><span class="rj-pl-fill"><i class="rj-pl-thumb"></i></span></div>' +
         '</div>' +
-        '<div class="rj-pl-btns">' +
-          '<button type="button" data-a="prev" title="上一首">' + svg(P.prev) + '</button>' +
-          '<button type="button" data-a="toggle" class="rj-pl-main" title="播放 / 暂停">' + svg(P.play) + '</button>' +
-          '<button type="button" data-a="next" title="下一首">' + svg(P.next) + '</button>' +
-          '<button type="button" data-a="list" title="播放列表">' + svg(P.list) + '</button>' +
-          '<button type="button" data-a="mode" class="rj-pl-mode" ' +
-               'title="随机播放 · 点击切换" aria-label="随机播放">' + svg(P.shuffle) + '</button>' +
-          '<div class="rj-pl-vol" title="音量 · 拖动调节" role="slider" tabindex="0" ' +
-               'aria-label="音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">' +
-            '<span class="rj-pl-vol-fill"></span>' +
+        /* 右侧控制区（V2.1.4）：上排播放控制、下排音量，整体靠右对齐。
+           meta 独占左侧剩下的宽度，歌名不再被一排控件挤成省略号。 */
+        '<div class="rj-pl-ctrl">' +
+          '<div class="rj-pl-btns">' +
+            '<button type="button" data-a="prev" title="上一首">' + svg(P.prev) + '</button>' +
+            '<button type="button" data-a="toggle" class="rj-pl-main" title="播放 / 暂停">' + svg(P.play) + '</button>' +
+            '<button type="button" data-a="next" title="下一首">' + svg(P.next) + '</button>' +
+            '<button type="button" data-a="list" title="播放列表">' + svg(P.list) + '</button>' +
+            '<button type="button" data-a="mode" class="rj-pl-mode" ' +
+                 'title="随机播放 · 点击切换" aria-label="随机播放">' + svg(P.shuffle) + '</button>' +
+          '</div>' +
+          '<div class="rj-pl-volrow">' +
+            '<span class="rj-pl-volicon" aria-hidden="true">' + svg(P.volume) + '</span>' +
+            '<div class="rj-pl-vol" title="音量 · 拖动调节" role="slider" tabindex="0" ' +
+                 'aria-label="音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">' +
+              '<span class="rj-pl-vol-fill"></span>' +
+            '</div>' +
+            '<span class="rj-pl-volpct">100%</span>' +
           '</div>' +
         '</div>';
       body.insertBefore(root, body.firstChild);
@@ -641,6 +657,9 @@
       //  和 rjGV（模块级），起播/淡入/切歌才会回到用户设定的音量而不是旧默认值。
       // ============================================================
       var elVol = root.querySelector('.rj-pl-vol');
+      var elVolIcon = root.querySelector('.rj-pl-volicon');
+      var elVolPct = root.querySelector('.rj-pl-volpct');
+      var volMuted = null;              // null = 图标还没画过，首次一定要渲染
       var volApply = function (v, persist) {
         v = Math.max(0, Math.min(1, v));
         rjUserVol = v;
@@ -655,6 +674,14 @@
           if (f) f.style.width = (v * 100) + '%';
           elVol.setAttribute('aria-valuenow', String(Math.round(v * 100)));
         }
+        // 喇叭图标只在「有声 / 静音」翻转时重画，拖动过程中不重建 DOM
+        var muted = v <= 0.001;
+        if (elVolIcon && muted !== volMuted) {
+          volMuted = muted;
+          elVolIcon.innerHTML = svg(muted ? P.mute : P.volume);
+          elVolIcon.classList.toggle('is-mute', muted);
+        }
+        if (elVolPct) elVolPct.textContent = String(Math.round(v * 100)) + '%';
         if (persist) { try { localStorage.setItem('rjVol', String(v)); } catch (e) {} }
       };
       if (elVol) {
