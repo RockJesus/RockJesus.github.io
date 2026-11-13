@@ -9,13 +9,13 @@
   var PLAYLIST_URLS = [
     // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
     // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
-    '/data/playlist.json?v=2.1.6',
+    '/data/playlist.json?v=2.1.7',
     // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
     // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
     // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.6'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.7'
   ];
   var SEED = {
     name: 'RockJesus Station',
