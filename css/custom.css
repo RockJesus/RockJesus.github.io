@@ -890,7 +890,7 @@ img {
 .rj-pl-btns {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 }
 .rj-pl-btns button {
   width: 26px;
@@ -1067,10 +1067,6 @@ img {
   color: #fff;
   transform: translateY(-1px) scale(1.06);
   box-shadow: none;
-}
-.rj-pl.rj-pl-haslist .rj-pl-btns [data-a="list"] {
-  background: color-mix(in srgb, var(--rj-brand) 16%, transparent);
-  color: #fff;
 }
 
 /* —— 播放列表面板 —— */

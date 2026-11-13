@@ -9,13 +9,13 @@
   var PLAYLIST_URLS = [
     // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
     // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
-    '/data/playlist.json?v=2.1.4',
+    '/data/playlist.json?v=2.1.5',
     // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
     // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
     // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.4'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.5'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -546,10 +546,6 @@
       if (!listEl) return;
       try { ap.list.hide(); } catch (e) { listEl.style.display = 'none'; }
     }
-    function toggleList() {
-      if (!listEl) return;
-      if (listHidden()) { showList(); } else { hideList(); }
-    }
     function isCollapsed() {
       return container.classList.contains('rj-pl-collapsed');
     }
@@ -574,7 +570,6 @@
                '<rect x="13.4" y="5.2" width="3.4" height="13.6" rx="1.7"/>',
         prev: 'M7 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zm10.6.7a1 1 0 0 1 1.5.8v10.8a1 1 0 0 1-1.5.8l-7.6-5.4a1 1 0 0 1 0-1.6l7.6-5.4z',
         next: 'M17 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zM5.9 6.7a1 1 0 0 1 1.5-.8l7.6 5.4a1 1 0 0 1 0 1.6l-7.6 5.4a1 1 0 0 1-1.5-.8V6.7z',
-        list: 'M4 6h2v2H4V6zm4 0h12v2H8V6zm-4 5h2v2H4v-2zm4 0h12v2H8v-2zm-4 5h2v2H4v-2zm4 0h12v2H8v-2z',
         /* —— 播放模式三态图标（V2.1.3）——
            用 stroke 画线，CSS 里对 [stroke] 的 path 单独豁免了全局 fill:currentColor，
            否则开放路径会被填成实心块。 */
@@ -620,13 +615,13 @@
           '<div class="rj-pl-bar"><span class="rj-pl-fill"><i class="rj-pl-thumb"></i></span></div>' +
         '</div>' +
         /* 右侧控制区（V2.1.4）：上排播放控制、下排音量，整体靠右对齐。
-           meta 独占左侧剩下的宽度，歌名不再被一排控件挤成省略号。 */
+           meta 独占左侧剩下的宽度，歌名不再被一排控件挤成省略号。
+           V2.1.5：播放列表常态展开，去掉列表开关按钮，上排只留 前/播/后/模式。 */
         '<div class="rj-pl-ctrl">' +
           '<div class="rj-pl-btns">' +
             '<button type="button" data-a="prev" title="上一首">' + svg(P.prev) + '</button>' +
             '<button type="button" data-a="toggle" class="rj-pl-main" title="播放 / 暂停">' + svg(P.play) + '</button>' +
             '<button type="button" data-a="next" title="下一首">' + svg(P.next) + '</button>' +
-            '<button type="button" data-a="list" title="播放列表">' + svg(P.list) + '</button>' +
             '<button type="button" data-a="mode" class="rj-pl-mode" ' +
                  'title="随机播放 · 点击切换" aria-label="随机播放">' + svg(P.shuffle) + '</button>' +
           '</div>' +
@@ -1217,18 +1212,11 @@
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
         rjSkip(1);
       });
-      var listBtn = root.querySelector('[data-a="list"]');
-      listBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleList(); });
-      // 展开态卡片空白处：单击播放/暂停，双击开/关播放列表
+      // 展开态卡片空白处：单击播放/暂停（播放列表常显，不再提供开关手势）
       root.addEventListener('click', function (e) {
         if (isCollapsed() || isInteractive(e.target)) return;
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
         singleTimer = setTimeout(function () { singleTimer = null; togglePlay(); }, 230);
-      });
-      root.addEventListener('dblclick', function (e) {
-        if (isCollapsed() || isInteractive(e.target)) return;
-        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
-        toggleList();
       });
       // 点页面其它任何地方 → 自动折叠（用 pointerdown 捕获，菜单/皮肤点击也能立刻响应）
       document.addEventListener('pointerdown', function (e) {
@@ -1244,12 +1232,6 @@
       on('ended', syncPlayIcon);
       on('loadedmetadata', syncProgress);
       if (ap.audio) ap.audio.addEventListener('timeupdate', syncProgress);
-      // 歌单显隐 → 列表按钮保持高亮
-      if (listEl && window.MutationObserver) {
-        new MutationObserver(function () {
-          root.classList.toggle('rj-pl-haslist', !listHidden());
-        }).observe(listEl, { attributes: true, attributeFilter: ['style', 'class'] });
-      }
       if (!root.style.getPropertyValue('--rj-pl-cover')) {
         root.style.setProperty('--rj-pl-cover', 'url("' + SEED.cover + '")');
         // 初始态就是默认标签 → 直接标上「不旋转」，避免首帧转一下再停
