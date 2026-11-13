@@ -7329,7 +7329,7 @@ html #article-container blockquote::before{
                100% @92% 108% 白 4.95% → 透明 58%
      发丝边    1px 白 10%
      圆角      18px
-     背景虚化  blur(40px) saturate(112%) brightness(.92)
+     背景虚化  blur(34px) saturate(160%) brightness(.98)
      投影      0 8px 32px #020617 35%
      内高光    inset 0 0 0 1px 白 42% + inset 0 0 24px 白 10%
    ============================================================================ */
@@ -7337,21 +7337,21 @@ html #content-inner > #page,
 html #content-inner > #archive,
 html #content-inner > #post,
 html #error-wrap .error-content {
-  background-color: color-mix(in srgb, var(--rjp-white) 3%, transparent) !important;
+  background-color: color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
   background-image:
     radial-gradient(140% 120% at 22% -10%,
-      color-mix(in srgb, var(--rjp-white) 7.65%, transparent) 0%,
+      color-mix(in srgb, var(--rjp-white) 11%, transparent) 0%,
       transparent 62%),
     radial-gradient(100% 90% at 92% 108%,
-      color-mix(in srgb, var(--rjp-white) 4.95%, transparent) 0%,
+      color-mix(in srgb, var(--rjp-white) 8%, transparent) 0%,
       transparent 58%) !important;
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 10%, transparent) !important;
+  border: 0 !important;
   border-radius: var(--rj-radius-lg, 18px) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(112%) brightness(.92) !important;
-          backdrop-filter: blur(40px) saturate(112%) brightness(.92) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(160%) brightness(.98) !important;
+          backdrop-filter: blur(34px) saturate(160%) brightness(.98) !important;
   box-shadow:
     0 8px 32px color-mix(in srgb, var(--rj-ink-shadow) 35%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 42%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 26%, transparent),
     inset 0 0 24px color-mix(in srgb, var(--rjp-white) 10%, transparent) !important;
 }
 
@@ -7366,4 +7366,17 @@ html #archive .article-sort-item.year:first-child {
   margin-top: 0;
   padding-top: 0;
   border-top: 0;
+}
+
+/* ============================================================================
+   v2.1.9 · 补充：侧栏小卡文字提纯
+   ----------------------------------------------------------------------------
+   参考图里「人生信条」正文是纯白实心字，本站原为 rgba(196,205,255,.88)
+   （偏淡蓝 + 88% 不透明），在毛玻璃亮底上会显得发灰。这里只提亮侧栏卡正文，
+   保留「∞ Keep exploring」的品牌紫链接色不动。
+   ============================================================================ */
+html #aside-content .card-widget.card-announcement,
+html #aside-content .card-widget.card-announcement .announcement_content,
+html #aside-content .card-widget.card-announcement p{
+  color: rgba(255, 255, 255, .94) !important;
 }
