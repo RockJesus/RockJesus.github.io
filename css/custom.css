@@ -4848,7 +4848,7 @@ body {
   background-image: none;
   animation: none;
   -webkit-animation: none;
-  border-top: 1px solid var(--rj-hairline-3);
+  border-top: 0;
   border-radius: 0;
   font-size: 13px;
   /* 主题给的上下留白配渐变底刚好，配纯深色就成了一块 270px 高的空黑板 */

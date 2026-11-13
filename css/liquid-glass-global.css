@@ -732,7 +732,7 @@ html #footer{
   -webkit-backdrop-filter: blur(56px) saturate(125%) brightness(0.92) !important;
 
   border: none !important;
-  border-top: 1px solid color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
+  border-top: 0 !important;
   box-shadow:
     0 -1px 0 color-mix(in srgb, var(--rjp-white) 18%, transparent),
     inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 26%, transparent) !important;
