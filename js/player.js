@@ -9,13 +9,13 @@
   var PLAYLIST_URLS = [
     // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
     // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
-    '/data/playlist.json?v=2.1.2',
+    '/data/playlist.json?v=2.1.3',
     // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
     // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
     // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.2'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.3'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -112,6 +112,15 @@
     var n = (ap && ap.list && ap.list.audios && ap.list.audios.length) || 0;
     var pool = [];
     for (var i = 0; i < n; i++) if (rjIsPlayable(ap, i)) pool.push(i);
+    if (!pool.length) return -1;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  // 随机模式下「下一首」用：在可播池里挑，且避开当前这首（否则有概率原地不动）
+  function rjRandomPlayableExcept(ap, exclude) {
+    var n = (ap && ap.list && ap.list.audios && ap.list.audios.length) || 0;
+    var pool = [];
+    for (var i = 0; i < n; i++) if (i !== exclude && rjIsPlayable(ap, i)) pool.push(i);
     if (!pool.length) return -1;
     return pool[Math.floor(Math.random() * pool.length)];
   }
@@ -245,7 +254,10 @@
       if (n < 2) return false;
       // 不能直接用 skipForward/skipBack：它们按列表顺序走，会落在不可播曲目上。
       // 这里沿同一方向线性找最近的可用曲目（环形，避开当前）。
-      var target = rjFindPlayable(ap, ap.list.index, dir);
+      // 随机模式下「下一首」改成真随机跳，否则按下去和顺序播放没区别。
+      var target = (dir > 0 && rjPlayMode === 'random')
+        ? rjRandomPlayableExcept(ap, ap.list.index)
+        : rjFindPlayable(ap, ap.list.index, dir);
       if (target < 0) return false;
       var wasPlaying = forcePlay || !!(ap.audio && !ap.audio.paused);
       try { ap.list.switch(target); } catch (e) { return false; }
@@ -562,7 +574,20 @@
                '<rect x="13.4" y="5.2" width="3.4" height="13.6" rx="1.7"/>',
         prev: 'M7 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zm10.6.7a1 1 0 0 1 1.5.8v10.8a1 1 0 0 1-1.5.8l-7.6-5.4a1 1 0 0 1 0-1.6l7.6-5.4z',
         next: 'M17 6a1 1 0 0 1 2 0v12a1 1 0 1 1-2 0V6zM5.9 6.7a1 1 0 0 1 1.5-.8l7.6 5.4a1 1 0 0 1 0 1.6l-7.6 5.4a1 1 0 0 1-1.5-.8V6.7z',
-        list: 'M4 6h2v2H4V6zm4 0h12v2H8V6zm-4 5h2v2H4v-2zm4 0h12v2H8v-2zm-4 5h2v2H4v-2zm4 0h12v2H8v-2z'
+        list: 'M4 6h2v2H4V6zm4 0h12v2H8V6zm-4 5h2v2H4v-2zm4 0h12v2H8v-2zm-4 5h2v2H4v-2zm4 0h12v2H8v-2z',
+        /* —— 播放模式三态图标（V2.1.3）——
+           用 stroke 画线，CSS 里对 [stroke] 的 path 单独豁免了全局 fill:currentColor，
+           否则开放路径会被填成实心块。 */
+        shuffle: '<path d="M3.5 7.2h2.9c.8 0 1.5.4 2 1l6.4 8c.5.6 1.2 1 2 1h3.6" stroke="currentColor" fill="none"/>' +
+                 '<path d="M3.5 16.8h2.9c.8 0 1.5-.4 2-1l6.4-8c.5-.6 1.2-1 2-1h3.6" stroke="currentColor" fill="none"/>' +
+                 '<path d="M17.9 4.1 20.4 6.4 17.9 8.7" stroke="currentColor" fill="none"/>' +
+                 '<path d="M17.9 15.3 20.4 17.6 17.9 19.9" stroke="currentColor" fill="none"/>',
+        sequence: '<path d="M4 6.2h9M4 12h9M4 17.8h6" stroke="currentColor" fill="none"/>' +
+                  '<path d="M19 5.2v10.8" stroke="currentColor" fill="none"/>' +
+                  '<path d="M16.4 13.4 19 16.1 21.6 13.4" stroke="currentColor" fill="none"/>',
+        single: '<circle cx="12" cy="12" r="8.2" stroke="currentColor" fill="none"/>' +
+                '<path d="M10.6 9.3 12.6 7.9v8.3" stroke="currentColor" fill="none"/>' +
+                '<path d="M10.1 16.2h4.9" stroke="currentColor" fill="none"/>'
       };
       // d 以 '<' 开头时按原始图形插入（圆角矩形等），否则当作单条 path
       var svg = function (d) {
@@ -591,6 +616,8 @@
           '<button type="button" data-a="toggle" class="rj-pl-main" title="播放 / 暂停">' + svg(P.play) + '</button>' +
           '<button type="button" data-a="next" title="下一首">' + svg(P.next) + '</button>' +
           '<button type="button" data-a="list" title="播放列表">' + svg(P.list) + '</button>' +
+          '<button type="button" data-a="mode" class="rj-pl-mode" ' +
+               'title="随机播放 · 点击切换" aria-label="随机播放">' + svg(P.shuffle) + '</button>' +
           '<div class="rj-pl-vol" title="音量 · 拖动调节" role="slider" tabindex="0" ' +
                'aria-label="音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">' +
             '<span class="rj-pl-vol-fill"></span>' +
@@ -665,6 +692,54 @@
           if (!step) return;
           e.preventDefault();
           volApply(rjGV + step, true);
+        });
+      }
+
+      // ============================================================
+      //  播放模式三态（V2.1.3）
+      //  随机 → 顺序 → 单曲循环，单按钮循环切换，选择存 localStorage。
+      //  APlayer 1.10.1 的 list.next() / handleEnded 读的是实例上的 order / loop，
+      //  所以运行时直接改 ap.order / ap.loop 就生效；options 一并写，兜住只读
+      //  options 的实现差异。改属性不会打断当前正在播的歌。
+      // ============================================================
+      var MODES = {
+        random:   { order: 'random', loop: 'all', label: '随机播放', icon: P.shuffle },
+        sequence: { order: 'list',   loop: 'all', label: '顺序播放', icon: P.sequence },
+        single:   { order: 'list',   loop: 'one', label: '单曲循环', icon: P.single }
+      };
+      var modeOrder = ['random', 'sequence', 'single'];
+      var modeBtn = root.querySelector('[data-a="mode"]');
+      try {
+        var savedMode = localStorage.getItem('rjPlayMode');
+        if (savedMode && MODES[savedMode]) rjPlayMode = savedMode;
+      } catch (e) {}
+
+      function applyMode(m, persist) {
+        var cfg = MODES[m] || MODES.random;
+        rjPlayMode = MODES[m] ? m : 'random';
+        try {
+          ap.order = cfg.order;
+          ap.loop = cfg.loop;
+          if (ap.options) { ap.options.order = cfg.order; ap.options.loop = cfg.loop; }
+        } catch (e) {}
+        if (modeBtn) {
+          modeBtn.innerHTML = svg(cfg.icon);
+          modeBtn.title = cfg.label + ' · 点击切换';
+          modeBtn.setAttribute('aria-label', cfg.label);
+          modeBtn.classList.toggle('is-random', rjPlayMode === 'random');
+          modeBtn.classList.toggle('is-single', rjPlayMode === 'single');
+        }
+        if (persist) { try { localStorage.setItem('rjPlayMode', rjPlayMode); } catch (e) {} }
+      }
+      applyMode(rjPlayMode, false);
+
+      if (modeBtn) {
+        modeBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var i = modeOrder.indexOf(rjPlayMode);
+          var next = modeOrder[(i + 1) % modeOrder.length];
+          applyMode(next, true);
+          showTip('♪ ' + MODES[next].label);
         });
       }
 
@@ -1305,6 +1380,9 @@
   // decorate() 里的 rjUserVol 只活在那个函数的作用域里，而 rjKickSound / autoPlay
   // 是模块级函数，必须有一个双方都能读到的音量值，否则「点一下起播」永远淡入到旧默认值。
   var rjGV = 1;
+  // 播放模式：random（随机）| sequence（顺序）| single（单曲循环）
+  // 模块级而非 decorate 内部，因为切歌函数 rjSkip 也要读它来决定「下一首」怎么走。
+  var rjPlayMode = 'random';
   try {
     var gv0 = parseFloat(localStorage.getItem('rjVol'));
     if (isFinite(gv0) && gv0 >= 0 && gv0 <= 1) rjGV = gv0;
