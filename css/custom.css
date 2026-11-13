@@ -7402,3 +7402,93 @@ html #post .next-post::before{
   display: none !important;
   background: none !important;
 }
+
+/* ============================================================
+   v2.2.2 · 留言页评论区：拆掉「框套框」
+   原来四层玻璃：页面卡 > .comment-wrap > .vwrap > 输入框
+   现在只留输入框自己一层淡填充，其余全部并进页面卡
+   ============================================================ */
+html #post-comment .comment-wrap,
+html #post-comment .comment-wrap > div {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+html #post-comment .comment-head {
+  border-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 14px !important;
+}
+html #post-comment .vwrap {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 0 10px !important;
+}
+html #post-comment .vwrap .vinput,
+html #post-comment .vwrap .veditor,
+html #post-comment .vwrap #veditor {
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 13px !important;
+  background: color-mix(in srgb, var(--rjp-white) 8%, transparent) !important;
+}
+html #post-comment .vwrap .vinput:focus,
+html #post-comment .vwrap .veditor:focus,
+html #post-comment .vwrap #veditor:focus {
+  background: color-mix(in srgb, var(--rjp-white) 13%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 42%, transparent) !important;
+  outline: 0 !important;
+}
+html #post-comment .vwrap .vinput::placeholder,
+html #post-comment .vwrap .veditor::placeholder {
+  color: color-mix(in srgb, var(--rjp-white) 44%, transparent) !important;
+}
+html #post-comment .vbtn {
+  border: 0 !important;
+  background: linear-gradient(135deg, var(--rj-brand), var(--rj-brand-2)) !important;
+  color: var(--rjp-white) !important;
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--rj-brand) 32%, transparent) !important;
+}
+html #post-comment .vpower {
+  border-top: 0 !important;
+  opacity: .6;
+}
+html #post-comment #vshow,
+html #post-comment .vempty {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 手机端：折叠组与悬浮文字标签一律不出现，只留 4 个圆钮 */
+@media screen and (max-width: 900px) {
+  html #rightside-config-hide { display: none !important; }
+  html #rightside > div > button::after,
+  html #rightside > div > a::after { display: none !important; }
+}
+
+/* v2.2.2 补充：评论项在深色底上不再画描边框，只留淡填充分层 */
+html #post-comment .vcard{
+  background: color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  box-shadow: none !important;
+  padding: 12px 12px 10px !important;
+  margin-bottom: 10px !important;
+}
+html #post-comment .vcard .vhead,
+html #post-comment .vcard .vh{
+  border: 0 !important;
+  border-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+html #post-comment .vcard .vquote{
+  background: color-mix(in srgb, var(--rjp-white) 4%, transparent) !important;
+  border-left: 2px solid color-mix(in srgb, var(--rj-brand) 42%, transparent) !important;
+  border-radius: 8px !important;
+}

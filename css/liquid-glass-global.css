@@ -647,30 +647,33 @@ html #rightside > div > a:hover{
 }
 
 /* ---------- 16.3 评论框 ---------- */
-html #post-comment,
+html #post-comment{
+  /* v2.2.2：评论区只留这一层底 —— 不加描边、不再嵌第二第三个框，
+     背图里的大号 ALIENWARE 字样靠这一层压住才读得清 */
+  background: color-mix(in srgb, var(--rjp-ink-900) 32%, transparent) !important;
+  border-radius: 16px !important;
+  padding: 16px 12px 12px !important;
+  backdrop-filter: blur(28px) saturate(155%) brightness(.94) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(155%) brightness(.94) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
 html #post-comment .vwrap,
 html #post-comment .vcontent,
 html #post-comment .comment-wrap{
-  background:
-    radial-gradient(120% 90% at 18% 0%,
-      color-mix(in srgb, var(--rjp-white) calc(var(--rj-glass-corner) * 0.6), transparent) 0%,
-      transparent 55%),
-    color-mix(in srgb, var(--rjp-white) var(--rj-glass-white), transparent) !important;
-
-  backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
-  -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
-
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   border: none !important;
-  box-shadow:
-    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent) !important;
+  box-shadow: none !important;
+}
+[data-theme='light'] html #post-comment{
+  background: color-mix(in srgb, var(--rjp-white) 46%, transparent) !important;
 }
 /* 输入区本身要比容器更「实」一点，否则光标与占位符在星点背景上难读 */
 html #post-comment .vwrap input,
 html #post-comment .vwrap textarea{
-  background: color-mix(in srgb, var(--rjp-ink-900) 20%, transparent) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--rjp-white) 8%, transparent) !important;
 }
 [data-theme='light'] html #post-comment .vwrap input,
 [data-theme='light'] html #post-comment .vwrap textarea{
@@ -936,29 +939,29 @@ html #post-comment #comment-switch .switch-btn{
 
 /* —— 19.2 输入区：容器抬一档 + 三格输入框 —— */
 html #post-comment .vwrap{
-  padding: 16px !important;
-  border-radius: 18px !important;
-  background: linear-gradient(158deg,
-    color-mix(in srgb, var(--rjp-white) 7%, transparent),
-    color-mix(in srgb, var(--rjp-white) 2%, transparent)) !important;
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 13%, transparent) !important;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 22%, transparent),
-              0 10px 30px color-mix(in srgb, var(--rj-ink-shadow) 30%, transparent) !important;
-  backdrop-filter: blur(20px) saturate(135%) brightness(.94) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(135%) brightness(.94) !important;
+  /* v2.2.2：表单不再自己是个框，直接铺在页面卡上 */
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 html #post-comment .vwrap .vheader input,
 html #post-comment .vwrap .vheader .vinput,
 html #post-comment .vwrap input.vinput{
   height: 40px !important;
-  padding: 0 12px !important;
-  border-radius: 12px !important;
-  background: color-mix(in srgb, var(--rjp-ink-900) 15%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  padding: 0 14px !important;
+  border-radius: 13px !important;
+  background: color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  border: 0 !important;
   color: var(--rj-text-strong) !important;
   font-size: 13.5px !important;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 9%, transparent) !important;
-  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease !important;
+  backdrop-filter: blur(14px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
+  box-shadow: none !important;
+  transition: box-shadow .22s ease, background .22s ease !important;
 }
 html #post-comment .vwrap input::placeholder,
 html #post-comment .vwrap textarea::placeholder{
@@ -972,14 +975,16 @@ html #post-comment .veditor{
   height: 150px !important;
   min-height: 150px !important;
   padding: 14px !important;
-  border-radius: 14px !important;
-  background: color-mix(in srgb, var(--rjp-ink-900) 15%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  border-radius: 13px !important;
+  background: color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  border: 0 !important;
   color: var(--rj-text-strong) !important;
   font-size: 14.5px !important;
   line-height: 1.8 !important;
+  backdrop-filter: blur(14px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
   resize: vertical;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 9%, transparent) !important;
+  box-shadow: none !important;
   transition: border-color .22s ease, box-shadow .22s ease, background .22s ease !important;
 }
 /* 聚焦：紫色描边 + 3px 光晕 */
@@ -987,11 +992,8 @@ html #post-comment .vwrap input:focus,
 html #post-comment .vwrap textarea:focus,
 html #post-comment .veditor:focus{
   outline: none !important;
-  border-color: color-mix(in srgb, var(--rj-brand) 62%, transparent) !important;
-  background: color-mix(in srgb, var(--rjp-ink-900) 24%, transparent) !important;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rj-brand) 22%, transparent),
-              0 0 18px color-mix(in srgb, var(--rj-brand) 28%, transparent),
-              inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 12%, transparent) !important;
+  background: color-mix(in srgb, var(--rjp-white) 13%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 46%, transparent) !important;
 }
 
 /* —— 19.3 工具条（表情 / 图片 / Ctrl 徽章）—— */
@@ -1076,17 +1078,17 @@ html #post-comment .vcount::before{
 
 /* —— 19.6 每条评论：一张小玻璃卡 —— */
 html #post-comment .vcard{
-  margin: 0 0 12px !important;
-  padding: 14px 16px !important;
-  border-radius: 14px !important;
-  background: color-mix(in srgb, var(--rjp-white) 4%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 11%, transparent) !important;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 15%, transparent) !important;
-  transition: border-color .2s ease, background .2s ease !important;
+  /* v2.2.2：评论项不画描边，只在深色底上叠一层淡填充 */
+  margin: 0 0 10px !important;
+  padding: 13px 14px !important;
+  border-radius: 13px !important;
+  background: color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transition: background .2s ease !important;
 }
 html #post-comment .vcard:hover{
-  border-color: color-mix(in srgb, var(--rj-brand) 38%, transparent) !important;
-  background: color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
+  background: color-mix(in srgb, var(--rjp-white) 9%, transparent) !important;
 }
 html #post-comment .vcard .vhead .vimg{
   width: 30px !important;
