@@ -7380,3 +7380,25 @@ html #aside-content .card-widget.card-announcement .announcement_content,
 html #aside-content .card-widget.card-announcement p{
   color: rgba(255, 255, 255, .94) !important;
 }
+
+/* ============================================================================
+   v2.1.9 · 去掉卡片顶部 1px 白线
+   ----------------------------------------------------------------------------
+   来源：custom.css 更早的「顶部高光线」规则 + liquid-glass-global 把它统一成
+   白 60% 均匀线。毛玻璃卡片本身已有四边内高光，这条线在深底上会显成一道
+   突兀的白色直线（手机端尤其明显）。这里统一取消，卡片不再有顶边亮线。
+   ============================================================================ */
+html #recent-posts > .recent-post-item::before,
+html #aside-content .card-widget::before,
+html #content-inner > #page::before,
+html #content-inner > #archive::before,
+html #content-inner > #post::before,
+html #error-wrap .error-content::before,
+html #post .relatedPosts-list > div::before,
+html #post .post-tags .tag_share::before,
+html #post .prev-post::before,
+html #post .next-post::before{
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
