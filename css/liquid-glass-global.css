@@ -422,18 +422,24 @@ html #sidebar #sidebar-menus{
    一并换成玻璃，紫色占位改成透明玻璃格。
    ========================================================================== */
 html #error-wrap .error-content{
-  background:
-    radial-gradient(120% 100% at 20% 0%,
-      color-mix(in srgb, var(--rjp-white) 18%, transparent) 0%,
+  /* v2.1.9：此处原为「更亮的一档」(白 7% / 48px / 20px 圆角 / 白 32% 描边)，
+     404 自成一套，和首页卡并排看仍是两代材质。改为直接复用全站统一参数。 */
+  background-color: color-mix(in srgb, var(--rjp-white) 3%, transparent);
+  background-image:
+    radial-gradient(140% 120% at 22% -10%,
+      color-mix(in srgb, var(--rjp-white) 7.65%, transparent) 0%,
       transparent 62%),
-    color-mix(in srgb, var(--rjp-white) 7%, transparent) !important;
-  backdrop-filter: blur(48px) saturate(140%) brightness(.94) !important;
-  -webkit-backdrop-filter: blur(48px) saturate(140%) brightness(.94) !important;
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 32%, transparent) !important;
-  border-radius: 20px !important;
+    radial-gradient(100% 90% at 92% 108%,
+      color-mix(in srgb, var(--rjp-white) 4.95%, transparent) 0%,
+      transparent 58%) !important;
+  backdrop-filter: blur(40px) saturate(112%) brightness(.92) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(112%) brightness(.92) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 10%, transparent) !important;
+  border-radius: var(--rj-radius-lg, 18px) !important;
   box-shadow:
-    0 12px 34px var(--rj-shadow-2, rgba(0, 0, 0, .2)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 26%, transparent) !important;
+    0 8px 32px color-mix(in srgb, var(--rj-ink-shadow) 35%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 42%, transparent),
+    inset 0 0 24px color-mix(in srgb, var(--rjp-white) 10%, transparent) !important;
   overflow: hidden;
 }
 html #error-wrap .error-content .error-img,

@@ -1,5 +1,5 @@
 /* ============================================================
-   看板娘闸门（live2d-guard）· 常显版（2026-11-02）
+   看板娘闸门（live2d-guard）· 常显版（2026-11-02）＋ 滚动触发（v2.1.8）
    ------------------------------------------------------------
    历史版本曾做「滚过首屏淡出 + 左上角折叠按钮 + localStorage 记忆」，
    站主后来要求：看板娘一直显示、不要隐藏、也不要挡住右下角按钮。
@@ -14,6 +14,8 @@
      4. z-index 压到 1（见 custom.css 批次 A1），卡片照旧盖在她身上；
      5. ≤768px / 系统「减少动态效果」仍不加载 —— 手机上这块画布
         只会压住正文和浮标，还省 ~1MB 流量。
+     6. 首屏不加载（v2.1.8）—— 页面滚过首屏一截才拉 L2Dwidget 与模型；
+        只看首屏就永远不加载，省掉约 1MB 请求与右侧占位。
    ============================================================ */
 (function () {
   'use strict';
@@ -136,12 +138,35 @@
     });
   }
 
-  // 等 load + 空闲再拉脚本，别和首屏抢带宽
-  function go() {
-    window.requestIdleCallback
-      ? requestIdleCallback(load, { timeout: 4000 })
-      : setTimeout(load, 2000);
+  /* 首屏不拉看板娘（v2.1.8）：
+     模型 + 贴图约 1MB，原先在 load 后空闲就拉 —— 等于用户刚看到首页、
+     首屏视频还在下的时候再插一条 1MB 请求，右侧也被立刻占住。
+     现在改成「用户真的往下滚了才加载」：
+       · 阈值 = min(260px, 视口高 × 0.34)，滚过首屏一截才动手；
+       · 滚轮 / 触屏 / 键盘 / 拖滚动条都会冒 scroll，只听这一个就够；
+       · 只触发一次，触发即摘监听，之后怎么滚都不重复加载；
+       · 首帧自检一次：带锚点进来、或浏览器恢复了上次滚动位置时，
+         用户本来就不在首屏，不该再等下一次滚动。
+     代价是「只看首屏从不滚动」的访问永远见不到看板娘 —— 这正是这次的取舍。 */
+  var l2dFired = false;
+
+  function l2dThreshold() {
+    return Math.min(260, Math.round(window.innerHeight * 0.34));
   }
-  if (document.readyState === 'complete') go();
-  else window.addEventListener('load', go, { once: true });
+
+  function l2dTryLoad() {
+    if (l2dFired) return;
+    if (window.scrollY <= l2dThreshold()) return;
+    l2dFired = true;
+    window.removeEventListener('scroll', l2dTryLoad);
+    load();
+  }
+
+  window.addEventListener('scroll', l2dTryLoad, { passive: true });
+  requestAnimationFrame(l2dTryLoad);
+
+  /* pjax 换页后滚动位置可能被重置，也可能直接落在文章中部：再判一次 */
+  document.addEventListener('pjax:complete', function () {
+    if (!l2dFired) requestAnimationFrame(l2dTryLoad);
+  });
 })();

@@ -7311,3 +7311,59 @@ html #article-container blockquote::before{
   #post .post-reward img.post-qr-code-img{ width: 78px; height: 78px; border-radius: 6px; }
   #post .post-reward .post-qr-code-desc{ margin-top: 7px; font-size: 10.5px; letter-spacing: .03em; }
 }
+
+
+/* ============================================================================
+   v2.1.9  全站卡片统一 —— 内页主卡并入「首页文章卡 / 侧栏卡」那套玻璃
+   ----------------------------------------------------------------------------
+   问题：.layout_page / .layout_post 是 butterfly 的 body class，
+   本站 body 没有这两个类（实测 body.className === ''），
+   所以此前所有 `.layout_page > div:first-child`、`.layout_post > #page`
+   规则从未命中。#page / #archive 一直是主题默认的
+   rgba(19,23,40,.62) 实心块 + 8px 小圆角，和首页卡完全不是一种东西。
+
+   下面的参数不是手调的，是直接抄自站内实测计算值（首页 .recent-post-item
+   与侧栏 .card-widget 两者完全一致）：
+     底色      3% 白
+     反光      140% @22% -10% 白 7.65% → 透明 62%
+               100% @92% 108% 白 4.95% → 透明 58%
+     发丝边    1px 白 10%
+     圆角      18px
+     背景虚化  blur(40px) saturate(112%) brightness(.92)
+     投影      0 8px 32px #020617 35%
+     内高光    inset 0 0 0 1px 白 42% + inset 0 0 24px 白 10%
+   ============================================================================ */
+html #content-inner > #page,
+html #content-inner > #archive,
+html #content-inner > #post,
+html #error-wrap .error-content {
+  background-color: color-mix(in srgb, var(--rjp-white) 3%, transparent) !important;
+  background-image:
+    radial-gradient(140% 120% at 22% -10%,
+      color-mix(in srgb, var(--rjp-white) 7.65%, transparent) 0%,
+      transparent 62%),
+    radial-gradient(100% 90% at 92% 108%,
+      color-mix(in srgb, var(--rjp-white) 4.95%, transparent) 0%,
+      transparent 58%) !important;
+  border: 1px solid color-mix(in srgb, var(--rjp-white) 10%, transparent) !important;
+  border-radius: var(--rj-radius-lg, 18px) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(112%) brightness(.92) !important;
+          backdrop-filter: blur(40px) saturate(112%) brightness(.92) !important;
+  box-shadow:
+    0 8px 32px color-mix(in srgb, var(--rj-ink-shadow) 35%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 42%, transparent),
+    inset 0 0 24px color-mix(in srgb, var(--rjp-white) 10%, transparent) !important;
+}
+
+/* 归档页：容器统一后，年份分组与条目之间补一道发丝分隔，
+   否则玻璃底上几十行标题会糊在一起（原来靠实心底的反差分隔）。 */
+html #archive .article-sort-item.year {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--rjp-white) 7%, transparent);
+}
+html #archive .article-sort-item.year:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}

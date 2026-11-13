@@ -175,6 +175,36 @@
 
   var heroTimer = null;
 
+  /* 视频既可能来自服务端（首页静态 <video>，解析器一看到就下载），
+     也可能由这里动态建（pjax 回到首页等）。两条路径必须挂同一套事件：
+     canplay -> 加 is-ready + 通知排队的人（歌单 / gtag 在等这个信号）；
+     error   -> 撤层露出底下的静帧海报，并且不再重建（多源已由浏览器回退过）。 */
+  var heroDead = false;
+
+  function hookHero(v) {
+    if (v.__rjHooked) return;
+    v.__rjHooked = true;
+    var fired = false;
+    function ok() {
+      if (fired) return;
+      fired = true;
+      v.classList.add('is-ready');
+      try { document.dispatchEvent(new CustomEvent('rj:hero-ready')); } catch (e) {}
+      var p2 = v.play();
+      if (p2 && p2.catch) p2.catch(function () {});
+    }
+    /* 视频在服务端输出，解析器立刻就下：命中缓存时 hookHero 挂上来的时候
+       canplay 已经过去了（once 监听永远收不到，播放器和 gtag 会白等兜底）。
+       所以先看 readyState，够 HAVE_FUTURE_DATA 就当场补一次。 */
+    if (v.readyState >= 3) return ok();
+    v.addEventListener('canplay', ok, { once: true });
+    v.addEventListener('error', function () {
+      try { document.dispatchEvent(new CustomEvent('rj:hero-ready')); } catch (e) {}
+      heroDead = true;
+      v.remove();
+    });
+  }
+
   function heroSync() {
     var header = doc.getElementById('page-header');
     var onHome = !!(header && /(^|\s)full_page(\s|$)/.test(header.className));
@@ -190,12 +220,15 @@
       return;
     }
     if (video) {
+      hookHero(video);
       if (video.paused) {
         var again = video.play();
         if (again && again.catch) again.catch(function () {});
       }
       return;
     }
+
+    if (heroDead) return;
 
     var v = doc.createElement('video');
     v.className = 'rj-hero-video';
@@ -220,29 +253,7 @@
       ? (av1 ? '/img/hero-bg-sm.av1.mp4' : '/img/hero-bg-sm.mp4')
       : (av1 ? '/img/hero-bg.av1.mp4' : '/img/hero-bg.mp4');
 
-    v.addEventListener(
-      'canplay',
-      function () {
-        v.classList.add('is-ready');
-        var p = v.play();
-        if (p && p.catch) p.catch(function () {});
-      },
-      { once: true }
-    );
-    /* 解码失败：AV1 探测误判（个别 Safari 会对 av01 乐观返回 'maybe'，
-       真解码却失败）→ 原地换回 H.264 重试一次；H.264 也失败才撤层。
-       静帧海报一直垫在下面，任何一步失败都不会白屏。 */
-    v.addEventListener('error', function () {
-      var cur = v.getAttribute('src') || '';
-      if (/\.av1\.mp4$/.test(cur)) {
-        v.setAttribute('src', cur.replace('.av1.mp4', '.mp4'));
-        v.load();
-        var p = v.play();
-        if (p && p.catch) p.catch(function () {});
-        return;
-      }
-      v.remove();
-    });
+    hookHero(v);
 
     header.insertBefore(v, header.firstChild);
   }

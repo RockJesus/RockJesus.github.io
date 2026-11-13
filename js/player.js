@@ -1680,7 +1680,7 @@
     if (!btn) return;
     if (btn.getAttribute('data-rj-doubao') === '1') return;
     btn.setAttribute('data-rj-doubao', '1');
-    var DOUBAO_AVATAR = 'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao/web/doubao_avatar.png';
+    var DOUBAO_AVATAR = '/img/doubao-avatar.webp?v=2.1.8';
     btn.className = 'rj-doubao-btn';
     btn.innerHTML = '<img class="rj-doubao-avatar" src="' + DOUBAO_AVATAR + '" alt="豆包">';
     btn.setAttribute('aria-label', '和豆包聊天');
@@ -1689,7 +1689,7 @@
   function buildPanel() {
     if (rjPanel) return rjPanel;
     var DOUBAO_CHAT_URL = 'https://www.doubao.com/chat/';
-    var DOUBAO_AVATAR = 'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao/web/doubao_avatar.png';
+    var DOUBAO_AVATAR = '/img/doubao-avatar.webp?v=2.1.8';
     rjPanel = document.createElement('div');
     rjPanel.id = 'rj-doubao-panel';
     rjPanel.innerHTML =
@@ -2677,27 +2677,35 @@
   });
 
   function load() {
+    // 歌单开始拉的一刻告诉后面排队的人（gtag 就等这个信号，确保排在音乐之后）
+    try { document.dispatchEvent(new CustomEvent('rj:player-start')); } catch (e) {}
     ensureAplayer(function () {
       fetchPlaylist()
         .then(function (data) {
           var list = normalize(data && data.tracks); // 已过滤：只留可播曲目
           // 兜底：整份歌单一条直链都没有（vkey 全局过期）→ 退回种子曲，播放器不至于是死的
           init(list.length ? list : [SEED]);
+          try { document.dispatchEvent(new CustomEvent('rj:player-ready')); } catch (e) {}
           // 列表就绪后空闲时探一下当前曲目能否真的取到音频（见 rjPreflight）
           rjWhenIdle(function () {
             if (window.__rjPreflight) window.__rjPreflight(0);
           });
         })
-        .catch(function () { init([SEED]); });
+        .catch(function () {
+          init([SEED]);
+          try { document.dispatchEvent(new CustomEvent('rj:player-ready')); } catch (e) {}
+        });
     });
   }
 
-  // —— 首屏不再拉 187KB 歌单 ——
-  // 播放器默认折叠成左下角一个小圆盘，首屏根本用不到歌单数据；但原来
-  // DOMContentLoaded 就 ensureAplayer + fetchPlaylist，187KB 直接压在首屏
-  // （首屏总传输 815KB，它是最大单项）。
-  // 改为「页面空闲 / 用户首次交互」先到先触发，并给 requestIdleCallback 加
-  // timeout 兜底：页面再忙也最多 2.5s 后开始拉，不会出现播放器永远不出来。
+  // —— 加载优先级：首屏视频 > 播放器音乐 > 其它 ——
+  // 首屏视频下载的那 2~5s 几乎占满带宽；歌单有 364KB（gzip 125KB），原来
+  // load + idle 就起跑，正好和视频撞在一起，把视频拖慢一倍。
+  // 现在改成「首屏视频 canplay 之后」才开始拉歌单（rj-enhance 在 canplay 时
+  // 派发 rj:hero-ready）。三条兜底，保证播放器不会因为视频失败而永远不出来：
+  //   1) 没有首屏视频的页面（文章页 / 关于页）load 后 600ms 直接排队；
+  //   2) 视频 12s 内还没就绪（慢网 / 解码失败 / 被拦）直接排队；
+  //   3) 用户一动手（点 / 触 / 按键）就先给音乐。
   var rjPlStarted = false;
   function loadOnce() {
     if (rjPlStarted) return;
@@ -2708,11 +2716,20 @@
     if (window.requestIdleCallback) window.requestIdleCallback(fn, { timeout: 2500 });
     else window.setTimeout(fn, 1200);
   }
+  function rjAfterHero() { rjWhenIdle(loadOnce); }
+  document.addEventListener('rj:hero-ready', rjAfterHero);
   if (document.readyState === 'complete') {
-    rjWhenIdle(loadOnce);
+    setTimeout(function () {
+      if (!document.querySelector('.rj-hero-video')) rjAfterHero();
+    }, 600);
   } else {
-    window.addEventListener('load', function () { rjWhenIdle(loadOnce); }, { once: true });
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        if (!document.querySelector('.rj-hero-video')) rjAfterHero();
+      }, 600);
+    }, { once: true });
   }
+  window.setTimeout(rjAfterHero, 12000);
   ['pointerdown', 'touchstart', 'keydown'].forEach(function (evt) {
     window.addEventListener(evt, loadOnce, { once: true, capture: true, passive: true });
   });
