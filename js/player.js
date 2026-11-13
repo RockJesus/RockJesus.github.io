@@ -9,13 +9,13 @@
   var PLAYLIST_URLS = [
     // 首选本站构建产物：与部署产物同一次构建，绝不会有旧数据。
     // 实测带 ?v= 时 4s（Envoy 缓存命中），不带 ?v= 才 19s，所以发版必须换 ?v=。
-    '/data/playlist.json?v=2.1.1',
+    '/data/playlist.json?v=2.1.2',
     // 兜底 jsDelivr：带 CORS 头、响应快，但它对 @main 有 12 小时 CDN 缓存，
     // 且实测 ?v= 不能绕过该缓存（曾因此把旧的全量歌单喂给前端，57% 是坏链，
     // 表现成「点了播不出」）。因此只能放兜底，不能放首选。
     // 不能用 raw.githubusercontent —— 它不给 Access-Control-Allow-Origin，
     // 浏览器 fetch 会被 CORS 直接拦掉（实测 ERR_FAILED，等于没这个源）。
-    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.1'
+    'https://cdn.jsdelivr.net/gh/RockJesus/rockjesus-blog@main/source/data/playlist.json?v=2.1.2'
   ];
   var SEED = {
     name: 'RockJesus Station',
@@ -689,9 +689,10 @@
       // 控制台报 “MediaElementAudioSource outputs zeroes due to CORS access restrictions”，
       // 现象正是「进度在走、音量 100%、未静音，但完全没有声音」。
       // 而且一个 audio 元素只能接一次、接上后无法回退，所以必须先判断再决定接不接。
-      // QQ 音乐 CDN（ws/dl/isure.stream.qqmusic.qq.com）实测回 Access-Control-Allow-Origin: *，
+      // QQ 音乐 CDN（ws/dl/isure/aqqmusic.stream.qqmusic.qq.com）实测回 Access-Control-Allow-Origin: *，
       // 配合 crossOrigin='anonymous' 可直接接 AnalyserNode 读真实频谱，不需要任何音频代理。
-      var CORS_AUDIO_HOST = /^[a-z0-9-_.]+\.(stream\.qqmusic\.qq\.com|qqmusic\.qq\.com)$/i;
+      // aqqmusic.tc.qq.com 是 Meting 中转 302 后落到的真实直链域名（M500<mid>.mp3），同样给 CORS。
+      var CORS_AUDIO_HOST = /^([a-z0-9-_.]+\.(stream\.qqmusic\.qq\.com|qqmusic\.qq\.com)|aqqmusic\.tc\.qq\.com)$/i;
       function canTapAudio(u) {
         if (!u) return false;
         if (/^data:|^blob:/.test(u)) return true;
