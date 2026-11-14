@@ -1255,3 +1255,37 @@ html .rj-glass{
   border: 0 !important;
   box-shadow: 0 20px 54px var(--rj-shadow-2, rgba(0, 0, 0, .3)) !important;
 }
+
+/* ==========================================================================
+   20. 导航下拉弹层的实底（v2.2.6）
+   --------------------------------------------------------------------------
+   上面第 5 节给桌面端下拉的底色是「白 7% + 白 18% 顶光」，依赖
+   backdrop-filter 把身后内容糊掉。但下拉挂在 #nav 内部，祖先已经带
+   backdrop-filter/transform，子元素的 backdrop-filter 实际不生效，
+   结果只剩 7% 白 —— 展开「元宇宙」时菜单项会和下方资料卡、社交按钮
+   叠在一起看不清。
+   这里按卡片口径换成「深色实底 78% + 白 11% 顶光 + 34px 模糊」，
+   模糊在有生效环境里继续加分，没生效也能靠底的不透明度读清楚。
+   描边维持 0，与卡片同一套。规则写在文件末尾，同特异性下靠后胜出。
+   ========================================================================== */
+html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu){
+  background:
+    radial-gradient(120% 120% at 20% 0%,
+      color-mix(in srgb, var(--rjp-white) 11%, transparent) 0%,
+      transparent 60%),
+    color-mix(in srgb, var(--rj-surface-solid, #12141c) 78%, transparent) !important;
+
+  backdrop-filter: blur(34px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(160%) !important;
+
+  box-shadow: 0 20px 50px rgba(2, 6, 18, 0.5) !important;
+}
+
+[data-theme='light'] html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu){
+  background:
+    radial-gradient(120% 120% at 20% 0%,
+      rgba(255, 255, 255, 0.5) 0%,
+      transparent 62%),
+    rgba(247, 248, 252, 0.94) !important;
+  box-shadow: 0 20px 44px rgba(30, 35, 50, 0.18) !important;
+}
