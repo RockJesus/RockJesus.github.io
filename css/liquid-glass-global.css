@@ -117,11 +117,9 @@ html #nav #blog_name{
   backdrop-filter: blur(44px) saturate(140%) brightness(.94) !important;
   -webkit-backdrop-filter: blur(44px) saturate(140%) brightness(.94) !important;
 
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 32%, transparent) !important;
-  box-shadow:
-    0 4px 18px var(--rj-shadow-2, rgba(0, 0, 0, .16)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 26%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 45%, transparent) !important;
+  /* v2.2.4：与卡片同一套 —— 去掉 1px 描边与内亮边，只留柔和外投影 */
+  border: 0 !important;
+  box-shadow: 0 6px 22px var(--rj-shadow-2, rgba(0, 0, 0, .24)) !important;
 }
 
 /* 导航文字：亮玻璃上原浅色字会糊，统一加深色字影 */
@@ -147,11 +145,9 @@ html #nav .menus_items .menus_item .menus_item_child.rj-qr-menu{
   backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) brightness(.94) !important;
   -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(140%) brightness(.94) !important;
 
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 34%, transparent) !important;
-  box-shadow:
-    0 12px 34px var(--rj-shadow-2, rgba(0, 0, 0, .2)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 28%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--rjp-white) 48%, transparent) !important;
+  /* v2.2.4：下拉面板同样无描边 */
+  border: 0 !important;
+  box-shadow: 0 18px 44px var(--rj-shadow-2, rgba(0, 0, 0, .32)) !important;
 }
 
 /* 下拉里的每一项：hover 保留站点品牌紫，但改成「白上叠紫」，不再是深色块 */
@@ -161,7 +157,7 @@ html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li{
 }
 html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover{
   background: color-mix(in srgb, var(--rj-brand) 14%, transparent) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 26%, transparent) !important;
+  box-shadow: none !important;
 }
 
 /* 下拉文字的阴影去掉：亮玻璃上深色字本身够，加影子发脏 */
@@ -619,11 +615,9 @@ html #rightside > div > .button{
   backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
   -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
 
-  border: none !important;
-  box-shadow:
-    0 6px 20px var(--rj-shadow-2, rgba(0, 0, 0, .2)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 48%, transparent),
-    inset 0 0 14px color-mix(in srgb, var(--rjp-white) 14%, transparent) !important;
+  /* v2.2.4：右下按钮与卡片统一，无内描边、无内发光 */
+  border: 0 !important;
+  box-shadow: 0 8px 24px var(--rj-shadow-2, rgba(0, 0, 0, .28)) !important;
 }
 /* 悬停仍走品牌色（保留可点击的反馈，不并入玻璃） */
 html #rightside > div > button:hover,

@@ -2771,7 +2771,7 @@ a:hover { color: var(--rj-brand-2); }
   background-image: linear-gradient(135deg,
     color-mix(in srgb, var(--rj-brand) 30%, transparent),
     color-mix(in srgb, var(--rj-brand-2) 16%, transparent));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 32%, transparent);
+  box-shadow: none;
 }
 /* —— 抽屉模式（窄屏 / 手机）：菜单项收进抽屉，右上角只剩汉堡。
    汉堡不能是裸图标 —— 左边站名是一枚玻璃胶囊，右上留一个光秃秃的图标会像没做完，
@@ -3981,7 +3981,7 @@ a:hover { color: var(--rj-brand-2); }
   background-image: linear-gradient(135deg,
     color-mix(in srgb, var(--rj-brand) 14%, transparent),
     color-mix(in srgb, var(--rj-brand-2) 8%, transparent));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 20%, transparent);
+  box-shadow: none;
 }
 /* 亮色：下拉面板的材质见文件末尾 v1.9.25 一节 */
 [data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li a {
@@ -3995,7 +3995,7 @@ a:hover { color: var(--rj-brand-2); }
 [data-theme='light'] #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover {
   background-image: none;
   background-color: color-mix(in srgb, var(--rj-brand) 13%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 22%, transparent);
+  box-shadow: none;
 }
 /* 卡片：提高不透明度，让浅底不被深图污染 */
 [data-theme='light'] #recent-posts > .recent-post-item,
@@ -5617,10 +5617,10 @@ html.rj-anim #aside-content .card-widget.rj-reveal.rj-in {
 
 /* 下拉里的每一项：悬停描边与卡片 hover 同一个紫（原来 32% 偏弱，读不出是同一套） */
 #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu) li:hover {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 45%, transparent);
+  box-shadow: none;
 }
 #nav #menus .site-page:hover {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rj-brand) 45%, transparent);
+  box-shadow: none;
 }
 
 /* ---------------------------------------------------------------------------
