@@ -7502,3 +7502,80 @@ html #rightside-config-show #mobile-toc-button{
   margin: 0 auto 0 !important;
   border-radius: 14px !important;
 }
+
+/* ============================================================
+   v2.2.5  播放器并入同一套玻璃
+   卡片在 v2.2.3/v2.2.4 已经去掉 1px 描边（白底 + blur + 大圆角 +
+   纯外阴影）。播放器仍带紫描边、白描边、内发光和逐行横线，
+   一眼就能看出是另一套皮肤。这里把歌单面板、控制条、封面、
+   主播放键、搜索框的描边全部清零，只保留外阴影；
+   列表行与统计条的横线改成「边框宽度保留、颜色透明」，
+   行高和原布局不动，视觉上不再有线条。
+   ============================================================ */
+
+/* ① 歌单面板：紫描边 -> 无，改为一层外投影 */
+.aplayer .aplayer-list {
+  border: 0 !important;
+  box-shadow: 0 14px 36px rgba(2, 6, 18, 0.5) !important;
+}
+
+/* ② 列表行分隔线：宽度留着占位，颜色透明，横线消失 */
+.aplayer .aplayer-list ol li {
+  border-top-color: transparent !important;
+}
+
+/* ③ 顶部统计条下边界：同法 */
+.aplayer .aplayer-list .rj-pl-stat {
+  border-bottom-color: transparent !important;
+}
+
+/* ④ 控制条：去掉紫色 1px 与内白线，只留外投影与极淡光晕 */
+.aplayer.aplayer-fixed .aplayer-body {
+  border: 0 !important;
+  box-shadow:
+    0 18px 46px rgba(2, 6, 18, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.14) !important;
+}
+
+/* ⑤ 封面：白描边清零；内层原本留 -1px 抵描边，贴回 0 免得露边 */
+.rj-pl-disc {
+  border: 0 !important;
+}
+.rj-pl-art {
+  inset: 0;
+}
+
+/* ⑥ 主播放键：去掉那圈内描边，保留渐变底与投影 */
+.rj-pl-btns .rj-pl-main {
+  box-shadow: 0 6px 18px rgba(49, 22, 100, 0.46) !important;
+}
+
+/* ⑦ 搜索框：去框，圆角改卡片同款 12px（不再用胶囊形），
+   底色提一档，浅底上也看得见 */
+.aplayer .aplayer-list .rj-pl-search {
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--rj-ink-text) 9%, transparent) !important;
+}
+
+/* ⑧ 折叠态小圆盘：原来靠三圈 0 0 0 1px 白 inset 环勾边（常态/播放中/hover
+   各一条），这是右下角那枚唱片唯一还带描边的地方，一并清掉，
+   改动只落在投影与呼吸光晕上 */
+.aplayer.rj-pl-collapsed .rj-pl-disc {
+  box-shadow: 0 12px 30px rgba(2, 6, 18, 0.52) !important;
+}
+.aplayer.rj-pl-collapsed .rj-pl.rj-pl-playing .rj-pl-disc {
+  box-shadow:
+    0 12px 30px rgba(2, 6, 18, 0.52),
+    0 0 30px rgba(139, 92, 246, calc(var(--rj-beat-glow, 0) * 0.92)) !important;
+}
+.aplayer.rj-pl-collapsed .rj-pl-disc:hover {
+  box-shadow:
+    0 15px 34px rgba(2, 6, 18, 0.56),
+    0 0 26px color-mix(in srgb, var(--rj-brand) 40%, transparent) !important;
+}
+.aplayer.rj-pl-collapsed .rj-pl.rj-pl-playing .rj-pl-disc:hover {
+  box-shadow:
+    0 15px 34px rgba(2, 6, 18, 0.56),
+    0 0 30px color-mix(in srgb, var(--rj-brand) 58%, transparent) !important;
+}

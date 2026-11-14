@@ -239,10 +239,11 @@ html .aplayer .aplayer-list{
   backdrop-filter: blur(40px) saturate(140%) brightness(.94) !important;
   -webkit-backdrop-filter: blur(40px) saturate(140%) brightness(.94) !important;
 
-  border: 1px solid color-mix(in srgb, var(--rjp-white) 30%, transparent) !important;
+  /* v2.2.5：与卡片同一口径 —— 不再勾 1px 白描边，也不再压内描边，
+     只留一层外投影；面板本身的白底与顶光渐变保留，材质不变 */
+  border: 0 !important;
   box-shadow:
-    0 12px 34px var(--rj-shadow-2, rgba(0, 0, 0, .22)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 24%, transparent) !important;
+    0 14px 36px var(--rj-shadow-2, rgba(0, 0, 0, .28)) !important;
 }
 
 /* ==========================================================================
