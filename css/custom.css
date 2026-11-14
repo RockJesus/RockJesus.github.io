@@ -7349,10 +7349,7 @@ html #error-wrap .error-content {
   border-radius: var(--rj-radius-lg, 18px) !important;
   -webkit-backdrop-filter: blur(34px) saturate(160%) brightness(.98) !important;
           backdrop-filter: blur(34px) saturate(160%) brightness(.98) !important;
-  box-shadow:
-    0 8px 32px color-mix(in srgb, var(--rj-ink-shadow) 35%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 26%, transparent),
-    inset 0 0 24px color-mix(in srgb, var(--rjp-white) 10%, transparent) !important;
+  box-shadow: 0 20px 54px color-mix(in srgb, var(--rj-ink-shadow) 40%, transparent) !important;
 }
 
 /* 归档页：容器统一后，年份分组与条目之间补一道发丝分隔，
