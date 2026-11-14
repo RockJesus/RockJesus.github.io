@@ -62,10 +62,7 @@
   -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.98);
 
   border: none;
-  box-shadow:
-    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent),
-    inset 0 0 24px color-mix(in srgb, var(--rjp-white) var(--rj-glass-glow), transparent);
+  box-shadow: 0 20px 54px var(--rj-shadow-2, rgba(0, 0, 0, .3));
 }
 
 /* ==========================================================================
@@ -88,10 +85,7 @@ html #aside-content .card-widget{
   backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.98) !important;
   -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.98) !important;
 
-  box-shadow:
-    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent),
-    inset 0 0 24px color-mix(in srgb, var(--rjp-white) var(--rj-glass-glow), transparent) !important;
+  box-shadow: 0 20px 54px var(--rj-shadow-2, rgba(0, 0, 0, .3)) !important;
 }
 
 /* 主列卡片原有的细渐变亮线 ::before：统一成均匀白线 */
@@ -436,10 +430,7 @@ html #error-wrap .error-content{
   -webkit-backdrop-filter: blur(34px) saturate(160%) brightness(.98) !important;
   border: 0 !important;
   border-radius: var(--rj-radius-lg, 18px) !important;
-  box-shadow:
-    0 8px 32px color-mix(in srgb, var(--rj-ink-shadow) 35%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) 42%, transparent),
-    inset 0 0 24px color-mix(in srgb, var(--rjp-white) 10%, transparent) !important;
+  box-shadow: 0 20px 54px color-mix(in srgb, var(--rj-ink-shadow) 40%, transparent) !important;
   overflow: hidden;
 }
 html #error-wrap .error-content .error-img,
@@ -529,10 +520,7 @@ html #post .next-post{
   -webkit-backdrop-filter: blur(var(--rj-glass-blur-sm)) saturate(var(--rj-glass-sat)) brightness(.92) !important;
 
   border: none !important;
-  box-shadow:
-    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent),
-    inset 0 0 24px color-mix(in srgb, var(--rjp-white) var(--rj-glass-glow), transparent) !important;
+  box-shadow: 0 20px 54px var(--rj-shadow-2, rgba(0, 0, 0, .3)) !important;
 }
 
 /* 尾卡里的分隔线/描边同步换白线，否则深色描边留在亮玻璃上会显脏 */
@@ -569,10 +557,7 @@ html .layout_page > div:first-child:not(.recent-posts),
   -webkit-backdrop-filter: blur(var(--rj-glass-blur)) saturate(var(--rj-glass-sat)) brightness(.98) !important;
 
   border: none !important;
-  box-shadow:
-    0 8px 32px var(--rj-shadow-2, rgba(0, 0, 0, .18)),
-    inset 0 0 0 1px color-mix(in srgb, var(--rjp-white) var(--rj-glass-line), transparent),
-    inset 0 0 24px color-mix(in srgb, var(--rjp-white) var(--rj-glass-glow), transparent) !important;
+  box-shadow: 0 20px 54px var(--rj-shadow-2, rgba(0, 0, 0, .3)) !important;
 }
 
 /* ==========================================================================
@@ -1243,4 +1228,35 @@ html #post-comment .vcount{
    ========================================================================== */
 html #rightside{
   bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ==========================================================================
+   v2.2.3 · 全站卡片去掉内侧 1px 白描边（2026-11-14）
+   --------------------------------------------------------------------------
+   参照图：卡片边缘是柔和的外投影，没有任何一圈白线。
+   原实现每块玻璃都带 inset 0 0 0 1px 白 26% 的「内描边」+ inset 0 0 24px 内发光，
+   在手机上看起来就是一层框套一层。这里统一压掉，只保留柔和外阴影。
+   小控件（导航胶囊、下拉、侧栏抽屉、搜索弹层、右下按钮、分页当前页）不在此列，
+   它们需要内描边维持可点的层次。
+   ========================================================================== */
+html #recent-posts > .recent-post-item,
+html #aside-content .card-widget,
+html .layout_post > #post,
+html .layout_post > #page,
+html .layout_page > div:first-child:not(.recent-posts),
+html #post .post-copyright,
+html #post .post-copyright-cc-info,
+html #error-wrap .error-content,
+html #page,
+html #archive,
+html #tag,
+html #category,
+html #link,
+html .rj-qe-item,
+html .rj-globe-stats,
+html .rj-globe-stat-item,
+html .rj-globe-stats-flags span,
+html .rj-glass{
+  border: 0 !important;
+  box-shadow: 0 20px 54px var(--rj-shadow-2, rgba(0, 0, 0, .3)) !important;
 }

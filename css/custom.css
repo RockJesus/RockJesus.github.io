@@ -7492,3 +7492,16 @@ html #post-comment .vcard .vquote{
   border-left: 2px solid color-mix(in srgb, var(--rj-brand) 42%, transparent) !important;
   border-radius: 8px !important;
 }
+
+
+/* v2.2.3 目录按钮：只有带正文的文章页才需要，其余页面一律不出现，
+   并且与右侧按钮列严格同尺寸、同间距，避免它单独浮在别处。 */
+html body:not(:has(#post)) #mobile-toc-button{
+  display: none !important;
+}
+html #rightside-config-show #mobile-toc-button{
+  width: 44px !important;
+  height: 44px !important;
+  margin: 0 auto 0 !important;
+  border-radius: 14px !important;
+}
