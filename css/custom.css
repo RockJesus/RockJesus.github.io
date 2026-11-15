@@ -3172,27 +3172,13 @@ a:hover { color: var(--rj-brand-2); }
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0, 0, 0, 0.55);
 }
 
-/* 滚动浮起时（nav-fixed）补一层「没有模糊的垂直渐隐」：
-   首屏仍然完全透明，只在导航压在正文上时给文字一层从深到无的底，
-   避免 logo 和正文首行叠字。比导航条高 22px，让正文是「淡出」而不是「被切断」。
-   注意不是毛玻璃：没有 backdrop-filter、没有描边、没有投影。 */
+/* v2.3.0 去掉了滚动状态压在导航上方的那条 88px 垂直渐隐带。
+   它本意是给导航文字垫一层从深到无的底，但站名胶囊和菜单胶囊自身已经是
+   有材质的玻璃底，遮字不需要它；留着只在页面最顶端刷出一条横贯全宽、
+   两侧又接不上卡片的暗带。这里显式写 none，防止主题或其他片段再把它带回来。 */
 #nav.nav-fixed::before,
 #page-header.nav-fixed #nav::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 88px;
-  z-index: -1;
-  pointer-events: none;
-  /* 只做很轻的整体压暗（顶部 0.22），不再承担遮字职责：
-     遮字交给两枚玻璃胶囊，所以这里淡到几乎看不出边界。 */
-  background: linear-gradient(180deg,
-    rgba(7, 10, 20, 0.46) 0%,
-    rgba(7, 10, 20, 0.4) 50%,
-    rgba(7, 10, 20, 0.22) 76%,
-    rgba(7, 10, 20, 0) 100%);
+  content: none;
 }
 /* 站名胶囊：不再区分「首屏 / 滚动」，始终是一枚和右侧菜单同款的玻璃胶囊。
    首屏压在大图上时尤其需要它 —— 裸渐变字在杂乱照片上根本读不清；
@@ -3960,14 +3946,10 @@ a:hover { color: var(--rj-brand-2); }
 }
 /* 亮色：站名胶囊的材质与亮色卡片一致，见文件末尾 v1.9.25 一节 */
 
-/* 亮色：滚动态那层压暗要用白色，深色那版会在白底页面上刷出一条黑带 */
+/* 亮色：滚动态压暗带已在 v2.3.0 一并移除，这里不再需要白色渐变那版 */
 [data-theme='light'] #nav.nav-fixed::before,
 [data-theme='light'] #page-header.nav-fixed #nav::before {
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.52) 0%,
-    rgba(255, 255, 255, 0.46) 50%,
-    rgba(255, 255, 255, 0.26) 76%,
-    rgba(255, 255, 255, 0) 100%);
+  content: none;
 }
 /* 亮色：菜单胶囊的材质见文件末尾 v1.9.25 一节 */
 /* 亮色：汉堡胶囊的材质见文件末尾 v1.9.25 一节 */
