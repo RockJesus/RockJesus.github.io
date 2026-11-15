@@ -1289,3 +1289,18 @@ html #nav .menus_items .menus_item .menus_item_child:not(.rj-qr-menu){
     rgba(247, 248, 252, 0.94) !important;
   box-shadow: 0 20px 44px rgba(30, 35, 50, 0.18) !important;
 }
+
+/* —— 21. 首页文章卡的右侧封面贴边 ——
+   flex 里 info 用的是内容宽度而不是 58%，多出来的约 8px 落在卡片最右，
+   露出卡片自身的渐变底色；紧挨着白色封面看过去就是一条竖边。
+   让封面靠右把这 8px 吃满，圆角只在右侧保留，与卡片 18px 外圆角吻合。 */
+@media (min-width: 769px) {
+  #recent-posts > .recent-post-item > .post_cover.right {
+    margin-left: auto;
+    border-radius: 0 18px 18px 0;
+  }
+  #recent-posts > .recent-post-item > .post_cover.right img,
+  #recent-posts > .recent-post-item > .post_cover.right img.post_bg {
+    border-radius: 0 18px 18px 0;
+  }
+}
