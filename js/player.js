@@ -518,6 +518,9 @@
     //    展开态：双击圆盘 = 折叠；卡片空白处单击 = 播放/暂停、双击 = 开/关播放列表
     //    展开时播放列表默认打开；点页面其它任何位置自动折叠播放器
     var singleTimer = null;
+    // 折叠态下单击就会展开，触屏没有 dblclick，双击入口在手机上等于不存在。
+    // 这个标记用来避免「单击已经展开、紧接着的 dblclick 又把它折回去」。
+    var justExpandedByClick = false;
     var vizSync = null;      // buildShell 内赋值，折叠/展开状态变化时同步律动启停
     function isInteractive(el) {
       return !!(el && el.closest && el.closest(
@@ -1191,6 +1194,15 @@
       disc.addEventListener('click', function (e) {
         e.stopPropagation();
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; return; }
+        // 折叠态单击 = 展开。手机上双击不会触发 dblclick（只会连着来两次 click，
+        // 第二次把待执行的单击定时器清掉），所以「双击展开」在触屏上等于没有，
+        // 这里补一个单击展开，桌面和手机同一个手势都能进歌单。
+        if (isCollapsed()) {
+          setCollapsed(false);
+          justExpandedByClick = true;
+          setTimeout(function () { justExpandedByClick = false; }, 420);
+          return;
+        }
         singleTimer = setTimeout(function () {
           singleTimer = null;
           togglePlay();
@@ -1199,6 +1211,8 @@
       disc.addEventListener('dblclick', function (e) {
         e.stopPropagation(); e.preventDefault();
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
+        // 双击的第一下若是「折叠态单击展开」，这次双击只算展开，不要再翻回去
+        if (justExpandedByClick) { justExpandedByClick = false; return; }
         setCollapsed(!isCollapsed());
       });
       mainBtn.addEventListener('click', function (e) { e.stopPropagation(); togglePlay(); });
