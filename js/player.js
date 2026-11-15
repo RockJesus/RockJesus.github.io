@@ -1226,9 +1226,16 @@
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
         rjSkip(1);
       });
-      // 展开态卡片空白处：单击播放/暂停（播放列表常显，不再提供开关手势）
+      // 折叠态：点条上任意位置都展开，不用去瞄那枚 47px 的小圆盘。
+      // 手机上双击既不触发 dblclick，标题栏原本也没绑任何手势，等于点了没反应。
       root.addEventListener('click', function (e) {
-        if (isCollapsed() || isInteractive(e.target)) return;
+        if (isCollapsed()) {
+          if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
+          setCollapsed(false);
+          return;
+        }
+        // 展开态卡片空白处：单击播放/暂停（播放列表常显，不再提供开关手势）
+        if (isInteractive(e.target)) return;
         if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
         singleTimer = setTimeout(function () { singleTimer = null; togglePlay(); }, 230);
       });
