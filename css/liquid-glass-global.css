@@ -114,8 +114,11 @@ html #nav #blog_name{
       transparent 60%),
     color-mix(in srgb, var(--rjp-white) 6%, transparent) !important;
 
-  backdrop-filter: blur(44px) saturate(140%) brightness(.94) !important;
-  -webkit-backdrop-filter: blur(44px) saturate(140%) brightness(.94) !important;
+  /* v2.3.0：顶部那层 88px 渐隐带去掉之后，胶囊直接压在白色封面上，
+     原来的 brightness(.94) 几乎不衰减透光，白字会糊在白底上。
+     压到 .82 让玻璃自己承担一点透光损耗，白字在亮暗背景上都立得住。 */
+  backdrop-filter: blur(44px) saturate(140%) brightness(.82) !important;
+  -webkit-backdrop-filter: blur(44px) saturate(140%) brightness(.82) !important;
 
   /* v2.2.4：与卡片同一套 —— 去掉 1px 描边与内亮边，只留柔和外投影 */
   border: 0 !important;
