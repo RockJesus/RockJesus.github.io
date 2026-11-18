@@ -283,19 +283,44 @@
         }, { once: true });
       }
     }
-    // —— 试听片段检测：vkey 过期时 QQ 只返回 30 秒试听，播放器误以为播完自动切歌 →
-    //    表现为"每首歌都是片段"。若实际时长明显短于歌单标注 → 判定为试听，自动跳过该歌 ——
+    // —— 试听片段检测：vkey 受限时 QQ 只给一段试听，播放器会把它当成整首歌。
+    //    以前判据是「实际时长 < 歌单标注时长的 60%」，但 meting 中转那条主通道
+    //    把 duration 写死成 0（sync_qq_music_meting.py），标注时长不存在，
+    //    这个检测于是一直直接 return —— 试听片段就这么被当成完整曲目播了，
+    //    听感就是「一进来这首歌就从中间开始」。改为：有标注按比例判，没标注按
+    //    绝对阈值判（完整曲目极少低于 100 秒）。
+    var rjPreviewGuard = { n: 0, t: 0 };
     function rjSkipPreview() {
       try {
         var a = curAudio();
-        if (!ap.audio || !a || !a.duration || a.duration < 60) return;
+        if (!ap.audio || !a) return;
         var real = ap.audio.duration;
-        if (real && real < a.duration * 0.6) {
-          rjSkip(1);
-        }
+        if (!real || !isFinite(real) || real <= 0) return;
+        var meta = a.duration;
+        var isPreview = (meta && meta > 30) ? (real < meta * 0.6) : (real < 100);
+        if (!isPreview) return;
+        // 30 秒内连续跳 3 首说明这一档音源整体降级了，停下别再跳，
+        // 免得用户点了播放却看到进度条一路往后蹦。
+        var now = Date.now();
+        if (now - rjPreviewGuard.t > 30000) rjPreviewGuard.n = 0;
+        if (rjPreviewGuard.n >= 3) return;
+        rjPreviewGuard.n++;
+        rjPreviewGuard.t = now;
+        rjSkip(1);
       } catch (e) {}
     }
-    if (ap.audio) ap.audio.addEventListener('loadedmetadata', rjSkipPreview);
+    // —— 每次加载新的音源都要落回 0 秒 ——
+    // APlayer 只在 setAudio 里 seek(0)，而 preload:'none' 时对 readyState=0 的
+    // 赋值会被忽略；首次进入还没有 resetTime() 兜底，于是可能停在上一次的播放位。
+    // loadedmetadata 只在换 src 时触发，所以这里归零不影响「暂停后续播」。
+    function rjRewindOnLoad() {
+      try {
+        if (!ap.audio) return;
+        if (ap.audio.currentTime > 0.05) ap.audio.currentTime = 0;
+      } catch (e) {}
+      rjSkipPreview();
+    }
+    if (ap.audio) ap.audio.addEventListener('loadedmetadata', rjRewindOnLoad);
     // —— 首播前置校验 V1.8.16 ——
     // 现实：歌单里约 1/4 曲目的 vkey 已被 QQ 限流，直链返回 403。只有真的加载才会
     // 触发 <audio> 的 error，而 APlayer 的错误自动切歌每首要 ~2s，实测最坏一次
