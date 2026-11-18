@@ -7561,3 +7561,17 @@ html #rightside-config-show #mobile-toc-button{
     0 15px 34px rgba(2, 6, 18, 0.56),
     0 0 30px color-mix(in srgb, var(--rj-brand) 58%, transparent) !important;
 }
+
+/* ---------- 22. 首屏底部渐隐遮罩：撤掉 ----------
+   早先为了不让首屏和文章列表之间出现硬边，在 `#page-header.full_page::after`
+   上压了一条 180px 高、贴底、向上渐到 --rj-bg 88% 的暗带。
+   头图换成暗色影像之后，这条遮罩在画面底部变成一条明显的黑边，
+   而下面的列表本来就接在同一张深色壁纸上，没有硬边要遮。
+   这里把伪元素整个撤掉（content: none），只删 background 会留下 180px 的
+   空占位层和 pointer-events。亮色同样撤（4087 行原先只清了 background）。 */
+#page-header.full_page::after,
+:root:not([data-theme='light']) #page-header.full_page::after,
+[data-theme='light'] #page-header.full_page::after {
+  content: none !important;
+  background: none !important;
+}
